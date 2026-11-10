@@ -920,6 +920,10 @@ html.js .top {
 .fig.ready canvas {
   opacity: 1;
 }
+/* figure frames delivered as bitmaps (js/app.js): the canvas may be larger than the box and is clipped to it */
+.fig.bm {
+  overflow: hidden;
+}
 .fig .halo {
   position: absolute;
   inset: 4%;

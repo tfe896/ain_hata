@@ -397,19 +397,43 @@
   /* ============ interactive 3D figures: one shared WebGL context ============ */
   const SRC = window.__FIGS_GLSL__,
     LOGO = window.__LOGO_SDF__;
-  const GLC = document.createElement("canvas");
-  GLC.width = 1400;
-  GLC.height = 1400;
-  let gl = null;
+  /* Figure frames are rendered off screen (band by band, into rfbo) and handed to each figure's own <canvas> when complete.
+   Where the browser can, the WebGL context lives on an OffscreenCanvas and a finished frame is passed on as an ImageBitmap
+   (transferToImageBitmap -> "bitmaprenderer"): no pixel copy and no CPU<->GPU sync on the main thread. Otherwise the frame is
+   copied into a 2D canvas with drawImage (the older path, which in some browsers reads the pixels back synchronously). */
+  const MAXPX = 1400; // largest figure frame in device pixels (size of the off-screen render target)
+  const GLA = {
+    alpha: true,
+    premultipliedAlpha: true,
+    antialias: false,
+    preserveDrawingBuffer: false,
+    powerPreference: "high-performance",
+  };
+  let GLC = null,
+    gl = null,
+    bmp = false;
   try {
-    gl = GLC.getContext("webgl2", {
-      alpha: true,
-      premultipliedAlpha: true,
-      antialias: false,
-      preserveDrawingBuffer: false,
-      powerPreference: "high-performance",
-    });
-  } catch (e) {}
+    if (
+      window.OffscreenCanvas &&
+      OffscreenCanvas.prototype.transferToImageBitmap &&
+      document.createElement("canvas").getContext("bitmaprenderer")
+    ) {
+      GLC = new OffscreenCanvas(16, 16);
+      gl = GLC.getContext("webgl2", GLA);
+      bmp = !!gl;
+    }
+  } catch (e) {
+    gl = null;
+    bmp = false;
+  }
+  if (!gl) {
+    GLC = document.createElement("canvas");
+    GLC.width = MAXPX;
+    GLC.height = MAXPX;
+    try {
+      gl = GLC.getContext("webgl2", GLA);
+    } catch (e) {}
+  }
   const idle = (fn) =>
     window.requestIdleCallback
       ? requestIdleCallback(fn, { timeout: 900 })
@@ -1195,7 +1219,7 @@ void main(){
     // figure frames are drawn into this off-screen target (band by band) and copied to the screen canvas when complete
     const rb = gl.createRenderbuffer();
     gl.bindRenderbuffer(gl.RENDERBUFFER, rb);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.RGBA8, GLC.width, GLC.height);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.RGBA8, MAXPX, MAXPX);
     rfbo = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, rfbo);
     gl.framebufferRenderbuffer(
@@ -1357,10 +1381,12 @@ void main(){
       cam = CAM[S] || [0.4, 0.15, 11];
     const rp = new Float32Array(16);
     for (let k = 0; k < 4; k++) rp[k * 4 + 3] = -100;
+    if (bmp) box.classList.add("bm");
     return {
       box,
+      cs: 1,
       cv,
-      ctx: cv.getContext("2d"),
+      ctx: cv.getContext(bmp ? "bitmaprenderer" : "2d"),
       S,
       cam,
       yaw: 0,
@@ -1712,7 +1738,7 @@ void main(){
     }
     const r = f.box.getBoundingClientRect(),
       dpr = Math.min(devicePixelRatio || 1, lvl >= 2 ? 1.5 : 2);
-    const px = clamp(Math.round(r.width * dpr), 160, GLC.width);
+    const px = clamp(Math.round(r.width * dpr), 160, MAXPX);
     const dtf = f.lp ? clamp((ms - f.lp) / 16.667, 0.5, 8) : 1;
     f.lp = ms; // animation is stepped by elapsed time, not by frame count
     const k = f.started === null ? 0 : clamp((ms - f.started) / 1300, 0, 1);
@@ -1787,7 +1813,7 @@ void main(){
     const f = j.f,
       pr = j.pr,
       px = j.px,
-      y0 = GLC.height - px;
+      y0 = MAXPX - px;
     let qy = null;
     if (tq) {
       qy = gl.createQuery();
@@ -1827,7 +1853,7 @@ void main(){
     const a = j.rows[j.k],
       b = j.rows[j.k + 1];
     gl.enable(gl.SCISSOR_TEST);
-    gl.scissor(0, GLC.height - b, px, b - a);
+    gl.scissor(0, MAXPX - b, px, b - a);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -1845,32 +1871,51 @@ void main(){
   function finishJob(j, ms) {
     const f = j.f,
       px = j.px,
-      y0 = GLC.height - px;
+      y0 = MAXPX - px;
     const ft0 = dgT();
+    /* OffscreenCanvas path: the context's canvas only ever grows (to the largest figure), because resizing it reallocates its
+     buffers and figures of different sizes are often on screen together. The frame goes to its top-left corner; a smaller
+     figure's <canvas> is then made proportionally larger with CSS and clipped by its box, so its pixels map 1:1 as before. */
+    if (bmp && GLC.width < px) {
+      GLC.width = px;
+      GLC.height = px;
+    }
+    const H = bmp ? GLC.height : MAXPX,
+      dy = H - px;
     gl.bindFramebuffer(gl.READ_FRAMEBUFFER, rfbo);
     gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
     gl.blitFramebuffer(
       0,
       y0,
       px,
-      GLC.height,
+      MAXPX,
       0,
-      y0,
+      dy,
       px,
-      GLC.height,
+      dy + px,
       gl.COLOR_BUFFER_BIT,
       gl.NEAREST,
     );
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     dgM("blit", ft0);
-    if (f.cv.width !== px) {
-      f.cv.width = px;
-      f.cv.height = px;
+    const cw = bmp ? H : px;
+    if (f.cv.width !== cw) {
+      f.cv.width = cw;
+      f.cv.height = cw;
+    }
+    if (bmp && f.cs !== H / px) {
+      f.cs = H / px;
+      const v = (f.cs * 100).toFixed(4) + "%";
+      f.cv.style.width = v;
+      f.cv.style.height = v;
     }
     const ft1 = dgT();
-    f.ctx.clearRect(0, 0, px, px);
-    f.ctx.drawImage(GLC, 0, 0, px, px, 0, 0, px, px);
-    dgM("drawImage", ft1);
+    if (bmp) f.ctx.transferFromImageBitmap(GLC.transferToImageBitmap());
+    else {
+      f.ctx.clearRect(0, 0, px, px);
+      f.ctx.drawImage(GLC, 0, 0, px, px, 0, 0, px, px);
+    }
+    dgM("present", ft1);
     f.done = ms;
     if (!f.box.classList.contains("ready")) f.box.classList.add("ready");
     f.jn++;
@@ -2072,7 +2117,7 @@ void main(){
     }
     const r = f.box.getBoundingClientRect(),
       dpr = Math.min(devicePixelRatio || 1, lvl >= 2 ? 1.5 : 2);
-    const px = clamp(Math.round((r.width || 584) * dpr), 160, GLC.width);
+    const px = clamp(Math.round((r.width || 584) * dpr), 160, MAXPX);
     const rp = new Float32Array(16);
     for (let k = 0; k < 4; k++) rp[k * 4 + 3] = -100;
     const j = {
@@ -2095,7 +2140,7 @@ void main(){
       k: 0,
       acc: { sum: 0, left: 1, bad: false },
     };
-    const y0 = GLC.height - px,
+    const y0 = MAXPX - px,
       t = [],
       n = f.cost > 20 ? 2 : 3;
     for (let i = 0; i < n; i++) {
@@ -2365,7 +2410,7 @@ void main(){
         }
         const r = f.box.getBoundingClientRect(),
           dpr = Math.min(devicePixelRatio || 1, 2),
-          px = clamp(Math.round((r.width || 584) * dpr), 160, GLC.width);
+          px = clamp(Math.round((r.width || 584) * dpr), 160, MAXPX);
         const rp = new Float32Array(16);
         for (let k = 0; k < 4; k++) rp[k * 4 + 3] = -100;
         const j = {
@@ -2388,7 +2433,7 @@ void main(){
           k: 0,
           acc: { sum: 0, left: 1, bad: false },
         };
-        const y0 = GLC.height - px,
+        const y0 = MAXPX - px,
           t = [];
         for (let i = 0; i < 4; i++) {
           j.k = 0;
@@ -2505,6 +2550,8 @@ void main(){
       lines.push(
         "tier " +
           tier +
+          " | present " +
+          (bmp ? "bitmap" : "2d copy") +
           " | timer " +
           (tq ? "yes" : "no") +
           " | lvl " +
@@ -2572,7 +2619,7 @@ void main(){
             "band",
             "finish",
             "blit",
-            "drawImage",
+            "present",
             "compile",
             "gpuBand",
           ]

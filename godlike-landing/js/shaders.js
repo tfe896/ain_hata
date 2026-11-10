@@ -197,17 +197,20 @@ void camRay(vec2 uv,out vec3 ro,out vec3 rd){
  ro.yz*=RYm;rd.yz*=RYm;ro.xz*=RXm;rd.xz*=RXm;
 }
 // sphere-trace one ray; fills the hit point data; minr = closest approach in pixel footprints (for silhouette detection)
-bool march(vec2 uv,out vec3 ro,out vec3 rd,out float t,out vec2 m,out float minr){
+// ts: start no earlier than this (a distance already proven empty for this ray); tsf: how far the empty-space proof of
+// this ray also covers every ray less than one pixel away (lets the anti-alias rays skip the part the centre ray already did)
+bool march(vec2 uv,float ts,float is,out vec3 ro,out vec3 rd,out float t,out vec2 m,out float minr,out float tsf,out float isf){
  camRay(uv,ro,rd);
- minr=1e9;t=0.;m=vec2(0);
+ minr=1e9;t=0.;m=vec2(0);tsf=0.;
  float bb=dot(ro,rd);float cc=dot(ro,ro)-4.6*4.6;float hh=bb*bb-cc;
  if(hh<0.)return false;
- hh=sqrt(hh);t=max(-bb-hh,0.);float tmax=-bb+hh;
- bool hit=false;
- for(int i=0;i<150;i++){
+ hh=sqrt(hh);t=max(max(-bb-hh,0.),ts);float tmax=-bb+hh;
+ bool hit=false,chain=true;float w=PXA*.75;tsf=t-4.*w*t;isf=0.;
+ for(int i=int(is);i<150;i++){
   if(float(i)>=L.x)break;
   m=map(ro+rd*t);
   minr=min(minr,m.x/(t*PXA));
+  if(chain){float r=m.x*.86;if((t-r)/(1.-w)<=tsf){tsf=max(tsf,(t+r)/(1.+w));isf=float(i);}else chain=false;}
   if(m.x<max(.0007,t*PXA*.25)){hit=true;break;}
   t+=m.x*.86;if(t>tmax)break;
  }
@@ -351,13 +354,16 @@ void main(){
  vec2 uv=(gl_FragCoord.xy-O-.5*R)/R.y;
 
  // anti-aliasing: the centre ray decides if the pixel needs it; extra rays only test coverage and re-use the
- // lighting of an already shaded hit on the same surface (same depth), so edges cost a fraction of a full trace
- vec4 acc=vec4(0),cref=vec4(0);float cnt=0.,tref=-1.;bool gz=false;
+ // lighting of an already shaded hit on the same surface (same depth), so edges cost a fraction of a full trace.
+ // The extra rays also start where the centre ray's empty spheres stop covering them (tsk), with the steps already spent
+ // counted against their budget (isk): same result, about a quarter fewer distance evaluations per frame.
+ vec4 acc=vec4(0),cref=vec4(0);float cnt=0.,tref=-1.,tsk=0.,isk=0.;bool gz=false;
  for(int k=0;k<8;k++){
   if(float(k)>=L.y)break;
   vec2 of=(k==0)?vec2(0):vec2(fract(.5+float(k)*.7548776662),fract(.5+float(k)*.5698402909))-.5;
-  vec3 ro,rd;float t,minr;vec2 m;
-  bool hit=march(uv+of/R.y,ro,rd,t,m,minr);
+  vec3 ro,rd;float t,minr,tf,itf;vec2 m;
+  bool hit=march(uv+of/R.y,tsk,isk,ro,rd,t,m,minr,tf,itf);
+  if(k==0){tsk=tf;isk=itf;}
   vec4 c=vec4(0);float e=0.;
   if(hit){
    if(tref>0.&&!gz&&abs(t-tref)<3.*t*PXA)c=cref;
