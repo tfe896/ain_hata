@@ -189,7 +189,8 @@
       sy = scrollY;
     const rects = scrubs.map((sc) => sc.el.getBoundingClientRect()),
       max = root.scrollHeight - vh; // all layout reads first, then the writes
-    prog.style.transform = "scaleX(" + clamp(sy / Math.max(1, max), 0, 1) + ")";
+    if (prog)
+      prog.style.transform = "scaleX(" + clamp(sy / Math.max(1, max), 0, 1) + ")";
     root.classList.toggle("scrolled", sy > vh * 0.7);
     curIdx = 0;
     tops.forEach((t, i) => {
@@ -245,10 +246,11 @@
     new ResizeObserver(() => {
       measure();
       onScroll();
-    }).observe($("main"));
+    }).observe($("main") || document.body);
 
   /* ============ gentle wheel smoothing (mouse wheels only; trackpads keep native feel) + anchor scrolling ============ */
   const sm = { cur: scrollY, target: scrollY, active: false };
+  let loopAlive = false;
   function smStep() {
     if (!sm.active) return;
     sm.cur = lerp(sm.cur, sm.target, 0.09);
@@ -272,7 +274,8 @@
     addEventListener(
       "wheel",
       (e) => {
-        if (e.ctrlKey || root.classList.contains("menu-open")) return;
+        if (!loopAlive || e.ctrlKey || root.classList.contains("menu-open"))
+          return; // the smoothing is driven by tick(); without it the page keeps native scrolling
         const mouseLike =
           e.deltaMode === 1 ||
           (e.wheelDeltaY && Math.abs(e.wheelDeltaY) % 120 === 0);
@@ -317,6 +320,7 @@
     menuEl = $(".menu");
   const mitems = $$(".menu button[data-i]");
   function setMenu(on) {
+    if (!mbtn || !menuEl) return;
     root.classList.toggle("menu-open", on);
     mbtn.setAttribute("aria-expanded", on ? "true" : "false");
     menuEl.setAttribute("aria-hidden", on ? "false" : "true");
@@ -329,9 +333,10 @@
       mitems.forEach((b, i) => b.classList.toggle("on", i === curIdx));
     }
   }
-  mbtn.addEventListener("click", () =>
-    setMenu(!root.classList.contains("menu-open")),
-  );
+  if (mbtn)
+    mbtn.addEventListener("click", () =>
+      setMenu(!root.classList.contains("menu-open")),
+    );
   addEventListener("keydown", (e) => {
     if (e.key === "Escape") setMenu(false);
   });
@@ -342,9 +347,10 @@
       setTimeout(() => smoothTo(tops[i] || 0), 120);
     }),
   );
-  menuEl.addEventListener("click", (e) => {
-    if (e.target === menuEl) setMenu(false);
-  });
+  if (menuEl)
+    menuEl.addEventListener("click", (e) => {
+      if (e.target === menuEl) setMenu(false);
+    });
   $$('a[href="#end"]').forEach((a) =>
     a.addEventListener("click", (e) => {
       e.preventDefault();
@@ -2229,6 +2235,7 @@ void main(){
   /* ============ main loop ============ */
   function tick(now) {
     requestAnimationFrame(tick);
+    loopAlive = true;
     const tk0 = dgT();
     const d0 = now - lastNow;
     if (dgOn && lastNow && d0 > 40 && d0 < 2000) {
