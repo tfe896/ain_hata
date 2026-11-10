@@ -1,0 +1,4 @@
+.cta.xl{height:clamp(56px, 6vw, 72px);padding:0 clamp(32px, 4vw, 52px);border-radius:999px;font-size:clamp(18px, 2vw, 24px)}
+.center{text-align:center;align-items:center}
+.fig-center{max-width:560px}
+.lead-box{width:100%;max-width:min(100%, 1000px)}

@@ -60,6 +60,16 @@
     return ws;
   }
 
+  /* ---- images: until a file is linked from the Webflow asset library, show the copy kept in the repository ---- */
+  $$("img[data-fallback]").forEach(function (im) {
+    var src = im.getAttribute("src") || "";
+    if (!src || /placeholder/i.test(src) || src === location.href) {
+      im.srcset = "";
+      im.sizes = "";
+      im.setAttribute("src", im.getAttribute("data-fallback"));
+    }
+  });
+
   /* ---- letters ---- */
   $$('[data-anim="letters"]').forEach(function (h) {
     var hero = h.tagName === "H1" && h.closest(".hero");
