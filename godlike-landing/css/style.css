@@ -1245,3 +1245,56 @@ h6 {
   display: block;
   width: 100%;
 }
+
+/* ---------- Webflow-native build (js/webflow-native.js): editable images and figure posters ---------- */
+.fig .fig-poster {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+  pointer-events: none;
+  transition: opacity 0.8s var(--ease);
+}
+.fig canvas {
+  z-index: 2;
+}
+.fig.ready .fig-poster {
+  opacity: 0;
+}
+.ph,
+.igor .pic {
+  overflow: hidden;
+}
+.ph > img,
+.igor .pic > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  border-radius: inherit;
+}
+.ph {
+  position: relative;
+}
+.igor .pic .tag {
+  z-index: 1;
+}
+.mbtn {
+  display: block;
+}
+.lead-box {
+  width: 100%;
+  max-width: min(100%, 1000px);
+}
+.col.tight {
+  gap: 14px;
+}
+.p.w.big {
+  font-size: clamp(18px, 1.9vw, 26px);
+  line-height: 1.3;
+}

@@ -1,0 +1,131 @@
+// Turns godlike-landing/index.html into the plain, Webflow-editable markup (data-attributes instead of per-letter spans).
+// usage: node mknative.js <index.html> <out-body.html>
+const { chromium } = require('playwright');
+const fs = require('fs');
+(async () => {
+  const [src, out] = process.argv.slice(2);
+  const html = fs.readFileSync(src, 'utf8');
+  const b = await chromium.launch();
+  const p = await b.newPage();
+  const res = await p.evaluate((html) => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const $$ = (s, r = doc) => Array.from(r.querySelectorAll(s));
+    const menu = $$('.menu button .t').map((x) => x.textContent.trim());
+    const mk = (tag, cls, txt) => { const e = doc.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    // headings: letters -> plain text, gradient runs -> <span class="gt">
+    $$('h1, h2.h').forEach((h) => {
+      const parts = [];
+      $$('.hw', h).forEach((hw, wi) => {
+        if (wi) parts.push({ t: ' ', g: false });
+        $$('.c, .ch', hw).forEach((c) => parts.push({ t: c.textContent, g: c.classList.contains('gt') }));
+      });
+      h.textContent = '';
+      let cur = null;
+      parts.forEach((x) => {
+        const g = x.g || (x.t === ' ' && cur && cur.g);
+        if (!cur || cur.g !== x.g) { cur = { g: x.g, t: '' }; cur.node = null; (h._runs = h._runs || []).push(cur); }
+        cur.t += x.t;
+      });
+      // merge gradient runs separated by a single space ("ТОП-23" stays one span)
+      const runs = h._runs || [];
+      runs.forEach((r) => {
+        if (r.g) { const s = mk('span', 'gt', r.t); h.appendChild(s); } else h.appendChild(doc.createTextNode(r.t));
+      });
+      h.removeAttribute('aria-label');
+      h.setAttribute('data-anim', 'letters');
+    });
+    // word reveals
+    $$('.rw').forEach((e) => {
+      $$('.wd', e).forEach((w) => w.replaceWith(doc.createTextNode(w.textContent)));
+      e.textContent = e.textContent.replace(/\s+/g, ' ').trim();
+      e.classList.remove('rw');
+      e.setAttribute('data-anim', 'words');
+    });
+    // scrub texts: keep gradient words as <span class="gt">
+    $$('.scrub').forEach((e) => {
+      const ws = $$('.sw', e).map((w) => ({ t: w.textContent.trim(), g: w.classList.contains('gt') }));
+      e.textContent = '';
+      let i = 0;
+      while (i < ws.length) {
+        let j = i;
+        while (j < ws.length && ws[j].g === ws[i].g) j++;
+        const t = ws.slice(i, j).map((w) => w.t).join(' ');
+        if (i) e.appendChild(doc.createTextNode(' '));
+        if (ws[i].g) e.appendChild(mk('span', 'gt', t)); else e.appendChild(doc.createTextNode(t));
+        i = j;
+      }
+      e.classList.remove('scrub');
+      e.setAttribute('data-anim', 'scrub');
+    });
+    // counters: write the final value as text
+    $$('[data-to]').forEach((e) => {
+      const to = e.dataset.to, pre = e.dataset.pre || '', suf = e.dataset.suf || '', sep = e.dataset.sep || '';
+      const small = e.querySelector('small');
+      const v = pre + String(to).replace(/\B(?=(\d{3})+(?!\d))/g, sep ? ' ' : '') + suf;
+      e.textContent = v;
+      if (small) e.appendChild(small);
+      ['data-to', 'data-pre', 'data-suf', 'data-sep'].forEach((a) => e.removeAttribute(a));
+      e.setAttribute('data-count', '');
+    });
+    // reveal blocks
+    $$('[data-r]').forEach((e) => {
+      e.removeAttribute('data-r');
+      if (!e.hasAttribute('data-scene')) e.setAttribute('data-anim', 'reveal');
+    });
+    // figures: canvas/halo are added by the adapter; a static poster image is shown until the live figure is ready
+    $$('.fig').forEach((f) => {
+      f.textContent = '';
+      const im = mk('img', 'fig-poster');
+      im.src = 'assets/posters/fig' + f.dataset.scene + '.png';
+      im.alt = '';
+      im.loading = 'lazy';
+      f.appendChild(im);
+      f.removeAttribute('aria-hidden');
+    });
+    // hero
+    const hero = doc.querySelector('.hero');
+    hero.setAttribute('data-stream', '');
+    $$('canvas.stream', hero).forEach((c) => c.remove());
+    // marquees: one set of items, the adapter repeats it
+    $$('.marq').forEach((m) => {
+      const tr = m.querySelector('.track');
+      const items = $$('span', tr).slice(0, 7).map((s) => s.textContent.trim());
+      tr.textContent = '';
+      items.forEach((t) => tr.appendChild(mk('span', 'marq-item', t)));
+      m.setAttribute('data-marquee', m.dataset.dir || 'l');
+      m.removeAttribute('data-dir');
+      m.removeAttribute('aria-hidden');
+      m.classList.remove('marq');
+      m.classList.add('marq');
+    });
+    // photos as editable images
+    $$('.ph, .pic').forEach((e) => {
+      const m = (e.getAttribute('style') || '').match(/url\(([^)]*)\)/);
+      if (!m) return;
+      const im = mk('img');
+      im.src = m[1];
+      im.alt = '';
+      im.loading = 'lazy';
+      e.insertBefore(im, e.firstChild);
+    });
+    // chrome generated by the adapter
+    $$('.menu, .bgl, .prog').forEach((e) => e.remove());
+    const mb = doc.querySelector('.mbtn');
+    const mdiv = mk('div', 'mbtn');
+    mb.replaceWith(mdiv);
+    // section titles for the menu
+    $$('.sec').forEach((s, i) => { if (menu[i]) s.setAttribute('data-menu', menu[i]); });
+    $$('[style]').forEach((e) => {
+      const st = e.getAttribute('style');
+      if (/max-width: min\(100%, 1000px\)/.test(st)) e.classList.add('lead-box');
+      if (/^gap: 14px/.test(st)) e.classList.add('tight');
+      if (/font-size: clamp\(18px, 1\.9vw, 26px\)/.test(st)) e.classList.add('big');
+      e.removeAttribute('style');
+    });
+    $$('[aria-hidden]').forEach((e) => e.removeAttribute('aria-hidden'));
+    return { header: doc.querySelector('header.top').outerHTML, main: doc.querySelector('main').outerHTML, n: menu.length };
+  }, html);
+  fs.writeFileSync(out, res.header + '\n' + res.main);
+  console.log('menu items', res.n, 'bytes', (res.header + res.main).length);
+  await b.close();
+})();
