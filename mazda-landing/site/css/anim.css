@@ -1,0 +1,92 @@
+/* Mazda × Співпраця — стани анімацій. Працюють лише коли на <html> стоїть клас mz-js
+   (його ставить скрипт), тож без скрипта сторінка лишається повністю видимою. */
+
+@font-face { font-family: "GT Pressura LC"; src: local("GT Pressura LC Bold"), local("GTPressuraLC-Bold"); font-weight: 700; font-style: normal; font-display: swap; }
+
+html { scroll-behavior: smooth; }
+body { margin: 0; background-color: #fff9d9; -webkit-font-smoothing: antialiased; }
+
+/* ---------- заставка першого екрана ---------- */
+.mz-intro { position: fixed; left: 0; top: 0; width: 100%; height: 100%; z-index: 1000; background-color: #ef6320; display: flex; flex-direction: column; align-items: center; justify-content: center; row-gap: 3vh; will-change: transform; }
+.mz-intro-count { font-family: "GT Pressura LC", "Inter Tight", Arial, sans-serif; font-weight: 700; font-size: clamp(72px, 15vw, 220px); line-height: 0.9; color: #000; text-transform: uppercase; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.mz-intro-cap { text-align: center; padding: 0 24px; max-width: 520px; font-family: "Inter Tight", Arial, sans-serif; font-weight: 600; font-size: clamp(14px, 1.4vw, 20px); letter-spacing: 0.03em; color: #000; opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease 0.35s, transform 0.5s ease 0.35s; }
+.mz-intro.is-on .mz-intro-cap { opacity: 1; transform: none; }
+.mz-intro-slot { width: clamp(220px, 34vw, 520px); aspect-ratio: 585 / 151; }
+.mz-intro.is-out { transform: translateY(-101%); transition: transform 0.9s cubic-bezier(0.76, 0, 0.24, 1); }
+.mz-intro.is-shake { animation: mz-shake 0.28s linear; }
+.mz-stamp-fly { position: fixed; left: 0; top: 0; z-index: 1001; transform-origin: 0 0; will-change: transform, opacity; pointer-events: none; }
+@keyframes mz-shake {
+  0% { transform: translate(0, 0); } 20% { transform: translate(-7px, 5px); } 40% { transform: translate(6px, -4px); }
+  60% { transform: translate(-4px, 3px); } 80% { transform: translate(3px, -2px); } 100% { transform: translate(0, 0); }
+}
+
+/* ---------- перший екран ---------- */
+.hero-video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; opacity: 0; transition: opacity 0.8s ease; }
+.hero-video.is-on { opacity: 1; }
+.mz-js .hero-poster, .mz-js .hero-video { scale: 1.2; transition: scale 2.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease; translate: 0 var(--mz-py, 0px); }
+.mz-js.mz-ready .hero-poster, .mz-js.mz-ready .hero-video { scale: 1.04; }
+.mz-js .hero-stamp { opacity: 0; }
+.mz-js.mz-intro-done .hero-stamp { opacity: 1; }
+.mz-js .hdr { transform: translateY(-100%); transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.55s; }
+.mz-js.mz-ready .hdr { transform: none; }
+.mz-line { display: block; overflow: hidden; padding-top: 0.12em; margin-top: -0.12em; }
+.mz-li { display: block; }
+.mz-js .mz-li { transform: translateY(112%) rotate(4deg); transform-origin: 0 100%; transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: calc(0.25s + var(--i, 0) * 0.12s); }
+.mz-js.mz-ready .mz-li { transform: none; }
+.hero-sub { --d: 0.95s; }
+
+/* ---------- тексти ---------- */
+.mz-w { display: inline-block; overflow: hidden; vertical-align: top; padding-top: 0.14em; margin-top: -0.14em; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.mz-i, .mz-c { display: inline-block; }
+.mz-js [data-anim="words"] .mz-i { transform: translateY(105%); opacity: 0; transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease; transition-delay: calc(var(--d, 0s) + var(--i, 0) * 0.012s); }
+.mz-js [data-anim="words"].is-in .mz-i { transform: none; opacity: 1; }
+.mz-js [data-anim="letters"] .mz-c { transform: translateY(110%); transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: calc(var(--i, 0) * 0.018s); }
+.mz-js [data-anim="letters"].is-in .mz-c { transform: none; }
+.mz-js [data-anim="scrub"] .mz-s { opacity: 0.16; transition: opacity 0.35s ease; }
+.mz-js [data-anim="scrub"] .mz-s.is-lit { opacity: 1; }
+.mz-js [data-anim="reveal"] { opacity: 0; translate: 0 44px; transition: opacity 0.8s ease, translate 1s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.5s ease; transition-delay: var(--d, 0s); }
+.mz-js [data-anim="reveal"].is-in { opacity: 1; translate: 0 0; }
+.mz-js .tag[data-anim="reveal"] { translate: -18px 0; }
+.mz-js .tag[data-anim="reveal"].is-in { translate: 0 0; }
+
+/* ---------- фактоїди, полароїди, фото ---------- */
+.mz-js .plate-img { scale: 1.25; transition: scale 1.8s cubic-bezier(0.16, 1, 0.3, 1); translate: 0 var(--mz-py, 0px); }
+.mz-js .plate.is-in .plate-img { scale: 1.08; }
+.mz-js [data-shot] { opacity: 0; translate: 0 calc(70px + var(--mz-py, 0px)); scale: 1.12; transition: opacity 0.6s ease, scale 0.9s cubic-bezier(0.34, 1.4, 0.64, 1), translate 0.9s cubic-bezier(0.16, 1, 0.3, 1), rotate 0.5s ease; transition-delay: var(--d, 0s), var(--d, 0s), var(--d, 0s), 0s; }
+.mz-js [data-shot].is-in { opacity: 1; scale: 1; translate: 0 var(--mz-py, 0px); }
+.mz-js [data-shot].is-set { transition: opacity 0.6s ease, scale 0.5s ease, rotate 0.5s ease; }
+.mz-js [data-shot].is-set:hover { scale: 1.04; rotate: 2deg; z-index: 3; }
+.mz-js .handling-bg { scale: 1.12; translate: 0 var(--mz-py, 0px); }
+.fact-num, .plate-num { font-variant-numeric: tabular-nums; }
+.cta { transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease; }
+.cta:hover { background-color: #fff9d9; color: #000; transform: translateY(-2px); }
+
+/* ---------- карта маршруту ---------- */
+.mz-map { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+.mz-obl { opacity: 0; transition: opacity 0.7s ease; }
+.mz-obl.is-on { opacity: 1; }
+.mz-pin { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background-color: #000; border: 4px solid #fff9d9; box-sizing: border-box; scale: 0; transition: scale 0.5s cubic-bezier(0.34, 1.7, 0.64, 1); z-index: 2; }
+.mz-pin.is-on { scale: 1; }
+.mz-lbl { position: absolute; padding: 4px 9px; border-radius: 999px; background-color: #000; color: #fff9d9; font-family: "Inter Tight", Arial, sans-serif; font-weight: 500; font-size: 15px; line-height: 1.2; letter-spacing: 0.02em; white-space: nowrap; opacity: 0; scale: 0.8; transition: opacity 0.4s ease 0.1s, scale 0.5s cubic-bezier(0.34, 1.5, 0.64, 1) 0.1s; z-index: 3; }
+.mz-lbl.is-on { opacity: 1; scale: 1; }
+.mz-lbl-right { transform: translate(16px, -50%); }
+.mz-lbl-above { transform: translate(11px, calc(-100% - 11px)); }
+.mz-lbl-below { transform: translate(-18px, 0); }
+.mz-lbl-between { transform: translate(0, -50%); }
+.mz-js .stop { background-color: #ffc08a; transition: opacity 0.8s ease, translate 1s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.6s ease; }
+.mz-js .stop.is-on { background-color: #ef6320; }
+
+/* ---------- індикатор прокрутки ---------- */
+.mz-bar { position: fixed; left: 0; top: 0; height: 4px; width: 100%; background-color: #ef6320; transform-origin: 0 50%; transform: scaleX(0); z-index: 900; pointer-events: none; }
+
+@media screen and (max-width: 767px) {
+  .mz-pin { width: 10px; height: 10px; margin: -5px 0 0 -5px; border-width: 2px; }
+  .mz-lbl { font-size: 10px; padding: 2px 6px; }
+  .mz-lbl-right { transform: translate(9px, -50%); }
+  .mz-lbl-above { transform: translate(6px, calc(-100% - 6px)); }
+  .mz-lbl-below { transform: translate(-8px, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
