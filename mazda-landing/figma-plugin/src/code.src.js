@@ -1,10 +1,10 @@
-// Mazda × Співпраця — дизайн-концепт лендінгу (екрани 1–3), ревізія r2.
+// Mazda × Співпраця — дизайн-концепт лендінгу (уся сторінка), ревізія r3 (повний концепт).
 // Повний генератор: за один запуск будує у будь-якому файлі сторінки Desktop 1440, Mobile 390 і Стилі
 // з урахуванням 13 коментарів дизайнерки від 11.11 та айдентики проєкту (SMM-візуали).
 // code.js збирається з цього файлу командою `python3 build.py` (вбудовує картинки й карту).
 
 const A = __ASSETS__;
-const REV = "r2";
+const REV = "r3";
 const NBSP = " ";
 
 const hex = (h) => ({
@@ -17,20 +17,29 @@ const PINK = hex("D6237A");
 
 const TXT = {
   h1: "2500 кілометрів,\n5 співпраць\nі 1 автомобіль",
+  sub: "Як Mazda CX-90 стала частиною експедиції «Співпраця»",
   tag2: "Mazda CX-90 у «Співпраці»",
   lead: "Щоб зняти історії про український бізнес, ремесла й мистецтво, AIN і KredoBank вирушили в масштабну експедицію Україною.",
-  p1: "За кожним випуском стояв великий організаційний виклик: знімальна група, камери, звук, освітлення, особисті речі й постійні переїзди між регіонами.",
-  p2: "Протягом понад 2500 кілометрів маршруту команду супроводжувала Mazda CX-90 — великий кросовер, який став частиною знімального процесу.",
-  plates: [
-    ["2500+", "кілометрів маршруту"],
-    ["5", "співпраць: бізнес, ремесла й мистецтво"],
-    ["1", "автомобіль для всієї знімальної групи"],
+  intro: [
+    "За кожним випуском стояв великий організаційний виклик: знімальна група, камери, звук, освітлення, особисті речі й постійні переїзди між регіонами.",
+    "Протягом понад 2500 кілометрів маршруту команду супроводжувала Mazda CX-90 — великий кросовер, який став частиною знімального процесу.",
+    "Розповідаємо, які його особливості виявилися найважливішими під час експедиції.",
   ],
-  productTag: "Автомобільний партнер",
-  productTitle: "Mazda CX-90",
-  productText:
-    "Великий кросовер, який супроводжував знімальну групу всі 2500 кілометрів маршруту і став частиною знімального процесу.",
-  cta: "Більше про Mazda CX-90 →",
+  plates: [
+    ["2500+", "кілометрів маршруту", "drone", 0.45, 0.6, 1.6],
+    ["5", "співпраць: бізнес, ремесла й мистецтво", "craft", 0.55, 0.4, 1.25],
+    ["1", "автомобіль для всієї знімальної групи", "grille", 0.6, 0.55, 1.25],
+  ],
+  space: {
+    tag: "Простір",
+    title: "Простір для всієї команди й обладнання",
+    paras: [
+      "Одна з головних особливостей Mazda CX-90 — просторий трирядний салон. У випадку «Співпраці» це мало цілком практичне значення: в автомобілі розмістилися вся знімальна група та необхідна апаратура.",
+      "Сотні кілометрів трасою стали своєрідним тестом на комфорт: у машині потрібно було не лише відпочивати між зйомками, а й обговорювати сценарії наступних випусків. Тут у пригоді стала можливість змінювати конфігурацію сидінь для різних потреб у подорожі.",
+    ],
+    facts: [["3", "ряди сидінь у салоні"]],
+    shots: [["team", 320, 20, 10, -4, 0.42, 0.5, 2.0], ["selfie", 280, 250, 150, 5, 0.42, 0.5, 2.0]],
+  },
   tag3: "Маршрут експедиції",
   h2: "2500" + NBSP + "км від Київщини до" + NBSP + "Верховини і" + NBSP + "назад",
   stops: [
@@ -40,8 +49,54 @@ const TXT = {
     ["04", "Верховина", "Гірські дороги й ґрунтовки"],
     ["05", "Верховина → Київ", "Довга дорога назад у столицю"],
   ],
+  roads: {
+    tag: "Дороги",
+    title: "Для міських вулиць, трас і гірських доріг",
+    paras: [
+      "Маршрут експедиції охопив декілька локацій: від Київщини й Полтавщини до Закарпаття й Карпатських гір. І якщо перший виїзд був коротким — близько 50 км, то згодом на команду чекали сотні кілометрів трас, гірських доріг і серпантинів.",
+      "Mazda CX-90 — великий кросовер, розрахований на різні сценарії використання: високий кліренс дає змогу впевненіше долати нерівності дорожнього покриття, а конструкція автомобіля та система повного приводу можуть стати додатковою перевагою на маршрутах зі змінними дорожніми умовами.",
+      "За словами команди, навіть там, де асфальт уже закінчувався, автомобіль продовжував рух без проблем.",
+    ],
+    facts: [],
+    shots: [["city", 250, 0, 30, -5, 0.5, 0.6, 1.9], ["hero", 250, 170, 0, 3, 0.55, 0.6, 2.2], ["mount", 250, 300, 160, 6, 0.62, 0.55, 2.0]],
+  },
+  handling: {
+    tag: "Керованість",
+    title: "Керованість на звивистих дорогах",
+    paras: [
+      "Окремим етапом експедиції стали закарпатські серпантини. На цьому відрізку команда мала подолати приблизно 200 км гірських доріг із численними поворотами й перепадами висот. У таких поїздках важливі не лише потужність автомобіля, а й передбачуваність його поведінки, баланс під час проходження поворотів і зручність керування.",
+      "Гірські дороги стали гарним тестом для великого кросовера. Попри довжину понад пʼять метрів, Mazda CX-90 чудово впоралася зі звивистими ділянками маршруту.",
+    ],
+    facts: [["200 км", "гірських серпантинів"], ["5+ м", "довжина кросовера"]],
+  },
+  team: {
+    tag: "Команда",
+    title: "Автомобіль як частина великої команди",
+    paras: [
+      "Простір для людей та обладнання, повний привід, потужний двигун і технології допомоги водієві стали важливою підмогою для експедиційного формату подорожі. Адже щоб розповісти історії про українську співпрацю, спочатку потрібно дістатися до тих, хто її створює.",
+      "Після насиченого маршруту, який завершився дорогою з Верховини до Києва, ведучі вже могли оцінити Mazda CX-90 не за окремими характеристиками, а за сукупним досвідом поїздки.",
+    ],
+  },
+  quotes: [
+    {
+      photo: ["drive", 0.42, 0.42, 1.9, -4],
+      text: "«Керованість і місткість салону — два ключові чинники, які просто закохали мене в цю машину. Добре запамʼятався один момент у Карпатах: ми всією знімальною групою дуже стрімко підіймалися. Зізнаюся, на мить навіть майнула думка, що не виїдемо, але Mazda CX-90 без жодних проблем витягнула нас нагору».",
+      name: "Геннадій Сухарніков",
+      role: "ведучий «Співпраці»",
+    },
+    {
+      photo: ["yulia", 0.42, 0.45, 1.9, 4],
+      text: "«У салоні CX-90 почуваєшся майже як у власному кабінеті: сидиш у великому зручному кріслі, в якому цілком можна було б читати книжку біля каміна. Але водночас, попри свої габарити, автомобіль досить маневровий, тихий і приємний у керуванні. А коли проводиш за кермом стільки часу, починаєш особливо цінувати саме такі речі».",
+      name: "Юлія Лободюченко",
+      role: "ведуча «Співпраці»",
+    },
+  ],
+  productTag: "Автомобільний партнер",
+  productTitle: "Mazda CX-90",
+  productText: "Великий кросовер, який супроводжував знімальну групу всі 2500 кілометрів маршруту і став частиною знімального процесу.",
+  cta: "Більше про Mazda CX-90 →",
   video:
-    'id="s1" · ФОНОВЕ ВІДЕО на весь екран: петля 10–15 с без звуку з кадрами Mazda з випусків «Співпраці» (youtu.be/Wu0hcS3nl9w #2, youtu.be/v7KsIPGGsDc #3 та ін.) · це фото = постер',
+    'id="s1" · ФОНОВЕ ВІДЕО на весь екран: Mazda1.mp4 (6,5 с, без звуку, петля) · це фото = постер; на мобільному кадрувати так, щоб авто лишалося в кадрі',
 };
 
 // Точки на карті в координатах десктопної карти 840×562: [x, y, підпис, куди ставити підпис]
@@ -52,48 +107,56 @@ const PINS = [
   [123, 296, "Верховина", "right"],
 ];
 
+const PHOTOS = ["hero", "drone", "drive", "craft", "yulia", "grille", "team", "selfie", "city", "mount", "wind"];
+
 const DESKTOP = {
   key: "Desktop", title: "🖥 Desktop 1440", W: 1440, padX: 56, vertical: false,
   headerPadY: 18, logoS: 1, creditsGap: 40,
-  heroH: 900, heroPad: [32, 56], stampW: 280, titleGap: 32,
+  heroH: 900, heroPad: [32, 64], stampW: 260, titleGap: 28, heroShot: [0.33, 0.66, 1.5],
   secPad: 120, wrapGap: 72, colGap: 28, colLW: 760, colRW: 400, pGap: 18,
   tagPad: [8, 14],
   platesGap: 16, plateH: 300, platePad: 32,
-  product: { figW: 540, figH: 470, pad: 56, gap: 24, logoS: 1.5, pW: 480, shots: [[300, 40, 20, 4, 0.2, 0.55], [260, 250, 150, -5, 0.72, 0.42]] },
+  featColW: 620, figW: 580, figH: 480, figK: 1,
+  darkColW: 600, darkShot: [0.6, 0.6, 1.25],
+  quotePad: 56, quoteGap: 64, quotePhoto: 300, quoteTextW: 800,
+  product: { figW: 540, figH: 470, pad: 56, gap: 24, logoS: 1.5, pW: 480, shots: [["mount", 300, 40, 20, 4, 0.62, 0.55, 2.0], ["grille", 260, 250, 150, -5, 0.6, 0.55, 1.5]] },
   routeGap: 56, h2W: 900, splitGap: 72, stopsW: 416, stopPad: [16, 20], stopGap: 20, stopsGap: 8,
   mapW: 840, mapH: 562, dot: 18, pinPad: [4, 9],
   type: {
-    h1: ["head", 112, 93, 0, true], h2: ["head", 72, 95, 0, true], lead: ["semi", 32, 125, -1, false],
-    body: ["med", 19, 155, 0, false], label: ["head", 13, 120, 4, true], pill: ["med", 16, 120, 3, false],
-    num: ["head", 128, 90, 0, false], cap: ["head", 22, 115, 0, true], stopName: ["head", 28, 100, 0, true],
-    stopNote: ["med", 16, 140, 0, false], stopN: ["head", 16, 120, 4, false], pin: ["med", 15, 120, 2, false],
-    productTitle: ["head", 56, 100, 0, true],
+    h1: ["head", 96, 95, 0, true], sub: ["semi", 26, 130, -1, false], h2: ["head", 72, 95, 0, true], h3: ["head", 56, 98, 0, true],
+    lead: ["semi", 32, 125, -1, false], body: ["med", 19, 155, 0, false], label: ["head", 13, 120, 4, true], pill: ["med", 16, 120, 3, false],
+    num: ["head", 128, 90, 0, false], cap: ["head", 22, 115, 0, true], fact: ["head", 56, 95, 0, true],
+    stopName: ["head", 28, 100, 0, true], stopNote: ["med", 16, 140, 0, false], stopN: ["head", 16, 120, 4, false],
+    pin: ["med", 15, 120, 2, false], quote: ["semi", 28, 140, -1, false], productTitle: ["head", 56, 100, 0, true],
   },
 };
 
 const MOBILE = {
   key: "Mobile", title: "📱 Mobile 390", W: 390, padX: 20, vertical: true,
   headerPadY: 12, logoS: 0.6, creditsGap: 18,
-  heroH: 780, heroPad: [20, 28], stampW: 150, titleGap: 18,
+  heroH: 780, heroPad: [20, 28], stampW: 150, titleGap: 16, heroShot: [0.485, 0.8, 4.1],
   secPad: 64, wrapGap: 40, colGap: 18, colLW: 0, colRW: 0, pGap: 14,
   tagPad: [6, 10],
   platesGap: 12, plateH: 164, platePad: 22,
-  product: { figW: 350, figH: 290, pad: 24, gap: 16, logoS: 1.1, pW: 0, shots: [[190, 14, 16, 4, 0.2, 0.55], [170, 160, 84, -5, 0.72, 0.42]] },
+  featColW: 0, figW: 350, figH: 290, figK: 0.6,
+  darkColW: 0, darkShot: [0.45, 0.6, 5.5],
+  quotePad: 24, quoteGap: 24, quotePhoto: 200, quoteTextW: 0,
+  product: { figW: 350, figH: 290, pad: 24, gap: 16, logoS: 1.1, pW: 0, shots: [["mount", 190, 14, 16, 4, 0.62, 0.55, 2.0], ["grille", 170, 160, 84, -5, 0.6, 0.55, 1.5]] },
   routeGap: 32, h2W: 0, splitGap: 32, stopsW: 0, stopPad: [12, 14], stopGap: 14, stopsGap: 6,
   mapW: 350, mapH: 234, dot: 9, pinPad: [2, 6],
   type: {
-    h1: ["head", 40, 95, 0, true], h2: ["head", 36, 95, 0, true], lead: ["semi", 21, 130, -1, false],
-    body: ["med", 16, 155, 0, false], label: ["head", 10, 120, 4, true], pill: ["med", 13, 120, 3, false],
-    num: ["head", 72, 90, 0, false], cap: ["head", 17, 115, 0, true], stopName: ["head", 22, 100, 0, true],
-    stopNote: ["med", 14, 140, 0, false], stopN: ["head", 13, 120, 4, false], pin: ["med", 9, 120, 2, false],
-    productTitle: ["head", 34, 100, 0, true],
+    h1: ["head", 40, 95, 0, true], sub: ["semi", 17, 130, -1, false], h2: ["head", 32, 95, 0, true], h3: ["head", 30, 98, 0, true],
+    lead: ["semi", 21, 130, -1, false], body: ["med", 16, 155, 0, false], label: ["head", 10, 120, 4, true], pill: ["med", 13, 120, 3, false],
+    num: ["head", 72, 90, 0, false], cap: ["head", 17, 115, 0, true], fact: ["head", 40, 95, 0, true],
+    stopName: ["head", 22, 100, 0, true], stopNote: ["med", 14, 140, 0, false], stopN: ["head", 13, 120, 4, false],
+    pin: ["med", 9, 120, 2, false], quote: ["semi", 19, 140, -1, false], productTitle: ["head", 34, 100, 0, true],
   },
 };
 
 const TYPE_NAMES = {
-  h1: "Heading 1 (hero)", h2: "Heading 2", lead: "Lead", body: "Body", label: "Label", pill: "Pill",
-  num: "Plate number", cap: "Plate caption", stopName: "Stop name", stopNote: "Stop note", stopN: "Stop number",
-  pin: "Map label", productTitle: "Product title",
+  h1: "Heading 1 (hero)", sub: "Hero subtitle", h2: "Heading 2", h3: "Heading 3", lead: "Lead", body: "Body", label: "Label", pill: "Pill",
+  num: "Plate number", cap: "Plate caption", fact: "Fact number", stopName: "Stop name", stopNote: "Stop note", stopN: "Stop number",
+  pin: "Map label", quote: "Quote", productTitle: "Product title",
 };
 
 let step = "старт";
@@ -209,8 +272,8 @@ function logoMazdaH(s) {
   f.appendChild(cropOf("mazda", 72, 64, 0, 52, 72, 64, s * 0.95, "wordmark"));
   return f;
 }
-// Фрагмент кадру hero (16:9) у рамці w×h: центр (cx, cy) у частках кадру, zoom — у скільки разів кадр ширший за рамку.
-function photoCrop(w, h, cx, cy, zoom, name) {
+// Фрагмент фото (усі фото 16:9) у рамці w×h: центр (cx, cy) у частках кадру, zoom — у скільки разів кадр ширший за рамку.
+function photoCrop(key, w, h, cx, cy, zoom, name) {
   const f = figma.createFrame();
   f.name = name || "photo";
   f.fills = [];
@@ -225,7 +288,7 @@ function photoCrop(w, h, cx, cy, zoom, name) {
   const r = figma.createRectangle();
   r.name = "img";
   r.resize(rw, rh);
-  r.fills = [{ type: "IMAGE", scaleMode: "FILL", imageHash: img.hero }];
+  r.fills = [{ type: "IMAGE", scaleMode: "FILL", imageHash: img[key] }];
   f.appendChild(r);
   r.x = Math.round(Math.min(0, Math.max(w - rw, w / 2 - cx * rw)));
   r.y = Math.round(Math.min(0, Math.max(h - rh, h / 2 - cy * rh)));
@@ -242,14 +305,14 @@ async function pill(d, chars, bg, fg, name, padding, kind) {
   return f;
 }
 // Полароїд з айдентики: кремова рамка з тінню, під нахилом.
-function polaroid(w, cx, cy, deg) {
+function polaroid(w, key, cx, cy, deg, zoom) {
   const m = Math.round(w * 0.06);
   const f = figma.createFrame();
   f.name = "polaroid";
   f.resize(w, Math.round(w * 1.2));
   f.fills = [P("cream")];
   f.effects = [{ type: "DROP_SHADOW", color: { r: 0, g: 0, b: 0, a: 0.18 }, offset: { x: 0, y: 8 }, radius: 24, spread: 0, visible: true, blendMode: "NORMAL" }];
-  const ph = photoCrop(w - m * 2, w - m * 2, cx, cy, 2.6, "photo");
+  const ph = photoCrop(key, w - m * 2, w - m * 2, cx, cy, zoom || 2, "photo");
   f.appendChild(ph);
   ph.x = m;
   ph.y = m;
@@ -322,13 +385,103 @@ async function setup() {
   }
 
   step = "картинки";
-  for (const k of ["hero", "stamp", "kb", "mazda"]) img[k] = figma.createImage(figma.base64Decode(A[k])).hash;
+  for (const k of ["stamp", "kb", "mazda"].concat(PHOTOS)) img[k] = figma.createImage(figma.base64Decode(A[k])).hash;
 }
 
 // ---------- сторінка лендінгу ----------
+// Секція: фон + внутрішній wrap з боковими відступами.
+function section(d, root, name, bg, gap) {
+  const sec = al("VERTICAL", name, 0);
+  pad(sec, d.secPad, 0);
+  sec.fills = [P(bg)];
+  sec.clipsContent = true;
+  add(root, sec, true);
+  const wrap = al("VERTICAL", "wrap", gap === undefined ? d.wrapGap : gap);
+  pad(wrap, 0, d.padX);
+  add(sec, wrap, true);
+  return { sec, wrap };
+}
+// Колонка фіксованої ширини на десктопі, на всю ширину на мобільному.
+function column(d, parent, width, gap) {
+  const c = al("VERTICAL", "col", gap);
+  parent.appendChild(c);
+  if (width) {
+    c.resize(width, 100);
+    c.counterAxisSizingMode = "FIXED";
+    c.primaryAxisSizingMode = "AUTO";
+  } else {
+    c.layoutSizingHorizontal = "FILL";
+  }
+  return c;
+}
+// Фото на весь блок під текстом: абсолютний шар із затемненням.
+function backdrop(frame, w, h, key, shot, gradient) {
+  const sh = figma.createRectangle();
+  sh.name = "shade";
+  sh.resize(w, h);
+  sh.fills = [gradient];
+  frame.insertChild(0, sh);
+  sh.layoutPositioning = "ABSOLUTE";
+  sh.x = 0;
+  sh.y = 0;
+  const ph = photoCrop(key, w, h, shot[0], shot[1], shot[2], "photo");
+  frame.insertChild(0, ph);
+  ph.layoutPositioning = "ABSOLUTE";
+  ph.x = 0;
+  ph.y = 0;
+}
+async function factRow(d, parent, facts, fg, bg) {
+  if (!facts || !facts.length) return null;
+  const row = al("HORIZONTAL", "facts", 12);
+  parent.appendChild(row);
+  for (const f of facts) {
+    const pl = al("VERTICAL", "fact", 6);
+    pad(pl, d.vertical ? 14 : 20, d.vertical ? 16 : 24);
+    pl.fills = [P(bg)];
+    pl.appendChild(await T(d, "fact", f[0], fg, "num"));
+    pl.appendChild(await T(d, "label", f[1], fg, "cap"));
+    row.appendChild(pl);
+  }
+  return row;
+}
+function shotsFig(d, shots, w, h, k) {
+  const fig = figma.createFrame();
+  fig.name = "fig";
+  fig.fills = [];
+  fig.clipsContent = false;
+  fig.resize(w, h);
+  for (const s of shots) {
+    const ph = polaroid(Math.round(s[1] * k), s[0], s[5], s[6], s[4], s[7]);
+    fig.appendChild(ph);
+    ph.x = Math.round(s[2] * k);
+    ph.y = Math.round(s[3] * k);
+  }
+  return fig;
+}
+// Блок «особливість»: пігулка, заголовок, текст, факт + полароїди.
+async function feature(d, wrap, o, flip) {
+  const split = al(d.vertical ? "VERTICAL" : "HORIZONTAL", "split", d.vertical ? 32 : 0);
+  if (!d.vertical) {
+    split.primaryAxisAlignItems = "SPACE_BETWEEN";
+    split.counterAxisAlignItems = "CENTER";
+  }
+  add(wrap, split, true);
+  const fig = shotsFig(d, o.shots, d.figW, d.figH, d.figK);
+  if (flip && !d.vertical) split.appendChild(fig);
+  const col = column(d, split, d.featColW, d.colGap);
+  const tag = await pill(d, o.tag, "black", "cream");
+  col.appendChild(tag);
+  const h3 = wrapText(col, await T(d, "h3", o.title, "black", "h3"), 0);
+  const first = [];
+  for (const p of o.paras) first.push(wrapText(col, await T(d, "body", p, "black", "p"), 0));
+  const facts = await factRow(d, col, o.facts, "black", "orange");
+  if (!(flip && !d.vertical)) split.appendChild(fig);
+  return { split, tag, h3, p: first[0], fig, facts };
+}
+
 async function buildLanding(d, host, originX) {
   const tags = [];
-  const root = al("VERTICAL", "Mazda × Співпраця — " + d.key + " " + d.W + " (екрани 1–3) · " + REV, 0);
+  const root = al("VERTICAL", "Mazda × Співпраця — " + d.key + " " + d.W + " · " + REV, 0);
   root.fills = [P("cream")];
   root.clipsContent = true;
   host.appendChild(root);
@@ -338,7 +491,7 @@ async function buildLanding(d, host, originX) {
   root.counterAxisSizingMode = "FIXED";
   root.primaryAxisSizingMode = "AUTO";
 
-  // шапка (#1)
+  // шапка
   step = d.key + ": шапка";
   const header = al("HORIZONTAL", "header", 0);
   header.primaryAxisAlignItems = "SPACE_BETWEEN";
@@ -361,13 +514,13 @@ async function buildLanding(d, host, originX) {
   header.appendChild(await credit("Автомобільний партнер", logoMazdaH(d.logoS), true));
   tags.push([header, "шапка окремим блоком · логотипи окремими файлами (SVG), Mazda — горизонтальна версія"]);
 
-  // hero (#2, #3)
+  // hero
   step = d.key + ": hero";
   const hero = al("VERTICAL", "sec hero (video)", 0);
-  hero.fills = [{ type: "IMAGE", scaleMode: "FILL", imageHash: img.hero }, shade(0.1, 0.2, 0.8)];
+  hero.fills = [P("black")];
   hero.clipsContent = true;
   hero.paddingTop = d.heroPad[0];
-  hero.paddingBottom = d.heroPad[1] * (d.vertical ? 1 : 1.75);
+  hero.paddingBottom = d.heroPad[1];
   hero.paddingLeft = d.padX;
   hero.paddingRight = d.padX;
   hero.primaryAxisAlignItems = "MAX";
@@ -379,58 +532,40 @@ async function buildLanding(d, host, originX) {
   const stamp = imgRect("stamp", d.stampW, Math.round((d.stampW * 151) / 585), "logo-spivpratsia");
   title.appendChild(stamp);
   const h1 = wrapText(title, await T(d, "h1", TXT.h1, "cream", "h1"), 0);
+  const sub = wrapText(title, await T(d, "sub", TXT.sub, "cream", "sub"), d.vertical ? 0 : 640);
+  backdrop(hero, d.W, d.heroH, "drone", d.heroShot, shade(0.05, 0.25, 0.85));
   tags.push([hero, TXT.video]);
   tags.push([stamp, "лого проєкту з'являється першим (opacity 0 → 1)"]);
-  tags.push([h1, "h1 сторінки (SEO) · анімована типографіка: рядки по черзі виїжджають з-під маски, цифри 2500 / 5 / 1 рахуються від 0 (data-count)"]);
-  tags.push([h1, "після появи заголовок повільно зсувається за скролом (паралакс відносно відео)"]);
+  tags.push([h1, "h1 сторінки (SEO, разом із підзаголовком) · анімована типографіка: рядки по черзі виїжджають з-під маски, цифри 2500 / 5 / 1 рахуються від 0 (data-count)"]);
+  tags.push([sub, 'підзаголовок · data-anim="words" після заголовка'] );
 
-  // вступ (#4, #7)
+  // вступ
   step = d.key + ": вступ";
-  const sec2 = al("VERTICAL", "sec", 0);
-  pad(sec2, d.secPad, 0);
-  sec2.fills = [P("cream")];
-  add(root, sec2, true);
-  const wrap2 = al("VERTICAL", "wrap", d.wrapGap);
-  pad(wrap2, 0, d.padX);
-  add(sec2, wrap2, true);
+  const s2 = section(d, root, "sec intro", "cream");
   const split2 = al(d.vertical ? "VERTICAL" : "HORIZONTAL", "split", d.vertical ? 32 : 0);
   if (!d.vertical) split2.primaryAxisAlignItems = "SPACE_BETWEEN";
-  add(wrap2, split2, true);
-  const colL = al("VERTICAL", "col", d.colGap);
-  split2.appendChild(colL);
-  if (d.colLW) {
-    colL.resize(d.colLW, 100);
-    colL.counterAxisSizingMode = "FIXED";
-    colL.primaryAxisSizingMode = "AUTO";
-  } else {
-    colL.layoutSizingHorizontal = "FILL";
-  }
+  add(s2.wrap, split2, true);
+  const colL = column(d, split2, d.colLW, d.colGap);
   const tag2 = await pill(d, TXT.tag2, "black", "cream");
   colL.appendChild(tag2);
   const lead = wrapText(colL, await T(d, "lead", TXT.lead, "black", "lead"), 0);
-  const colR = al("VERTICAL", "col", d.pGap);
-  split2.appendChild(colR);
-  if (d.colRW) {
-    colR.resize(d.colRW, 100);
-    colR.counterAxisSizingMode = "FIXED";
-    colR.primaryAxisSizingMode = "AUTO";
-    colR.paddingTop = Math.round(tag2.height + d.colGap);
-  } else {
-    colR.layoutSizingHorizontal = "FILL";
+  const colR = column(d, split2, d.colRW, d.pGap);
+  if (d.colRW) colR.paddingTop = Math.round(tag2.height + d.colGap);
+  let p1 = null;
+  for (const p of TXT.intro) {
+    const t = wrapText(colR, await T(d, "body", p, "black", "p"), 0);
+    if (!p1) p1 = t;
   }
-  const p1 = wrapText(colR, await T(d, "body", TXT.p1, "black", "p"), 0);
-  wrapText(colR, await T(d, "body", TXT.p2, "black", "p"), 0);
   tags.push([tag2, 'id="s2" · пігулка розділу · data-anim="reveal"']);
   tags.push([lead, 'data-anim="scrub" · слова темнішають під час скролу']);
   tags.push([p1, 'data-anim="words"']);
 
-  // фактоїди (#8)
+  // фактоїди
   step = d.key + ": фактоїди";
   const plates = al(d.vertical ? "VERTICAL" : "HORIZONTAL", "plates", d.platesGap);
-  add(wrap2, plates, true);
+  add(s2.wrap, plates, true);
   const plateW = d.vertical ? d.W - d.padX * 2 : (d.W - d.padX * 2 - d.platesGap * 2) / 3;
-  const crops = [[0.2, 0.55, 2.0], [0.45, 0.5, 2.4], [0.72, 0.42, 2.2]];
-  for (let i = 0; i < TXT.plates.length; i++) {
+  for (const it of TXT.plates) {
     const pl = al("VERTICAL", "plate", 8);
     pad(pl, d.platePad, d.platePad);
     pl.primaryAxisAlignItems = "SPACE_BETWEEN";
@@ -442,78 +577,34 @@ async function buildLanding(d, host, originX) {
     pl.counterAxisSizingMode = "FIXED";
     if (d.vertical) pl.layoutSizingHorizontal = "FILL";
     else pl.layoutGrow = 1;
-    const ph = photoCrop(plateW, d.plateH, crops[i][0], crops[i][1], crops[i][2], "photo");
-    pl.appendChild(ph);
-    ph.layoutPositioning = "ABSOLUTE";
-    ph.x = 0;
-    ph.y = 0;
-    const sh = figma.createRectangle();
-    sh.name = "shade";
-    sh.resize(plateW, d.plateH);
-    sh.fills = [shade(0.35, 0.45, 0.8)];
-    pl.appendChild(sh);
-    sh.layoutPositioning = "ABSOLUTE";
-    sh.x = 0;
-    sh.y = 0;
-    pl.appendChild(await T(d, "num", TXT.plates[i][0], "cream", "num"));
-    wrapText(pl, await T(d, "cap", TXT.plates[i][1], "cream", "cap"), 0);
+    pl.appendChild(await T(d, "num", it[0], "cream", "num"));
+    wrapText(pl, await T(d, "cap", it[1], "cream", "cap"), 0);
+    backdrop(pl, plateW, d.plateH, it[2], [it[3], it[4], it[5]], shade(0.35, 0.45, 0.82));
   }
-  tags.push([plates, "data-count · 0 → «2500+» / «5» / «1» · плашки виїжджають знизу по черзі"]);
-  tags.push([plates, "фото у плашках і полароїдах — заглушки з відео; потрібні кадри з експедиції"]);
+  tags.push([plates, "data-count · 0 → «2500+» / «5» / «1» · плашки виїжджають знизу по черзі, фото всередині повільно масштабується"]);
 
-  // продуктова вставка (#9)
-  step = d.key + ": продуктова вставка";
-  const pr = d.product;
-  const product = al(d.vertical ? "VERTICAL" : "HORIZONTAL", "product", 0);
-  product.fills = [P("beige")];
-  product.counterAxisAlignItems = "CENTER";
-  add(wrap2, product, true);
-  const fig = figma.createFrame();
-  fig.name = "fig";
-  fig.fills = [];
-  fig.clipsContent = false;
-  fig.resize(pr.figW, pr.figH);
-  product.appendChild(fig);
-  for (const s of pr.shots) {
-    const ph = polaroid(s[0], s[4], s[5], s[3]);
-    fig.appendChild(ph);
-    ph.x = s[1];
-    ph.y = s[2];
-  }
-  const pcol = al("VERTICAL", "col", pr.gap);
-  pad(pcol, pr.pad, pr.pad);
-  add(product, pcol, true);
-  pcol.appendChild(await pill(d, TXT.productTag, "black", "cream"));
-  const stampBox = al("HORIZONTAL", "partner-stamp", 0);
-  pad(stampBox, Math.round(10 * pr.logoS), Math.round(16 * pr.logoS));
-  stampBox.strokes = [P("black")];
-  stampBox.strokeWeight = 2;
-  stampBox.appendChild(logoMazdaH(pr.logoS));
-  pcol.appendChild(stampBox);
-  stampBox.rotation = 2;
-  pcol.appendChild(await T(d, "productTitle", TXT.productTitle, "black", "h3"));
-  wrapText(pcol, await T(d, "body", TXT.productText, "black", "p"), pr.pW);
-  pcol.appendChild(await pill(d, TXT.cta, "black", "cream", "cta", [d.tagPad[0] * 2, d.tagPad[1] * 2]));
-  tags.push([product, 'продуктова вставка Mazda CX-90 · data-anim="reveal" · фото, текст і посилання — заглушки']);
+  // простір
+  step = d.key + ": простір";
+  const s3 = section(d, root, "sec feature space", "cream");
+  s3.sec.paddingTop = 0;
+  const f1 = await feature(d, s3.wrap, TXT.space, false);
+  tags.push([f1.tag, 'id="s3" · пігулка розділу']);
+  tags.push([f1.h3, 'data-anim="letters"']);
+  tags.push([f1.p, 'data-anim="words"']);
+  tags.push([f1.fig, "полароїди «падають» на місце з легким обертанням і зсуваються за скролом (паралакс)"]);
+  if (f1.facts) tags.push([f1.facts, "data-count · 0 → 3"]);
 
-  // маршрут (#10–#13)
+  // маршрут
   step = d.key + ": маршрут";
-  const route = al("VERTICAL", "sec route", 0);
-  pad(route, d.secPad, 0);
-  route.fills = [P("beige")];
-  add(root, route, true);
-  const wrap3 = al("VERTICAL", "wrap", d.routeGap);
-  pad(wrap3, 0, d.padX);
-  add(route, wrap3, true);
-  const head3 = al("VERTICAL", "col", d.colGap);
-  add(wrap3, head3, true);
-  const tag3 = await pill(d, TXT.tag3, "black", "cream");
-  head3.appendChild(tag3);
-  const h2 = wrapText(head3, await T(d, "h2", TXT.h2, "black", "h2"), d.h2W);
-  const split3 = al(d.vertical ? "VERTICAL" : "HORIZONTAL", "split", d.splitGap);
-  split3.counterAxisAlignItems = d.vertical ? "MIN" : "CENTER";
-  add(wrap3, split3, true);
-
+  const s4 = section(d, root, "sec route", "beige", d.routeGap);
+  const head4 = al("VERTICAL", "col", d.colGap);
+  add(s4.wrap, head4, true);
+  const tag4 = await pill(d, TXT.tag3, "black", "cream");
+  head4.appendChild(tag4);
+  const h2 = wrapText(head4, await T(d, "h2", TXT.h2, "black", "h2"), d.h2W);
+  const split4 = al(d.vertical ? "VERTICAL" : "HORIZONTAL", "split", d.splitGap);
+  split4.counterAxisAlignItems = d.vertical ? "MIN" : "CENTER";
+  add(s4.wrap, split4, true);
   const stops = al("VERTICAL", "stops", d.stopsGap);
   const map = figma.createFrame();
   map.name = "fig map";
@@ -521,14 +612,14 @@ async function buildLanding(d, host, originX) {
   map.clipsContent = false;
   map.resize(d.mapW, d.mapH);
   if (d.vertical) {
-    split3.appendChild(map);
-    add(split3, stops, true);
+    split4.appendChild(map);
+    add(split4, stops, true);
   } else {
-    split3.appendChild(stops);
+    split4.appendChild(stops);
     stops.resize(d.stopsW, 100);
     stops.counterAxisSizingMode = "FIXED";
     stops.primaryAxisSizingMode = "AUTO";
-    split3.appendChild(map);
+    split4.appendChild(map);
   }
   for (const s of TXT.stops) {
     const st = al("HORIZONTAL", "stop", d.stopGap);
@@ -541,7 +632,6 @@ async function buildLanding(d, host, originX) {
     wrapText(c, await T(d, "stopName", s[1], "black", "h3"), 0);
     wrapText(c, await T(d, "stopNote", s[2], "black", "p"), 0);
   }
-
   step = d.key + ": карта";
   const k = d.mapW / 840;
   const svg = figma.createNodeFromSvg(A.map);
@@ -577,12 +667,114 @@ async function buildLanding(d, host, originX) {
       pl.y = Math.round(dot.y - pl.height - g);
     }
   }
-  tags.push([tag3, 'id="s3" · пігулка розділу']);
+  tags.push([tag4, 'id="s4" · пігулка розділу']);
   tags.push([h2, 'data-anim="letters" · «2500» — data-count 0 → 2500']);
   tags.push([map, "карта України: Natural Earth, лише суша (з Кримом), межі областей · SVG"]);
   tags.push([map, "області маршруту підсвічуються, коли лінія до них доходить"]);
   tags.push([map, "data-route · лінія малюється під час скролу (stroke-dashoffset)"]);
   tags.push([stops, 'data-anim="reveal" · плашки зупинок з\'являються по черзі, коли лінія маршруту доходить до точки']);
+
+  // дороги (у тій самій бежевій секції, під картою)
+  step = d.key + ": дороги";
+  const f2 = await feature(d, s4.wrap, TXT.roads, true);
+  tags.push([f2.h3, 'data-anim="letters"']);
+  tags.push([f2.fig, "три полароїди: місто · траса · гори; розкладаються віялом під час скролу"]);
+
+  // керованість: темний блок на фото серпантину
+  step = d.key + ": керованість";
+  const s5 = al("VERTICAL", "sec handling (photo)", 0);
+  pad(s5, d.secPad, d.padX);
+  s5.fills = [P("black")];
+  s5.clipsContent = true;
+  add(root, s5, true);
+  const col5 = column(d, s5, d.darkColW, d.colGap);
+  const tag5 = await pill(d, TXT.handling.tag, "cream", "black");
+  col5.appendChild(tag5);
+  const h5 = wrapText(col5, await T(d, "h3", TXT.handling.title, "cream", "h3"), 0);
+  for (const p of TXT.handling.paras) wrapText(col5, await T(d, "body", p, "cream", "p"), 0);
+  const facts5 = await factRow(d, col5, TXT.handling.facts, "black", "orange");
+  const grad5 = d.vertical
+    ? shade(0.6, 0.65, 0.8)
+    : {
+        type: "GRADIENT_LINEAR",
+        gradientTransform: [[1, 0, 0], [0, 1, 0]],
+        gradientStops: [
+          { position: 0, color: { r: 0, g: 0, b: 0, a: 0.88 } },
+          { position: 0.5, color: { r: 0, g: 0, b: 0, a: 0.6 } },
+          { position: 1, color: { r: 0, g: 0, b: 0, a: 0.1 } },
+        ],
+      };
+  backdrop(s5, d.W, Math.max(100, Math.round(s5.height)), "drone", d.darkShot, grad5);
+  tags.push([tag5, 'id="s5" · фото серпантину на весь блок (можна друге відео-петлю) · паралакс фону']);
+  tags.push([h5, 'data-anim="letters"']);
+  tags.push([facts5, "data-count · 0 → 200 і 0 → 5 · плашки виїжджають по черзі"]);
+
+  // команда й цитати ведучих
+  step = d.key + ": команда";
+  const s6 = section(d, root, "sec team", "cream");
+  const head6 = al(d.vertical ? "VERTICAL" : "HORIZONTAL", "split", d.vertical ? 24 : 0);
+  if (!d.vertical) head6.primaryAxisAlignItems = "SPACE_BETWEEN";
+  add(s6.wrap, head6, true);
+  const col6 = column(d, head6, d.featColW, d.colGap);
+  const tag6 = await pill(d, TXT.team.tag, "black", "cream");
+  col6.appendChild(tag6);
+  const h6 = wrapText(col6, await T(d, "h3", TXT.team.title, "black", "h3"), 0);
+  const col6r = column(d, head6, d.vertical ? 0 : 560, d.pGap);
+  if (!d.vertical) col6r.paddingTop = Math.round(tag6.height + d.colGap);
+  for (const p of TXT.team.paras) wrapText(col6r, await T(d, "body", p, "black", "p"), 0);
+  const quotes = al("VERTICAL", "quotes", d.vertical ? 16 : 24);
+  add(s6.wrap, quotes, true);
+  let qi = 0;
+  for (const q of TXT.quotes) {
+    const card = al(d.vertical ? "VERTICAL" : "HORIZONTAL", "quote", d.quoteGap);
+    pad(card, d.quotePad, d.quotePad);
+    card.fills = [P("beige")];
+    card.counterAxisAlignItems = d.vertical ? "MIN" : "CENTER";
+    add(quotes, card, true);
+    const ph = polaroid(d.quotePhoto, q.photo[0], q.photo[1], q.photo[2], q.photo[4], q.photo[3]);
+    const body = al("VERTICAL", "col", d.vertical ? 16 : 24);
+    if (qi % 2 === 1 && !d.vertical) {
+      add(card, body, true);
+      card.appendChild(ph);
+    } else {
+      card.appendChild(ph);
+      add(card, body, true);
+    }
+    wrapText(body, await T(d, "quote", q.text, "black", "quote"), 0);
+    const who = al("VERTICAL", "who", 4);
+    body.appendChild(who);
+    who.appendChild(await T(d, "stopName", q.name, "black", "name"));
+    who.appendChild(await T(d, "stopNote", q.role, "black", "role"));
+    qi++;
+  }
+  tags.push([tag6, 'id="s6" · пігулка розділу']);
+  tags.push([h6, 'data-anim="letters"']);
+  tags.push([quotes, 'цитати ведучих: data-anim="words" для тексту, полароїд повертається на кілька градусів при появі']);
+
+  // продуктова вставка
+  step = d.key + ": продуктова вставка";
+  const pr = d.product;
+  const product = al(d.vertical ? "VERTICAL" : "HORIZONTAL", "product", 0);
+  product.fills = [P("orange")];
+  product.counterAxisAlignItems = "CENTER";
+  add(s6.wrap, product, true);
+  const fig = shotsFig(d, pr.shots, pr.figW, pr.figH, 1);
+  product.appendChild(fig);
+  const pcol = al("VERTICAL", "col", pr.gap);
+  pad(pcol, pr.pad, pr.pad);
+  add(product, pcol, true);
+  pcol.appendChild(await pill(d, TXT.productTag, "black", "cream"));
+  const stampBox = al("HORIZONTAL", "partner-stamp", 0);
+  pad(stampBox, Math.round(10 * pr.logoS), Math.round(16 * pr.logoS));
+  stampBox.strokes = [P("black")];
+  stampBox.strokeWeight = 2;
+  stampBox.appendChild(logoMazdaH(pr.logoS));
+  pcol.appendChild(stampBox);
+  stampBox.rotation = 2;
+  pcol.appendChild(await T(d, "productTitle", TXT.productTitle, "black", "h3"));
+  wrapText(pcol, await T(d, "body", TXT.productText, "black", "p"), pr.pW);
+  pcol.appendChild(await pill(d, TXT.cta, "black", "cream", "cta", [d.tagPad[0] * 2, d.tagPad[1] * 2]));
+  tags.push([product, 'продуктова вставка Mazda CX-90 · data-anim="reveal" · текст і посилання кнопки — заглушки']);
 
   // рожеві мітки анімацій праворуч від макета
   step = d.key + ": мітки";
@@ -596,6 +788,7 @@ async function buildLanding(d, host, originX) {
   box.y = 0;
   const top = root.absoluteBoundingBox ? root.absoluteBoundingBox.y : 0;
   const rows = tags
+    .filter((t) => t[0])
     .map((t, i) => ({ i, y: (t[0].absoluteBoundingBox ? t[0].absoluteBoundingBox.y : 0) - top, text: t[1] }))
     .sort((a, b) => a.y - b.y || a.i - b.i);
   let last = -1e9;
@@ -656,7 +849,7 @@ async function buildStyles(host, originX) {
     row.appendChild(meta);
     meta.resize(220, meta.height);
     meta.textAutoResize = "HEIGHT";
-    row.appendChild(await T(d, kind, kind === "num" ? "2500+" : "Mazda CX-90 у «Співпраці»", "black", "sample"));
+    row.appendChild(await T(d, kind, kind === "num" ? "2500+" : kind === "fact" ? "200 км" : "Mazda CX-90 у «Співпраці»", "black", "sample"));
     type.appendChild(row);
   }
   root.appendChild(await T(d, "label", "Елементи", "orange", "lbl"));
@@ -666,7 +859,7 @@ async function buildStyles(host, originX) {
   els.appendChild(await pill(d, "Спецпроєкт", "black", "cream"));
   els.appendChild(await pill(d, TXT.cta, "black", "cream", "cta", [16, 28]));
   els.appendChild(logoMazdaH(1.5));
-  els.appendChild(polaroid(180, 0.72, 0.42, 4));
+  els.appendChild(polaroid(180, "mount", 0.62, 0.55, 4, 2));
   return root;
 }
 
