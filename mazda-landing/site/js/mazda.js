@@ -27,7 +27,7 @@
     return out;
   }
   step("типографіка", function () {
-    $$(".h1, .h2, .h3, .lead, .p, .hero-sub, .quote-text, .plate-cap, .stop-note, .fact-cap").forEach(function (e) {
+    $$(".mz-h1, .mz-h2, .mz-h3, .mz-lead, .mz-p, .mz-hero-sub, .mz-quote-text, .mz-plate-cap, .mz-stop-note, .mz-fact-cap").forEach(function (e) {
       textNodes(e).forEach(function (t) { t.nodeValue = nb(t.nodeValue); });
     });
   });
@@ -141,11 +141,11 @@
   /* ---------- поява при скролі ---------- */
   step("поява", function () {
     if (RM || !("IntersectionObserver" in W)) {
-      $$("[data-anim], [data-shot], .plate").forEach(function (e) { e.classList.add("is-in"); });
+      $$("[data-anim], [data-shot], .mz-plate").forEach(function (e) { e.classList.add("is-in"); });
       return;
     }
     // сусідні елементи одного ряду з'являються по черзі
-    $$(".plates, .stops, .facts, .fig-shots, .quotes").forEach(function (group) {
+    $$(".mz-plates, .mz-stops, .mz-facts, .mz-fig-shots, .mz-quotes").forEach(function (group) {
       Array.prototype.slice.call(group.children).forEach(function (c, i) { c.style.setProperty("--d", i * 0.12 + "s"); });
     });
     var io = new IntersectionObserver(function (entries) {
@@ -163,17 +163,17 @@
       });
     }, { rootMargin: "0px 0px -12% 0px", threshold: 0.12 });
     $$('[data-anim="words"], [data-anim="letters"], [data-anim="reveal"], [data-shot]').forEach(function (e) {
-      if (e.closest(".hero")) return; // перший екран веде заставка
+      if (e.closest(".mz-hero")) return; // перший екран веде заставка
       io.observe(e);
     });
   });
 
   /* ---------- фонове відео першого екрана ---------- */
   step("відео", function () {
-    var hero = $(".hero[data-video]");
+    var hero = $(".mz-hero[data-video]");
     if (!hero || RM) return;
-    var poster = $(".hero-poster", hero);
-    var v = el("video", "hero-video");
+    var poster = $(".mz-hero-poster", hero);
+    var v = el("video", "mz-hero-video");
     v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
     v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("preload", "auto");
     v.setAttribute("aria-hidden", "true");
@@ -242,7 +242,7 @@
       x.p.setAttribute("stroke-dasharray", x.len + " " + x.len);
       x.p.setAttribute("stroke-dashoffset", RM ? 0 : x.len);
     });
-    route = { box: box, paths: paths, obls: obls, pins: pins, stops: $$(".stops .stop"), last: -1 };
+    route = { box: box, paths: paths, obls: obls, pins: pins, stops: $$(".mz-stops .mz-stop"), last: -1 };
     if (RM) drawRoute(1);
   }
   function drawRoute(p) {
@@ -271,9 +271,9 @@
     bar = el("div", "mz-bar"); D.body.appendChild(bar);
     scrubs = $$('[data-anim="scrub"]').map(function (e) { return { el: e, words: $$(".mz-s", e) }; });
     $$("[data-shot]").forEach(function (e, i) { floats.push({ el: e, k: i % 2 ? -0.07 : 0.05 }); });
-    $$(".plate-img").forEach(function (e) { floats.push({ el: e, k: -0.06 }); });
-    $$(".handling-bg").forEach(function (e) { floats.push({ el: e, k: -0.1 }); });
-    $$(".hero-poster, .hero-video").forEach(function (e) { floats.push({ el: e, k: -0.18, top: true }); });
+    $$(".mz-plate-img").forEach(function (e) { floats.push({ el: e, k: -0.06 }); });
+    $$(".mz-handling-bg").forEach(function (e) { floats.push({ el: e, k: -0.1 }); });
+    $$(".mz-hero-poster, .mz-hero-video").forEach(function (e) { floats.push({ el: e, k: -0.18, top: true }); });
   });
   function onScroll() {
     ticking = false;
@@ -303,17 +303,17 @@
   /* ---------- заставка першого екрана ---------- */
   function heroIn() {
     H.classList.add("mz-ready");
-    $$(".hero [data-anim]").forEach(function (e) { e.classList.add("is-in"); });
-    $$(".hero .mz-num").forEach(function (n) { countTo(n, parseInt(n.getAttribute("data-to"), 10), 1500); });
+    $$(".mz-hero [data-anim]").forEach(function (e) { e.classList.add("is-in"); });
+    $$(".mz-hero .mz-num").forEach(function (n) { countTo(n, parseInt(n.getAttribute("data-to"), 10), 1500); });
     requestTick();
   }
   step("заставка", function () {
-    var stamp = $(".hero-stamp");
+    var stamp = $(".mz-hero-stamp");
     if (RM || !stamp) { heroIn(); return; }
-    var intro = el("div", "mz-intro");
-    var slot = el("div", "mz-intro-slot");
-    var count = el("div", "mz-intro-count", "0 км");
-    var cap = el("div", "mz-intro-cap", (D.querySelector(".hero-sub") || {}).textContent || "");
+    var intro = el("div", "mz-curtain");
+    var slot = el("div", "mz-curtain-slot");
+    var count = el("div", "mz-curtain-count", "0 км");
+    var cap = el("div", "mz-curtain-cap", (D.querySelector(".mz-hero-sub") || {}).textContent || "");
     intro.appendChild(slot); intro.appendChild(count); intro.appendChild(cap);
     D.body.appendChild(intro);
     var fly = stamp.cloneNode(false);

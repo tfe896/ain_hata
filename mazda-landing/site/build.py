@@ -42,6 +42,20 @@ if COMMIT:
     for i, html in enumerate(chunks):
         (out / f"{i:02d}-{names[i]}.html").write_text(html.replace("{{A}}", CDN + "assets/"), encoding="utf-8")
     (out / "layout.css").write_text(css.strip() + "\n", encoding="utf-8")
+    # CSS кожної секції окремо (лише класи, які в ній уперше з'являються) — для вставки у Webflow разом із розміткою
+    media = re.findall(r"(@media[^{]+)\{((?:[^{}]*\{[^{}]*\})+)\s*\}", css)
+    base = re.sub(r"@media[^{]+\{(?:[^{}]*\{[^{}]*\})+\s*\}", "", css)
+    rules = lambda txt: re.findall(r"(\.[\w-]+)\s*\{([^{}]*)\}", txt)
+    one = lambda rs, use: " ".join("%s{%s}" % (sel, re.sub(r"\s+", " ", b).strip()) for sel, b in rs if sel[1:] in use)
+    seen = set()
+    for i, html in enumerate(chunks):
+        cls = set(c for a in re.findall(r'class="([^"]+)"', html) for c in a.split())
+        use = cls - seen
+        seen |= cls
+        parts = [one(rules(base), use)] + ["%s{%s}" % (m.strip(), one(rules(b), use)) for m, b in media if one(rules(b), use)]
+        (out / f"{i:02d}-{names[i]}.css").write_text("\n".join(x for x in parts if x), encoding="utf-8")
+        mini = re.sub(r">\s+<", "><", html.replace("{{A}}", CDN + "assets/")).strip()
+        (out / f"{i:02d}-{names[i]}.min.html").write_text(mini, encoding="utf-8")
     (out / "head.html").write_text(f'{FONTS}\n<link rel="stylesheet" href="{CDN}css/anim.css">\n{GUARD}\n', encoding="utf-8")
     (out / "footer.html").write_text(f'<script src="{CDN}js/mazda.js"></script>\n', encoding="utf-8")
     print("webflow/out:", len(chunks), "секцій, коміт", COMMIT)
