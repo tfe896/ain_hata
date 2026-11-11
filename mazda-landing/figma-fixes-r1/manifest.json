@@ -1,0 +1,9 @@
+{
+  "name": "Mazda × Співпраця — правки дизайнерки (r1)",
+  "id": "mazda-spivpratsia-fixes-r1",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": { "allowedDomains": ["none"] }
+}
