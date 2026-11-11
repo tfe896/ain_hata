@@ -1,0 +1,8 @@
+.q{font-weight:700;line-height:1.28;letter-spacing:-0.01em;font-size:clamp(20px, 2.1vw, 30px)}
+.stats{display:flex;flex-wrap:wrap;gap:clamp(12px, 1.6vw, 22px)}
+.glass{position:relative;border-radius:28px;background:linear-gradient( 135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03) ), rgba(9, 15, 18, 0.82);border:1px solid rgba(255, 255, 255, 0.16)}
+.stat{padding:clamp(20px, 2.2vw, 30px) clamp(22px, 2.4vw, 32px);min-width:min(100%, 230px);flex:1 1 230px;max-width:340px;display:flex;flex-direction:column;gap:clamp(14px, 2vw, 24px)}
+.num{font-weight:900;line-height:1;letter-spacing:-0.03em;white-space:nowrap;font-size:clamp(46px, 5.6vw, 84px)}
+.stat-num{font-size:clamp(38px, 4vw, 58px)}
+.cap{font-size:clamp(14px, 1.2vw, 17px);line-height:1.4;font-weight:600;color:#d4dcde}
+@media screen and (max-width: 991px){.stat{max-width:none}}

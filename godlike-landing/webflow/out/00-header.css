@@ -1,0 +1,12 @@
+.top{position:fixed;left:0;right:0;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:22px;padding-bottom:12px;padding-left:clamp(20px, 4vw, 56px);padding-right:clamp(20px, 4vw, 56px)}
+.brand{display:flex;align-items:center;gap:clamp(12px, 2vw, 20px)}
+.cta{white-space:nowrap;position:relative;display:inline-flex;align-items:center;justify-content:center;height:46px;padding:0 26px;border-radius:23px;font-weight:800;font-size:16px;color:#04070a;background:linear-gradient(90deg, #b1ff00, #13f2dc);box-shadow:0 0 30px rgba(177, 255, 0, 0.35);overflow:hidden}
+.hr{display:flex;align-items:center;gap:10px}
+.mbtn{box-sizing:border-box;cursor:pointer;position:relative;width:46px;height:46px;border-radius:50%;background:rgba(10, 17, 20, 0.78);border:1px solid rgba(255, 255, 255, 0.24)}
+.mbtn{display:block}
+@media screen and (max-width: 991px){.cta{height:42px;padding:0 20px;font-size:15px}}
+@media screen and (max-width: 479px){.mbtn{width:40px;height:40px}.hr{gap:8px}.brand{gap:10px}.cta{padding:0 16px;height:40px;font-size:14px}}
+.brand-ain{height:clamp(22px, 2.2vw, 30px);width:auto}
+.brand-gl{height:clamp(28px, 2.7vw, 38px);width:auto}
+.brand-div{width:1.5px;height:28px;background-color:#ffffff;opacity:0.3}
+@media screen and (max-width: 479px){.brand-div{display:none}.brand-ain{height:20px}.brand-gl{height:24px}}
