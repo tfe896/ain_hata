@@ -10,7 +10,7 @@ const hex = (h) => ({
   g: parseInt(h.slice(2, 4), 16) / 255,
   b: parseInt(h.slice(4, 6), 16) / 255,
 });
-const C = { orange: hex("EF6320"), cream: hex("FFF9D9"), black: hex("000000"), sand: hex("EFE2B6") };
+const C = { orange: hex("EF6320"), cream: hex("FFF9D9"), black: hex("000000"), sand: hex("F3E6BF"), peach: hex("FFC08A") };
 const solid = (c) => [{ type: "SOLID", color: c }];
 const shade = (a0, a1, a2) => ({
   type: "GRADIENT_LINEAR",
@@ -40,13 +40,13 @@ const DESKTOP = {
   credits: "25:89", creditLbl: "25:91", kbDark: "25:92", mazdaDark: "25:95",
   route: "25:96", routeLbl: "25:99", h2: "25:100", stops: "25:102",
   stop: ["25:103", "25:108", "25:113", "25:118", "25:123"], stopH3: "25:106",
-  map: "25:128", badge: "25:144", tags: "25:146",
+  map: "25:128", badge: "25:144", tags: "25:146", oblasts: "25:131", routeLines: ["25:134", "25:135"],
   pins: [["25:136", "25:137", "right"], ["25:138", "25:139", "above-right"], ["25:140", "25:141", "above"], ["25:142", "25:143", "right"]],
   plateComp: "25:44",
   vertical: false, headerPad: [18, 56], headerLbl: 13, logoS: 1, creditsGap: 40,
   heroH: 900, stampW: 280, h1Size: 112, h1LH: 104, titleGap: 32,
   tagPad: [8, 14], colLW: 760, colRW: 400,
-  product: { dir: "HORIZONTAL", figW: 560, figH: 420, pad: 56, gap: 24, logoS: 1.5, h3: 56, pW: 480 },
+  product: { dir: "HORIZONTAL", figW: 540, figH: 470, pad: 56, gap: 24, logoS: 1.5, h3: 56, pW: 480, shots: [[300, 40, 20, 4], [260, 250, 150, -5]] },
   stopPad: [16, 20], stopsGap: 8, pinPad: [4, 8],
 };
 
@@ -59,13 +59,13 @@ const MOBILE = {
   credits: "25:213", creditLbl: "25:215", kbDark: "25:216", mazdaDark: "25:219",
   route: "25:220", routeLbl: "25:223", h2: "25:224", stops: "25:244",
   stop: ["25:245", "25:250", "25:255", "25:260", "25:265"], stopH3: "25:248",
-  map: "25:226", badge: "25:242", tags: "25:270",
+  map: "25:226", badge: "25:242", tags: "25:270", oblasts: "25:229", routeLines: ["25:232", "25:233"],
   pins: [["25:234", "25:235", "right"], ["25:236", "25:237", "above-right"], ["25:238", "25:239", "above"], ["25:240", "25:241", "right"]],
   plateComp: "25:51",
   vertical: true, headerPad: [12, 20], headerLbl: 10, logoS: 0.6, creditsGap: 18,
   heroH: 780, stampW: 150, h1Size: 40, h1LH: 38, titleGap: 18,
   tagPad: [6, 10], colLW: 0, colRW: 0,
-  product: { dir: "VERTICAL", figW: 350, figH: 210, pad: 24, gap: 16, logoS: 1.1, h3: 34, pW: 0 },
+  product: { dir: "VERTICAL", figW: 350, figH: 290, pad: 24, gap: 16, logoS: 1.1, h3: 34, pW: 0, shots: [[190, 14, 16, 4], [170, 160, 84, -5]] },
   stopPad: [12, 14], stopsGap: 6, pinPad: [2, 5],
 };
 
@@ -145,7 +145,33 @@ async function labelClone(src, chars, size, color) {
   t.name = "lbl";
   return t;
 }
-// Мітка розділу у вигляді плашки.
+// Пігулка як «Спецпроєкт» в айдентиці: кругла, Inter Tight, без капсу.
+function pillStyle(f, text) {
+  f.cornerRadius = 999;
+  text.fontName = { family: "Inter Tight", style: interStyle("Medium") };
+  text.textCase = "ORIGINAL";
+  text.letterSpacing = { unit: "PERCENT", value: 3 };
+  text.lineHeight = { unit: "PERCENT", value: 120 };
+}
+// Фото-полароїд з айдентики: кремова рамка з тінню, під нахилом.
+function polaroid(w, paint, deg) {
+  const m = Math.round(w * 0.06);
+  const f = figma.createFrame();
+  f.name = "polaroid";
+  f.resize(w, Math.round(w * 1.2));
+  f.fills = solid(C.cream);
+  f.effects = [{ type: "DROP_SHADOW", color: { r: 0, g: 0, b: 0, a: 0.18 }, offset: { x: 0, y: 8 }, radius: 24, spread: 0, visible: true, blendMode: "NORMAL" }];
+  const r = figma.createRectangle();
+  r.name = "photo";
+  f.appendChild(r);
+  r.resize(w - m * 2, w - m * 2);
+  r.x = m;
+  r.y = m;
+  r.fills = [paint];
+  f.rotation = deg;
+  return f;
+}
+// Мітка розділу у вигляді пігулки.
 function plateAround(text, bg, fg, p, name) {
   const parent = text.parent;
   const i = parent.children.indexOf(text);
@@ -155,6 +181,7 @@ function plateAround(text, bg, fg, p, name) {
   parent.insertChild(i, f);
   f.appendChild(text);
   text.fills = solid(fg);
+  pillStyle(f, text);
   text.textAutoResize = "WIDTH_AND_HEIGHT";
   return f;
 }
@@ -177,7 +204,6 @@ async function fixDevice(d, ctx) {
   const creditLbl = await get(d.creditLbl);
   const kbDark = await get(d.kbDark);
   const mazdaDark = await get(d.mazdaDark);
-  const mazdaLight = await get(d.mazdaLight);
   const lbl = await get(d.lbl);
 
   // #1 — окрема шапка: автор / за підтримки ліворуч, автомобільний партнер праворуч, лого в один рядок
@@ -207,7 +233,7 @@ async function fixDevice(d, ctx) {
   step = d.key + ": hero";
   const h1 = await get(d.h1);
   const stampLogo = await get(d.stampLogo);
-  const productLogo = logoMazdaH(mazdaLight, d.product.logoS); // поки «top» ще існує
+  const productLogo = logoMazdaH(mazdaDark, d.product.logoS);
   const title = al("VERTICAL", "hero-title", d.titleGap);
   hero.appendChild(title);
   title.layoutSizingHorizontal = "FILL";
@@ -264,8 +290,12 @@ async function fixDevice(d, ctx) {
     ];
     const num = inst.findOne((n) => n.name === "num");
     const cap = inst.findOne((n) => n.name === "cap");
-    if (num) num.fills = solid(C.orange);
-    if (cap) cap.fills = solid(C.cream);
+    if (num) num.fills = solid(C.cream);
+    if (cap) {
+      cap.fills = solid(C.cream);
+      if (num) cap.fontName = num.fontName;
+      cap.textCase = "UPPER";
+    }
   }
 
   // #9 — продуктова вставка замість блоку логотипів
@@ -274,16 +304,26 @@ async function fixDevice(d, ctx) {
   const credits = await get(d.credits);
   const pr = d.product;
   const product = al(pr.dir, "product", 0);
-  product.fills = solid(C.black);
+  product.fills = solid(C.sand);
+  product.counterAxisAlignItems = "CENTER";
   wrap2.insertChild(wrap2.children.indexOf(credits), product);
   product.layoutSizingHorizontal = "FILL";
   const fig = figma.createFrame();
   fig.name = "fig";
   fig.resize(pr.figW, pr.figH);
-  fig.fills = [{ type: "IMAGE", scaleMode: "FILL", imageHash: heroImg.imageHash }];
+  fig.fills = [];
+  fig.clipsContent = false;
   product.appendChild(fig);
-  if (pr.dir === "HORIZONTAL") fig.layoutSizingVertical = "FILL";
-  else fig.layoutSizingHorizontal = "FILL";
+  if (pr.dir === "VERTICAL") fig.layoutSizingHorizontal = "FILL";
+  const shotCrops = [[0.2, 0.5, 0.4], [0.72, 0.42, 0.42]];
+  for (let i = 0; i < pr.shots.length; i++) {
+    const sh = pr.shots[i];
+    const side = sh[0] - Math.round(sh[0] * 0.06) * 2;
+    const ph = polaroid(sh[0], cropPaint(heroImg.imageHash, size.width, size.height, side, side, shotCrops[i][0], shotCrops[i][1], shotCrops[i][2]), sh[3]);
+    fig.appendChild(ph);
+    ph.x = sh[1];
+    ph.y = sh[2];
+  }
   const col = al("VERTICAL", "col", pr.gap);
   pad(col, pr.pad, pr.pad);
   col.primaryAxisAlignItems = "CENTER";
@@ -291,23 +331,32 @@ async function fixDevice(d, ctx) {
   col.layoutSizingHorizontal = "FILL";
   const pTag = al("HORIZONTAL", "tag", 0);
   pad(pTag, d.tagPad[0], d.tagPad[1]);
-  pTag.fills = solid(C.orange);
+  pTag.fills = solid(C.black);
+  productLbl.fills = solid(C.cream);
   pTag.appendChild(productLbl);
+  pillStyle(pTag, productLbl);
   col.appendChild(pTag);
-  col.appendChild(productLogo);
+  // лого партнера в рамці-штампі, як у візуалах проєкту
+  const stampBox = al("HORIZONTAL", "partner-stamp", 0);
+  pad(stampBox, Math.round(10 * pr.logoS), Math.round(16 * pr.logoS));
+  stampBox.strokes = solid(C.black);
+  stampBox.strokeWeight = 2;
+  stampBox.appendChild(productLogo);
+  col.appendChild(stampBox);
+  stampBox.rotation = 2;
   const h3 = (await get(d.stopH3)).clone();
   col.appendChild(h3);
   await loadFor(h3);
   h3.characters = TXT.productTitle;
   h3.fontSize = pr.h3;
   h3.lineHeight = { unit: "PERCENT", value: 100 };
-  h3.fills = solid(C.cream);
+  h3.fills = solid(C.black);
   h3.textAutoResize = "WIDTH_AND_HEIGHT";
   const pp = p2.clone();
   col.appendChild(pp);
   await loadFor(pp);
   pp.characters = TXT.productText;
-  pp.fills = solid(C.cream);
+  pp.fills = solid(C.black);
   if (pr.pW) {
     pp.layoutSizingHorizontal = "FIXED";
     pp.resize(pr.pW, pp.height);
@@ -317,8 +366,10 @@ async function fixDevice(d, ctx) {
   pp.textAutoResize = "HEIGHT";
   const cta = al("HORIZONTAL", "cta", 0);
   pad(cta, d.tagPad[0] * 2, d.tagPad[1] * 2);
-  cta.fills = solid(C.orange);
+  cta.fills = solid(C.black);
+  ctaLbl.fills = solid(C.cream);
   cta.appendChild(ctaLbl);
+  pillStyle(cta, ctaLbl);
   col.appendChild(cta);
   credits.remove();
 
@@ -348,6 +399,9 @@ async function fixDevice(d, ctx) {
   // #11 — підписи на карті не накладаються: плашки, розведені відносно точок
   step = d.key + ": карта";
   const map = await get(d.map);
+  // області маршруту світло-помаранчеві (як у візуалах проєкту), лінія чорна: тепер її видно всюди
+  (await get(d.oblasts)).fills = solid(C.peach);
+  for (const id of d.routeLines) (await get(id)).strokes = solid(C.black);
   for (const pin of d.pins) {
     const dot = await get(pin[0]);
     const t = await get(pin[1]);
@@ -358,6 +412,7 @@ async function fixDevice(d, ctx) {
     pl.appendChild(t);
     t.fills = solid(C.cream);
     t.name = "lbl";
+    pl.cornerRadius = 999;
     const g = dot.width * 0.3;
     const cy = dot.y + dot.height / 2;
     if (pin[2] === "right") {
@@ -394,7 +449,7 @@ async function fixDevice(d, ctx) {
       [await get(d.lead), 'data-anim="scrub" · слова темнішають під час скролу'],
       [p1, 'data-anim="words"'],
       [await get(d.plates), "data-count · 0 → «2500+» / «5» / «1» · плашки виїжджають знизу по черзі"],
-      [await get(d.plates), "фото у плашках — заглушки з відео; потрібні 3 кадри з експедиції"],
+      [await get(d.plates), "фото у плашках і полароїдах — заглушки з відео; потрібні кадри з експедиції"],
       [product, 'продуктова вставка Mazda CX-90 · data-anim="reveal" · фото, текст і посилання — заглушки'],
       [route, 'id="s3"'],
       [await get(d.h2), 'data-anim="letters" · «2500» — data-count 0 → 2500'],
@@ -430,8 +485,12 @@ async function fixStyles(ctx) {
     comp.fills = [{ type: "IMAGE", scaleMode: "FILL", imageHash: ctx.heroHash }, shade(0.35, 0.45, 0.8)];
     const num = comp.findOne((n) => n.name === "num");
     const cap = comp.findOne((n) => n.name === "cap");
-    if (num) num.fills = solid(C.orange);
-    if (cap) cap.fills = solid(C.cream);
+    if (num) num.fills = solid(C.cream);
+    if (cap) {
+      cap.fills = solid(C.cream);
+      if (num) cap.fontName = num.fontName;
+      cap.textCase = "UPPER";
+    }
   }
   for (const id of STYLES.stickers) {
     const n = await figma.getNodeByIdAsync(id);
@@ -445,11 +504,18 @@ async function fixStyles(ctx) {
   const sw = await get(STYLES.swatchCream);
   const sand = sw.clone();
   sw.parent.insertChild(sw.parent.children.indexOf(sw) + 1, sand);
-  sand.name = "swatch sand";
+  sand.name = "swatch beige";
   const rect = sand.findOne((n) => n.type === "RECTANGLE");
   if (rect) rect.fills = [ctx.sandPaint];
   const nm = sand.findOne((n) => n.type === "TEXT");
-  if (nm) await setText(nm, "sand  #EFE2B6");
+  if (nm) await setText(nm, "beige  #F3E6BF");
+  const peach = sw.clone();
+  sw.parent.insertChild(sw.parent.children.indexOf(sand) + 1, peach);
+  peach.name = "swatch peach";
+  const rect2 = peach.findOne((n) => n.type === "RECTANGLE");
+  if (rect2) rect2.fills = solid(C.peach);
+  const nm2 = peach.findOne((n) => n.type === "TEXT");
+  if (nm2) await setText(nm2, "peach  #FFC08A");
 }
 
 // ---------- fonts: Onest → Inter Tight (#6) ----------
@@ -533,10 +599,10 @@ async function main() {
       for (const id of c.variableIds) {
         const v = await figma.variables.getVariableByIdAsync(id);
         if (v && /(^|\/)cream$/.test(v.name)) cream = v;
-        if (v && /(^|\/)sand$/.test(v.name)) { cream = null; break; }
+        if (v && /(^|\/)beige$/.test(v.name)) { cream = null; break; }
       }
       if (!cream) continue;
-      const v = figma.variables.createVariable(cream.name.replace(/cream$/, "sand"), c, "COLOR");
+      const v = figma.variables.createVariable(cream.name.replace(/cream$/, "beige"), c, "COLOR");
       for (const m of c.modes) v.setValueForMode(m.modeId, C.sand);
       v.scopes = cream.scopes;
       ctx.sandPaint = figma.variables.setBoundVariableForPaint({ type: "SOLID", color: C.sand }, "color", v);
