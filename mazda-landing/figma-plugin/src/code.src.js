@@ -104,7 +104,7 @@ const PINS = [
   [390, 134, "Київ", "above-right"],
   [546.7, 184.6, "Полтавщина", "right"],
   [26.5, 275.5, "Закарпаття", "below"],
-  [123, 296, "Карпати", "below-right"],
+  [123, 296, "Карпати", "between"],
 ];
 
 const PHOTOS = ["hero", "drone", "drive", "craft", "yulia", "grille", "team", "selfie", "city", "mount", "wind"];
@@ -667,9 +667,10 @@ async function buildLanding(d, host, originX) {
     } else if (pin[3] === "above-right") {
       pl.x = Math.round(cx + d.dot * 0.6);
       pl.y = Math.round(dot.y - pl.height - 2 * k);
-    } else if (pin[3] === "below-right") {
-      pl.x = Math.round(cx + 10 * k);
-      pl.y = Math.round(cy + 12 * k);
+    } else if (pin[3] === "between") {
+      // між суцільною лінією маршруту й пунктиром дороги назад
+      pl.x = Math.round(cx + 18 * k);
+      pl.y = Math.round(cy - 34 * k - pl.height / 2);
     } else {
       pl.x = Math.max(0, Math.round(dot.x - d.dot * 0.5));
       pl.y = Math.round(cy + 30 * k);
