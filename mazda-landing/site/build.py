@@ -39,8 +39,17 @@ if COMMIT:
     blocks = re.findall(r"<(header|section)\b.*?</\1>", body, flags=re.S)
     chunks = [m.group(0) for m in re.finditer(r"<(header|section)\b.*?</\1>", body, flags=re.S)]
     names = ["header", "hero", "intro", "space", "route", "handling", "team"]
+    # картинки, завантажені в Assets сайту Webflow (webflow/assets.json), беруться звідти; решта (відео, карта) — з jsDelivr
+    import json
+    hosted = json.loads((HERE / "webflow/assets.json").read_text(encoding="utf-8"))
+    WF = "https://cdn.prod.website-files.com/6aec9fbcb1bc39fcfd02af09/"
+    def links(html):
+        for local, name in hosted.items():
+            html = html.replace("{{A}}" + local, WF + name)
+        return html.replace("{{A}}", CDN + "assets/")
+    chunks = [links(c) for c in chunks]
     for i, html in enumerate(chunks):
-        (out / f"{i:02d}-{names[i]}.html").write_text(html.replace("{{A}}", CDN + "assets/"), encoding="utf-8")
+        (out / f"{i:02d}-{names[i]}.html").write_text(html, encoding="utf-8")
     (out / "layout.css").write_text(css.strip() + "\n", encoding="utf-8")
     # CSS кожної секції окремо (лише класи, які в ній уперше з'являються) — для вставки у Webflow разом із розміткою
     media = re.findall(r"(@media[^{]+)\{((?:[^{}]*\{[^{}]*\})+)\s*\}", css)
@@ -54,7 +63,7 @@ if COMMIT:
         seen |= cls
         parts = [one(rules(base), use)] + ["%s{%s}" % (m.strip(), one(rules(b), use)) for m, b in media if one(rules(b), use)]
         (out / f"{i:02d}-{names[i]}.css").write_text("\n".join(x for x in parts if x), encoding="utf-8")
-        mini = re.sub(r">\s+<", "><", html.replace("{{A}}", CDN + "assets/")).strip()
+        mini = re.sub(r">\s+<", "><", html).strip()
         (out / f"{i:02d}-{names[i]}.min.html").write_text(mini, encoding="utf-8")
     (out / "head.html").write_text(f'{FONTS}\n<link rel="stylesheet" href="{CDN}css/anim.css">\n{GUARD}\n', encoding="utf-8")
     (out / "footer.html").write_text(f'<script src="{CDN}js/mazda.js"></script>\n', encoding="utf-8")

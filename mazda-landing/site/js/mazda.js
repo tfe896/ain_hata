@@ -8,6 +8,27 @@
   if (W.__mazdaReady) return;
   W.__mazdaReady = true;
 
+  /* Стилі анімацій мають бути завантажені до старту: інакше заставка з'явиться без оформлення.
+     Якщо сторінка сама не підключила anim.css, підключаємо його поруч зі скриптом. */
+  var SRC = (D.currentScript && D.currentScript.src) || "";
+  function whenCss(cb) {
+    var link = D.querySelector('link[href*="anim.css"]');
+    if (!link && SRC) {
+      link = D.createElement("link");
+      link.rel = "stylesheet";
+      link.href = SRC.replace(/js\/mazda\.js.*$/, "css/anim.css");
+      D.head.appendChild(link);
+    }
+    var t0 = Date.now();
+    (function wait() {
+      if (!link || link.sheet || Date.now() - t0 > 3000) { H.classList.remove("mz-wait"); cb(); return; }
+      W.setTimeout(wait, 30);
+    })();
+  }
+  whenCss(boot);
+
+  function boot() {
+
   var RM = W.matchMedia && W.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var NBSP = " ";
   function $$(sel, root) { return Array.prototype.slice.call((root || D).querySelectorAll(sel)); }
@@ -361,4 +382,5 @@
   });
 
   requestTick();
+  } // boot
 })();
