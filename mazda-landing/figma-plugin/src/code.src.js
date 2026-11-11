@@ -67,7 +67,7 @@ const TXT = {
       "Окремим етапом експедиції стали закарпатські серпантини. На цьому відрізку команда мала подолати приблизно 200 км гірських доріг із численними поворотами й перепадами висот. У таких поїздках важливі не лише потужність автомобіля, а й передбачуваність його поведінки, баланс під час проходження поворотів і зручність керування.",
       "Гірські дороги стали гарним тестом для великого кросовера. Попри довжину понад пʼять метрів, Mazda CX-90 чудово впоралася зі звивистими ділянками маршруту.",
     ],
-    facts: [["200 км", "гірських серпантинів"], ["5+ м", "довжина кросовера"]],
+    facts: [["200 км", "гірських серпантинів"], ["5+ метрів", "довжина кросовера"]],
   },
   team: {
     tag: "Команда",
@@ -117,7 +117,7 @@ const DESKTOP = {
   tagPad: [8, 14],
   platesGap: 16, plateH: 300, platePad: 32,
   featColW: 620, figW: 580, figH: 480, figK: 1,
-  darkColW: 600, darkShot: [0.6, 0.6, 1.25],
+  darkColW: 600, darkShot: [0.63, 0.61, 1.4],
   quotePad: 56, quoteGap: 64, quotePhoto: 300, quoteTextW: 800,
   product: { figW: 540, figH: 470, pad: 56, gap: 24, logoS: 1.5, pW: 480, shots: [["mount", 300, 40, 20, 4, 0.62, 0.55, 2.0], ["grille", 260, 250, 150, -5, 0.6, 0.55, 1.5]] },
   routeGap: 56, h2W: 900, splitGap: 72, stopsW: 416, stopPad: [16, 20], stopGap: 20, stopsGap: 8,
@@ -139,7 +139,7 @@ const MOBILE = {
   tagPad: [6, 10],
   platesGap: 12, plateH: 164, platePad: 22,
   featColW: 0, figW: 350, figH: 290, figK: 0.6,
-  darkColW: 0, darkShot: [0.45, 0.6, 5.5],
+  darkColW: 0, darkShot: [0.485, 0.72, 1.9],
   quotePad: 24, quoteGap: 24, quotePhoto: 200, quoteTextW: 0,
   product: { figW: 350, figH: 290, pad: 24, gap: 16, logoS: 1.1, pW: 0, shots: [["mount", 190, 14, 16, 4, 0.62, 0.55, 2.0], ["grille", 170, 160, 84, -5, 0.6, 0.55, 1.5]] },
   routeGap: 32, h2W: 0, splitGap: 32, stopsW: 0, stopPad: [12, 14], stopGap: 14, stopsGap: 6,
@@ -438,7 +438,9 @@ function backdrop(frame, w, h, key, shot, gradient) {
 async function factRow(d, parent, facts, fg, bg) {
   if (!facts || !facts.length) return null;
   const row = al("HORIZONTAL", "facts", 12);
-  parent.appendChild(row);
+  add(parent, row, true);
+  row.layoutWrap = "WRAP";
+  row.counterAxisSpacing = 12;
   for (const f of facts) {
     const pl = al("VERTICAL", "fact", 6);
     pad(pl, d.vertical ? 14 : 20, d.vertical ? 16 : 24);
@@ -692,31 +694,39 @@ async function buildLanding(d, host, originX) {
   // керованість: темний блок на фото серпантину
   step = d.key + ": керованість";
   const s5 = al("VERTICAL", "sec handling (photo)", 0);
-  pad(s5, d.secPad, d.padX);
   s5.fills = [P("black")];
   s5.clipsContent = true;
   add(root, s5, true);
-  const col5 = column(d, s5, d.darkColW, d.colGap);
+  // на мобільному фото з авто стоїть окремим кадром над текстом, на десктопі — фоном, текст праворуч
+  if (d.vertical) {
+    const ph5 = photoCrop("drone", d.W, 260, d.darkShot[0], d.darkShot[1], d.darkShot[2], "photo");
+    s5.appendChild(ph5);
+  }
+  const in5 = al("VERTICAL", "wrap", 0);
+  pad(in5, d.vertical ? 40 : d.secPad, d.padX);
+  in5.counterAxisAlignItems = "MAX";
+  add(s5, in5, true);
+  const col5 = column(d, in5, d.darkColW, d.colGap);
   const tag5 = await pill(d, TXT.handling.tag, "cream", "black");
   col5.appendChild(tag5);
   const h5 = wrapText(col5, await T(d, "h3", TXT.handling.title, "cream", "h3"), 0);
   for (const p of TXT.handling.paras) wrapText(col5, await T(d, "body", p, "cream", "p"), 0);
   const facts5 = await factRow(d, col5, TXT.handling.facts, "black", "orange");
-  const grad5 = d.vertical
-    ? shade(0.6, 0.65, 0.8)
-    : {
-        type: "GRADIENT_LINEAR",
-        gradientTransform: [[1, 0, 0], [0, 1, 0]],
-        gradientStops: [
-          { position: 0, color: { r: 0, g: 0, b: 0, a: 0.88 } },
-          { position: 0.5, color: { r: 0, g: 0, b: 0, a: 0.6 } },
-          { position: 1, color: { r: 0, g: 0, b: 0, a: 0.1 } },
-        ],
-      };
-  backdrop(s5, d.W, Math.max(100, Math.round(s5.height)), "drone", d.darkShot, grad5);
-  tags.push([tag5, 'id="s5" · фото серпантину на весь блок (можна друге відео-петлю) · паралакс фону']);
+  if (!d.vertical) {
+    const grad5 = {
+      type: "GRADIENT_LINEAR",
+      gradientTransform: [[1, 0, 0], [0, 1, 0]],
+      gradientStops: [
+        { position: 0, color: { r: 0, g: 0, b: 0, a: 0.05 } },
+        { position: 0.45, color: { r: 0, g: 0, b: 0, a: 0.55 } },
+        { position: 1, color: { r: 0, g: 0, b: 0, a: 0.9 } },
+      ],
+    };
+    backdrop(s5, d.W, Math.max(100, Math.round(s5.height)), "drone", d.darkShot, grad5);
+  }
+  tags.push([tag5, 'id="s5" · фото серпантину з авто (можна друге відео-петлю): на десктопі фон на весь блок, текст праворуч; на мобільному кадр над текстом · паралакс фону']);
   tags.push([h5, 'data-anim="letters"']);
-  tags.push([facts5, "data-count · 0 → 200 і 0 → 5 · плашки виїжджають по черзі"]);
+  tags.push([facts5, "data-count · 0 → 200 і 0 → 5 («+ метрів» — звичайний текст) · плашки виїжджають по черзі"]);
 
   // команда й цитати ведучих
   step = d.key + ": команда";
