@@ -47,7 +47,7 @@ const TXT = {
 // Точки на карті в координатах десктопної карти 840×562: [x, y, підпис, куди ставити підпис]
 const PINS = [
   [390, 134, "Київ", "right"],
-  [87.5, 177, "Львів", "above-right"],
+  [87.5, 177, "Львів", "left"],
   [26.5, 275.5, "Закарпаття", "above"],
   [123, 296, "Верховина", "right"],
 ];
@@ -569,9 +569,9 @@ async function buildLanding(d, host, originX) {
     if (pin[3] === "right") {
       pl.x = Math.round(dot.x + d.dot + g);
       pl.y = Math.round(cy - pl.height / 2);
-    } else if (pin[3] === "above-right") {
-      pl.x = Math.round(dot.x + d.dot - 2);
-      pl.y = Math.round(dot.y - pl.height + 2);
+    } else if (pin[3] === "left") {
+      pl.x = Math.round(dot.x - g - pl.width);
+      pl.y = Math.round(cy - pl.height / 2);
     } else {
       pl.x = Math.max(2, Math.round(dot.x - d.dot * 0.9));
       pl.y = Math.round(dot.y - pl.height - g);
