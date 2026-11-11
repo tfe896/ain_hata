@@ -41,13 +41,13 @@ const TXT = {
     shots: [["team", 320, 20, 10, -4, 0.42, 0.5, 2.0], ["selfie", 280, 250, 150, 5, 0.42, 0.5, 2.0]],
   },
   tag3: "Маршрут експедиції",
-  h2: "2500" + NBSP + "км від Київщини до" + NBSP + "Верховини і" + NBSP + "назад",
+  h2: "2500" + NBSP + "км від Київщини до" + NBSP + "Карпат і" + NBSP + "назад",
   stops: [
     ["01", "Київщина", "Перший виїзд, близько 50 км"],
     ["02", "Полтавщина", "Сотні кілометрів трас"],
     ["03", "Закарпаття", "Близько 200 км серпантинів"],
-    ["04", "Карпати, Верховина", "Гірські дороги, де закінчується асфальт"],
-    ["05", "Верховина → Київ", "Завершення маршруту"],
+    ["04", "Карпати", "Гірські дороги, де закінчується асфальт"],
+    ["05", "Карпати → Київ", "Завершення маршруту"],
   ],
   roads: {
     tag: "Дороги",
@@ -101,10 +101,10 @@ const TXT = {
 
 // Точки на карті в координатах десктопної карти 840×562: [x, y, підпис, куди ставити підпис]
 const PINS = [
-  [390, 134, "Київ", "right"],
+  [390, 134, "Київ", "above-right"],
   [546.7, 184.6, "Полтавщина", "right"],
-  [26.5, 275.5, "Закарпаття", "above"],
-  [123, 296, "Верховина", "right"],
+  [26.5, 275.5, "Закарпаття", "below"],
+  [123, 296, "Карпати", "below-right"],
 ];
 
 const PHOTOS = ["hero", "drone", "drive", "craft", "yulia", "grille", "team", "selfie", "city", "mount", "wind"];
@@ -134,7 +134,7 @@ const DESKTOP = {
 const MOBILE = {
   key: "Mobile", title: "📱 Mobile 390", W: 390, padX: 20, vertical: true,
   headerPadY: 12, logoS: 0.6, creditsGap: 18,
-  heroH: 780, heroPad: [20, 28], stampW: 150, titleGap: 16, heroShot: [0.485, 0.8, 4.1],
+  heroH: 780, heroPad: [20, 28], stampW: 150, titleGap: 16, heroShot: [0.485, 0.9, 4.6],
   secPad: 64, wrapGap: 40, colGap: 18, colLW: 0, colRW: 0, pGap: 14,
   tagPad: [6, 10],
   platesGap: 12, plateH: 164, platePad: 22,
@@ -204,6 +204,11 @@ function add(parent, child, fill) {
   if (fill) child.layoutSizingHorizontal = "FILL";
   return child;
 }
+// Короткі слова (й, і, у, в, з, на, до…) не лишаються в кінці рядка: після них нерозривний пробіл.
+function nb(text) {
+  const re = /(^|[ \n\u00a0«(])([А-Яа-яІіЇїЄєҐґ]{1,2}) /g;
+  return text.replace(re, "$1$2" + NBSP).replace(re, "$1$2" + NBSP);
+}
 async function T(d, kind, chars, color, name) {
   const st = d.type[kind];
   const t = figma.createText();
@@ -218,7 +223,7 @@ async function T(d, kind, chars, color, name) {
   } else {
     applyType(t, st);
   }
-  t.characters = chars;
+  t.characters = nb(chars);
   t.fills = [P(color)];
   t.name = name || kind;
   return t;
@@ -659,12 +664,15 @@ async function buildLanding(d, host, originX) {
     if (pin[3] === "right") {
       pl.x = Math.round(dot.x + d.dot + g);
       pl.y = Math.round(cy - pl.height / 2);
-    } else if (pin[3] === "left") {
-      pl.x = Math.round(dot.x - g - pl.width);
-      pl.y = Math.round(cy - pl.height / 2);
+    } else if (pin[3] === "above-right") {
+      pl.x = Math.round(cx + d.dot * 0.6);
+      pl.y = Math.round(dot.y - pl.height - 2 * k);
+    } else if (pin[3] === "below-right") {
+      pl.x = Math.round(cx + 10 * k);
+      pl.y = Math.round(cy + 12 * k);
     } else {
-      pl.x = Math.max(2, Math.round(dot.x - d.dot * 0.9));
-      pl.y = Math.round(dot.y - pl.height - g);
+      pl.x = Math.max(0, Math.round(dot.x - d.dot * 0.5));
+      pl.y = Math.round(cy + 30 * k);
     }
   }
   tags.push([tag4, 'id="s4" · пігулка розділу']);
