@@ -79,6 +79,15 @@ body { margin: 0; background-color: #fff9d9; -webkit-font-smoothing: antialiased
 .mz-js .mz-stop { background-color: #ffc08a; transition: opacity 0.8s ease, translate 1s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.6s ease; }
 .mz-js .mz-stop.is-on { background-color: #ef6320; }
 
+/* ---------- футер AIN: «Читайте також» і панель (розмітка й розміри — класи .ainf-* у Webflow) ---------- */
+.ainf-arrow { isolation: isolate; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.ainf-arrow::before { content: ""; position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 12'%3E%3Cpath d='M1 6h14M10 1l5 5-5 5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 40% auto no-repeat; }
+.ainf-all:hover .ainf-arrow, .ainf-all-pill:hover .ainf-arrow { transform: translateX(4px); }
+.ainf-card_img { transition: scale 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.ainf-card:hover .ainf-card_img { scale: 1.05; }
+.ainf-link { transition: opacity 0.25s ease; }
+.ainf-link:hover { opacity: 0.55; }
+
 /* ---------- індикатор прокрутки ---------- */
 .mz-bar { position: fixed; left: 0; top: 0; height: 4px; width: 100%; background-color: #ef6320; transform-origin: 0 50%; transform: scaleX(0); z-index: 900; pointer-events: none; }
 

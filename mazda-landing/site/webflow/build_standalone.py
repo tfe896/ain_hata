@@ -66,7 +66,7 @@ def main():
     scripts = []  # (name, location, code)
     # 1) head: шрифт Inter Tight, клас-запобіжник, шматки стилів
     head = ('var d=document,h=d.documentElement,l=d.createElement("link");l.rel="stylesheet";'
-            'l.href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&display=swap";'
+            'l.href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Montserrat:wght@400;500;600&display=swap";'
             'd.head.appendChild(l);h.classList.add("mz-js");'
             'setTimeout(function(){if(!window.__mazdaReady)h.classList.remove("mz-js")},5000);')
     scripts.append(("mz_a_boot", "header", head))
@@ -98,7 +98,7 @@ def build_files(version="v1"):
     css = minify_css((SITE / "css" / "anim.css").read_text(encoding="utf-8"))
     style = ('/* Mazda x Spivpratsia: styles + guard. Source: mazda-landing/site/css/anim.css */\n'
              '(function(){var d=document,h=d.documentElement,l=d.createElement("link");l.rel="stylesheet";'
-             'l.href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&display=swap";'
+             'l.href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Montserrat:wght@400;500;600&display=swap";'
              'd.head.appendChild(l);h.classList.add("mz-js");'
              'setTimeout(function(){if(!window.__mazdaReady)h.classList.remove("mz-js")},5000);'
              'var s=d.createElement("style");s.textContent=%s;d.head.appendChild(s);})();\n' % json.dumps(css, ensure_ascii=True))

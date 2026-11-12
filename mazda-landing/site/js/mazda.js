@@ -170,7 +170,7 @@
       return;
     }
     // сусідні елементи одного ряду з'являються по черзі
-    $$(".mz-plates, .mz-stops, .mz-facts, .mz-fig-shots, .mz-quotes").forEach(function (group) {
+    $$(".mz-plates, .mz-stops, .mz-facts, .mz-fig-shots, .mz-quotes, .ainf-cards").forEach(function (group) {
       Array.prototype.slice.call(group.children).forEach(function (c, i) { c.style.setProperty("--d", i * 0.12 + "s"); });
     });
     var io = new IntersectionObserver(function (entries) {
