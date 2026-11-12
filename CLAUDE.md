@@ -71,6 +71,7 @@
 - `special.ain.ua/...` — **експорт Webflow** (відносні `css/`, `js/`, `images/`), статика на їхньому сервері + GTM. Скрипти, зареєстровані у Webflow, в експорті лишаються абсолютними посиланнями на `cdn.prod.website-files.com`.
 - Анімації: GSAP + ScrollTrigger (cdnjs) + Lenis (unpkg), невеликі читабельні inline-скрипти в Custom code сторінки, прості ефекти — нативні Webflow Interactions; запобіжник `anim-ready` (4 с) і `prefers-reduced-motion`.
 - Великий код — .js-файли в Webflow Assets із версією в назві (`gl-3d-v9.js`, `defer`), спільний футер AIN вставлений inline (`footer-v2/ain-footer.js`). Класи на кшталт BEM/Client-First (`stat-card_value`, `is-light`).
+- Інструкція для команди (що правити у Webflow без коду, що заміною файлу): `mazda-landing/TEAM-GUIDE.md`; технічні кроки для мене: `mazda-landing/README.md`, розділ «Автономна версія».
 - Рішення користувача: на Mazda лишаємо обидві версії (GitHub/jsDelivr і автономну з шматків) без змін. У наступних проєктах пробуємо робити так само, як колеги (команда Articoders): код файлами в Webflow Assets із версією в назві, прості ефекти нативними Interactions, більше схожості з їхнім процесом. Чи правитиме наш код хтось у команді без мене, поки не відомо (користувач уточнює).
 
 ## Уроки щодо Figma (перевірено на Mazda)
