@@ -1,0 +1,77 @@
+[
+ {
+  "name": "mz_a_boot",
+  "location": "header",
+  "chars": 304
+ },
+ {
+  "name": "mz_b_css01",
+  "location": "header",
+  "chars": 1457
+ },
+ {
+  "name": "mz_b_css02",
+  "location": "header",
+  "chars": 1447
+ },
+ {
+  "name": "mz_b_css03",
+  "location": "header",
+  "chars": 1463
+ },
+ {
+  "name": "mz_b_css04",
+  "location": "header",
+  "chars": 1447
+ },
+ {
+  "name": "mz_b_css05",
+  "location": "header",
+  "chars": 1312
+ },
+ {
+  "name": "mz_d_js01",
+  "location": "footer",
+  "chars": 1607
+ },
+ {
+  "name": "mz_d_js02",
+  "location": "footer",
+  "chars": 1612
+ },
+ {
+  "name": "mz_d_js03",
+  "location": "footer",
+  "chars": 1559
+ },
+ {
+  "name": "mz_d_js04",
+  "location": "footer",
+  "chars": 1536
+ },
+ {
+  "name": "mz_d_js05",
+  "location": "footer",
+  "chars": 1634
+ },
+ {
+  "name": "mz_d_js06",
+  "location": "footer",
+  "chars": 1529
+ },
+ {
+  "name": "mz_d_js07",
+  "location": "footer",
+  "chars": 1634
+ },
+ {
+  "name": "mz_d_js08",
+  "location": "footer",
+  "chars": 1272
+ },
+ {
+  "name": "mz_e_run",
+  "location": "footer",
+  "chars": 39
+ }
+]

@@ -1,0 +1,1 @@
+new Function(window.__mzJs.join(""))();

@@ -1,0 +1,1 @@
+var d=document,h=d.documentElement,l=d.createElement("link");l.rel="stylesheet";l.href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&display=swap";d.head.appendChild(l);h.classList.add("mz-js");setTimeout(function(){if(!window.__mazdaReady)h.classList.remove("mz-js")},5000);

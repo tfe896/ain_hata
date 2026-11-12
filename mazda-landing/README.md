@@ -97,3 +97,12 @@
 - Зараз на сторінці версія скриптів 1.1.0, коміт `9afc0e3`; при зміні коміту оновити також `data-video` і `data-video-mobile` на першому екрані.
 - Оновлення коду анімацій: коміт і push → у Webflow оновити скрипти `mazda_loader` (посилання на anim.css) і `mazda_animations` (посилання на mazda.js + новий SRI `openssl dgst -sha384 -binary … | openssl base64 -A`), нова версія → застосувати до сторінки → Publish.
 - Нові картинки: `create_asset` через Webflow MCP → завантаження у S3 (скрипт на кшталт `wfup.py`: політика підпису відтворюється з дати, ключа й типу) → `set_image_asset` на елементі.
+
+## Автономна версія (код усередині Webflow, без GitHub)
+
+- Сторінка `/mazda-spivpratsia-standalone` (id `6af57eecd17e817cf8a30486`) — копія `/mazda-spivpratsia`; та сторінка й її код на jsDelivr лишаються як є.
+- Webflow API не дозволяє писати вільний кастомний код, а inline-скрипт обмежений 2000 символами (і максимум 15 скриптів на сторінку). Тому `webflow/build_standalone.py` мінімізує `js/mazda.js` та `css/anim.css` (terser) і ріже на шматки; кожен шматок — окремий зареєстрований скрипт (`mzaboot`, `mzbcss01…05m` у head; `mzdjs01…08`, `mzerun` у footer), що дописує свою частину в масив, а останній збирає й виконує. Скрипти хостить сам Webflow (cdn.prod.website-files.com).
+- Відео (`mazda-hero.mp4`, `mazda-hero-m.mp4`) і карта (`mazda-map.svg`) лежать у Webflow Assets; посилання — в атрибутах `data-video`, `data-video-mobile`, `data-map` на сторінці.
+- Оновлення коду: правка `js/mazda.js` / `css/anim.css` → `python3 webflow/build_standalone.py` → зареєструвати змінені шматки новою версією (наприклад 1.0.1; існуючий скрипт API не оновлює) → `set_page_scripts` → Publish. Зміна довжини коду зсуває межі шматків, тому реєструвати треба всі скрипти групи.
+- Шрифт Inter Tight підключається з Google Fonts, GT Pressura — із Webflow Fonts; це не GitHub, але й не Webflow.
+
