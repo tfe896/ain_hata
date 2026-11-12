@@ -30,6 +30,10 @@
   function boot() {
 
   var RM = W.matchMedia && W.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Телефони й планшети: без паралаксу (на iOS висота вікна «дихає» разом з адресним рядком, і фото смикаються)
+  var TOUCH = W.matchMedia && W.matchMedia("(max-width: 767px), (hover: none) and (pointer: coarse)").matches;
+  var SMALL = W.matchMedia && W.matchMedia("(max-width: 767px)").matches;
+  if (TOUCH) H.classList.add("mz-touch");
   var NBSP = " ";
   function $$(sel, root) { return Array.prototype.slice.call((root || D).querySelectorAll(sel)); }
   function $(sel, root) { return (root || D).querySelector(sel); }
@@ -198,7 +202,10 @@
     v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
     v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("preload", "auto");
     v.setAttribute("aria-hidden", "true");
-    v.src = hero.getAttribute("data-video");
+    // на телефоні — легка вертикальна версія того самого ролика (hero-m.mp4 поруч із hero.mp4)
+    var src = hero.getAttribute("data-video");
+    v.src = SMALL ? (hero.getAttribute("data-video-mobile") || src.replace("hero.mp4", "hero-m.mp4")) : src;
+    v.setAttribute("webkit-playsinline", "");
     v.addEventListener("playing", function () { v.classList.add("is-on"); });
     hero.insertBefore(v, poster ? poster.nextSibling : hero.firstChild);
     var p = v.play();
@@ -267,6 +274,8 @@
     if (RM) drawRoute(1);
   }
   function drawRoute(p) {
+    // маршрут тільки «росте»: при прокрутці назад лінія й зупинки не гаснуть і не блимають
+    if (route && route.last > p) return;
     if (!route || Math.abs(p - route.last) < 0.002) return;
     route.last = p;
     route.paths.forEach(function (x) {
@@ -291,6 +300,7 @@
     if (RM) return;
     bar = el("div", "mz-bar"); D.body.appendChild(bar);
     scrubs = $$('[data-anim="scrub"]').map(function (e) { return { el: e, words: $$(".mz-s", e) }; });
+    if (TOUCH) return;
     $$("[data-shot]").forEach(function (e, i) { floats.push({ el: e, k: i % 2 ? -0.07 : 0.05 }); });
     $$(".mz-plate-img").forEach(function (e) { floats.push({ el: e, k: -0.06 }); });
     $$(".mz-handling-bg").forEach(function (e) { floats.push({ el: e, k: -0.1 }); });
