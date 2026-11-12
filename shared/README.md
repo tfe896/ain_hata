@@ -4,6 +4,8 @@
 
 | Папка / файл | Що це |
 |---|---|
+| `SETUP.md` | як дати новому середовищу доступ до Figma (токен), Webflow і потрібних хостів |
+| `figma-tools/figma_read.py` | читання Figma: структура файлу, коментарі з координатами, рендери вузлів |
 | `webflow-tools/build_files.py` | збирає з `js/*.js` і `css/anim.css` проєкту два файли для Webflow Assets: `<name>-style-vN.js` (head) і `<name>-anim-vN.js` (кінець body) |
 | `webflow-tools/wfup.py` | завантажує файл у сховище Webflow за даними `create_asset` (потрібна змінна `WEBFLOW_SITE_ID`) |
 | `qa/` | Playwright-перевірки: мобільна версія й паралакс, заставка, трясіння завіси, жива сторінка (див. `qa/README.md`) |
