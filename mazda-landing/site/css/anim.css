@@ -7,6 +7,9 @@ html { scroll-behavior: smooth; }
 body { margin: 0; background-color: #fff9d9; -webkit-font-smoothing: antialiased; }
 
 /* ---------- заставка першого екрана ---------- */
+/* Помаранчеве тло з першого кадру: поки скрипт ще вантажиться, сторінку закриває цей шар, і завіса
+   не «вистрибує» зненацька. Скрипт додає mz-curtain-on, коли будує справжню завісу такого самого кольору. */
+.mz-js:not(.mz-curtain-on):not(.mz-ready)::before { content: ""; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: #ef6320; z-index: 999; }
 .mz-curtain { position: fixed; left: 0; top: 0; width: 100%; height: 100%; z-index: 1000; background-color: #ef6320; display: flex; flex-direction: column; align-items: center; justify-content: center; row-gap: 3vh; will-change: transform; }
 .mz-curtain-count { font-family: "GT Pressura LC", "Inter Tight", Arial, sans-serif; font-weight: 700; font-size: clamp(72px, 15vw, 220px); line-height: 0.9; color: #000; text-transform: uppercase; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .mz-curtain-cap { text-align: center; padding: 0 24px; max-width: 520px; font-family: "Inter Tight", Arial, sans-serif; font-weight: 600; font-size: clamp(14px, 1.4vw, 20px); letter-spacing: 0.03em; color: #000; opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease 0.35s, transform 0.5s ease 0.35s; }

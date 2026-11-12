@@ -301,7 +301,7 @@
     bar = el("div", "mz-bar"); D.body.appendChild(bar);
     scrubs = $$('[data-anim="scrub"]').map(function (e) { return { el: e, words: $$(".mz-s", e) }; });
     if (TOUCH) return;
-    $$("[data-shot]").forEach(function (e, i) { floats.push({ el: e, k: i % 2 ? -0.07 : 0.05 }); });
+    // Полароїди без паралаксу: зсув від скролу рахується в основному потоці й відстає від прокрутки на кадр, фото «дрижать»
     $$(".mz-plate-img").forEach(function (e) { floats.push({ el: e, k: -0.06 }); });
     $$(".mz-handling-bg").forEach(function (e) { floats.push({ el: e, k: -0.1 }); });
     $$(".mz-hero-poster, .mz-hero-video").forEach(function (e) { floats.push({ el: e, k: -0.18, top: true }); });
@@ -351,7 +351,15 @@
     fly.className = "mz-stamp-fly";
     fly.removeAttribute("loading");
     D.body.appendChild(fly);
+    H.classList.add("mz-curtain-on"); // справжня завіса того ж кольору на місці, шар-заглушка зі стилів більше не потрібен
+    // Шрифт лічильника: чекаємо на нього (не довше 1,2 с), щоб текст не «перемикався» посеред заставки
+    count.style.visibility = "hidden";
+    var started = false;
+    function begin() { if (started) return; started = true; count.style.visibility = ""; run(); }
+    W.setTimeout(begin, 1200);
+    if (D.fonts && D.fonts.load) { D.fonts.load('700 1em "GT Pressura LC"').then(begin, begin); } else { begin(); }
 
+    function run() {
     function place(rect, extra) {
       fly.style.width = rect.width + "px";
       fly.style.height = rect.height + "px";
@@ -389,6 +397,7 @@
     }
     W.setTimeout(finish, 1750);
     W.addEventListener("scroll", function early() { W.removeEventListener("scroll", early); if (W.pageYOffset > 40) finish(); }, { passive: true });
+    } // run
   });
 
   requestTick();
