@@ -26,14 +26,14 @@ import sys
 import tempfile
 
 
-def minify_js(src: str) -> str:
+def minify_js(src: str, prefix: str) -> str:
     # Необов'язково: якщо в джерелі є блок «чекати на anim.css» (старий варіант з jsDelivr), прибираємо його:
     # стилі вже в head, чекати немає на що.
     a = src.find("  /* Стилі анімацій мають бути завантажені")
     b = src.find("  whenCss(boot);")
     if a != -1 and b != -1:
         b += len("  whenCss(boot);")
-        src = src[:a] + "  H.classList.remove(\"mz-wait\");\n  boot();" + src[b:]
+        src = src[:a] + "  H.classList.remove(\"%s-wait\");\n  boot();" % prefix + src[b:]
     with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, encoding="utf-8") as f:
         f.write(src)
         tmp = f.name
@@ -59,7 +59,7 @@ def main():
     ap.add_argument("--prefix", required=True, help="префікс класів проєкту (mz): клас-запобіжник <prefix>-js")
     ap.add_argument("--title", default=None, help="назва проєкту для коментаря у файлах")
     ap.add_argument("--src", required=True, help="папка з js/*.js і css/anim.css (відносно кореня репозиторію)")
-    ap.add_argument("--js", default="js/mazda.js", help="шлях до скрипта відносно --src")
+    ap.add_argument("--js", default=None, help="шлях до скрипта відносно --src (за замовчуванням js/<name>.js)")
     ap.add_argument("--css", default="css/anim.css", help="шлях до стилів відносно --src")
     ap.add_argument("--version", required=True, help="v1, v2 ...")
     ap.add_argument("--font", action="append", default=[], help="посилання на Google Fonts (можна кілька)")
@@ -67,7 +67,8 @@ def main():
     a = ap.parse_args()
 
     root = pathlib.Path(a.src)
-    js = minify_js((root / a.js).read_text(encoding="utf-8"))
+    a.js = a.js or "js/%s.js" % a.name
+    js = minify_js((root / a.js).read_text(encoding="utf-8"), a.prefix)
     css = minify_css((root / a.css).read_text(encoding="utf-8"))
     title = a.title or a.name
     # перший шрифт — у списку var (як у вже опублікованих файлах), решта — окремими вставками

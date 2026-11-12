@@ -11,6 +11,7 @@ contentType; 2) цей скрипт; 3) звірити з CDN: curl hostedUrl �
 Перевірка політики:  python3 -I wfup.py policy <xAmzDate> <key> <contentType>
 """
 import base64
+import datetime
 import json
 import os
 import subprocess
@@ -22,8 +23,9 @@ CRED = os.environ.get("WEBFLOW_S3_CRED", "AKIAQLLHWD6MEJGETLST") + "/%s/us-east-
 
 
 def policy(date, key, ctype):
-    h = int(date[9:11]) + 1
-    exp = "%s-%s-%sT%02d:%s:%sZ" % (date[0:4], date[4:6], date[6:8], h, date[11:13], date[13:15])
+    # термін дії = xAmzDate + 1 година (через datetime, щоб 23:xx коректно переходило на наступну добу)
+    t = datetime.datetime.strptime(date, "%Y%m%dT%H%M%SZ") + datetime.timedelta(hours=1)
+    exp = t.strftime("%Y-%m-%dT%H:%M:%SZ")
     obj = {"expiration": exp, "conditions": [["starts-with", "$key", SITE + "/"], {"cache-control": "max-age=31536000"},
            {"Content-Type": ctype}, {"success_action_status": "201"}, ["starts-with", "$Content-Type", ctype],
            ["content-length-range", 0, 31457280], {"acl": "public-read"}, {"bucket": "webflow-prod-assets"},
@@ -46,9 +48,15 @@ def upload(path, asset_id, name, date, sig, ctype):
 if __name__ == "__main__":
     if not SITE:
         sys.exit("Задайте WEBFLOW_SITE_ID (id сайту Webflow)")
-    if sys.argv[1] == "policy":
+    if len(sys.argv) == 5 and sys.argv[1] == "policy":
         print(policy(*sys.argv[2:5]))
+    elif len(sys.argv) == 2 and sys.argv[1] != "policy":
+        for n, line in enumerate(open(sys.argv[1], encoding="utf-8"), 1):
+            if not line.strip():
+                continue
+            parts = line.split()
+            if len(parts) != 6:
+                sys.exit("Рядок %d: потрібно 6 полів (шлях asset_id ім'я xAmzDate xAmzSignature contentType), є %d" % (n, len(parts)))
+            upload(*parts)
     else:
-        for line in open(sys.argv[1]):
-            if line.strip():
-                upload(*line.split())
+        sys.exit(__doc__)
