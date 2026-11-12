@@ -101,8 +101,9 @@
 ## Автономна версія (код усередині Webflow, без GitHub)
 
 - Сторінка `/mazda-spivpratsia-standalone` (id `6af57eecd17e817cf8a30486`) — копія `/mazda-spivpratsia`; та сторінка й її код на jsDelivr лишаються як є.
-- Webflow API не дозволяє писати вільний кастомний код, а inline-скрипт обмежений 2000 символами (і максимум 15 скриптів на сторінку). Тому `webflow/build_standalone.py` мінімізує `js/mazda.js` та `css/anim.css` (terser) і ріже на шматки; кожен шматок — окремий зареєстрований скрипт (`mzaboot`, `mzbcss01…05m` у head; `mzdjs01…08`, `mzerun` у footer), що дописує свою частину в масив, а останній збирає й виконує. Скрипти хостить сам Webflow (cdn.prod.website-files.com).
-- Відео (`mazda-hero.mp4`, `mazda-hero-m.mp4`) і карта (`mazda-map.svg`) лежать у Webflow Assets; посилання — в атрибутах `data-video`, `data-video-mobile`, `data-map` на сторінці.
-- Оновлення коду: правка `js/mazda.js` / `css/anim.css` → `python3 webflow/build_standalone.py` → зареєструвати змінені шматки новою версією (наприклад 1.0.1; існуючий скрипт API не оновлює) → `set_page_scripts` → Publish. Зміна довжини коду зсуває межі шматків, тому реєструвати треба всі скрипти групи.
-- Шрифт Inter Tight підключається з Google Fonts, GT Pressura — із Webflow Fonts; це не GitHub, але й не Webflow.
-
+- Принцип такий самий, як у команди AIN: код — файли в Webflow Assets із версією в назві. `webflow/standalone/mazda-style-v1.js` (head: клас-запобіжник, шрифт Inter Tight, стилі анімацій) і `mazda-anim-v1.js` (перед `</body>`: уся логіка). Обидва зібрані `python3 webflow/build_standalone.py files v1` з `css/anim.css` і `js/mazda.js` (terser) і підключені двома зареєстрованими hosted-скриптами `mazdastylev1` / `mazdaanimv1` із SRI.
+- Відео (`mazda-hero.mp4`, `mazda-hero-m.mp4`) і карта (`mazda-map.svg`) лежать у Webflow Assets; посилання в атрибутах `data-video`, `data-video-mobile`, `data-map`. На опублікованій сторінці жодних посилань на GitHub/jsDelivr.
+- Оновлення коду: правка `js/mazda.js` / `css/anim.css` → `build_standalone.py files v2` → `create_asset` для нових файлів (ім'я з новою версією) + `wfup.py` (завантаження в S3) → перевірити хеші з CDN → `register_hosted_script` (нова версія, SRI) → `set_page_scripts` → Publish. Старий файл залишається на CDN, тож відкат — повернути стару версію.
+- Webflow API не дає писати вільний кастомний код, але приймає `.js` як ассет: цим користуємося замість першого варіанта (15 шматків по 2000 символів, зареєстровані скрипти `mzaboot`, `mzbcss*`, `mzdjs*`, `mzerun` — вони досі зареєстровані, але ніде не підключені).
+- Шрифт Inter Tight підтягується з Google Fonts, GT Pressura — із Webflow Fonts.
+- Порожні ассети `mazda-style-v1.js`/`mazda-anim-v1.js` з першої спроби вже заповнені: це ті самі записи, дублів немає.
