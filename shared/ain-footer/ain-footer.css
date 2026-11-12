@@ -1,0 +1,41 @@
+.ain-footer { color: #111; background-color: #fff; flex-direction: column; row-gap: 96px; padding: 96px 80px 40px; font-family: Montserrat, sans-serif; font-size: 14px; line-height: 17px; display: flex; }
+.ain-footer { box-sizing: border-box; width: 100%; }
+.ainf-credits { flex-direction: column; row-gap: 24px; padding-bottom: 64px; display: flex; }
+.ainf-line { background-color: #e6e6e6; width: 100%; height: 1px; }
+.ainf-credits_list { grid-column-gap: 24px; grid-row-gap: 24px; grid-template-rows: auto; grid-template-columns: repeat(6, minmax(0, 1fr)); display: grid; }
+.ainf-credit { flex-direction: column; row-gap: 6px; display: flex; }
+.ainf-credit_role { color: #8c8c8c; letter-spacing: .48px; text-transform: uppercase; font-size: 12px; font-weight: 500; line-height: 16px; }
+.ainf-credit_name { color: #111; font-size: 16px; font-weight: 400; line-height: 22px; }
+.ainf-suggest { flex-direction: column; row-gap: 32px; display: flex; }
+.ainf-suggest_head { justify-content: space-between; align-items: flex-end; column-gap: 24px; display: flex; }
+.ainf-suggest_title { color: #111; letter-spacing: -.8px; margin-top: 0; margin-bottom: 0; font-family: Montserrat, sans-serif; font-size: 40px; font-weight: 600; line-height: 48px; }
+.ainf-all { color: #111; flex: none; align-items: center; column-gap: 12px; font-size: 18px; font-weight: 500; line-height: 24px; text-decoration: none; display: flex; }
+.ainf-arrow { background-color: #ff3b3b; border-radius: 50%; flex: none; width: 40px; height: 40px; position: relative; overflow: hidden; }
+.ainf-suggest_line { background-color: #e6e6e6; width: 100%; height: 1px; display: none; }
+.ainf-cards { grid-column-gap: 24px; grid-row-gap: 40px; grid-template-rows: auto; grid-template-columns: repeat(4, minmax(0, 1fr)); display: grid; }
+.ainf-card { color: #111; flex-direction: column; row-gap: 20px; text-decoration: none; display: flex; }
+.ainf-card_media { aspect-ratio: 2; background-color: #f2f2f2; border-radius: 14px; width: 100%; position: relative; overflow: hidden; }
+.ainf-card_img { object-fit: cover; width: 100%; height: 100%; display: block; }
+.ainf-card_meta { align-items: center; column-gap: 12px; display: flex; }
+.ainf-card_tag { color: #111; background-color: #f2f2f2; border-radius: 100px; padding: 6px 12px; font-size: 13px; font-weight: 500; line-height: 16px; }
+.ainf-card_partner { color: #8c8c8c; font-size: 14px; font-weight: 500; line-height: 16px; }
+.ainf-card_body { flex-direction: column; row-gap: 10px; display: flex; }
+.ainf-card_title { color: #111; letter-spacing: -.22px; font-size: 22px; font-weight: 600; line-height: 28px; }
+.ainf-card_text { color: #5c5c5c; font-size: 16px; font-weight: 400; line-height: 24px; }
+.ainf-all-pill { color: #111; border: 1px solid #111; border-radius: 100px; justify-content: space-between; align-items: center; padding: 6px 6px 6px 20px; font-size: 16px; font-weight: 500; line-height: 24px; text-decoration: none; display: none; }
+.ainf-panel { background-color: #f4f4f4; border-radius: 24px; flex-direction: column; row-gap: 40px; padding: 48px 48px 40px; display: flex; }
+.ainf-panel_top { grid-column-gap: 24px; grid-row-gap: 32px; grid-template-rows: auto; grid-template-columns: minmax(0, 316fr) repeat(4, minmax(0, 313fr)); align-items: start; display: grid; }
+.ainf-logo-link { place-self: start; display: block; }
+.ainf-logo { width: 131px; height: auto; display: block; }
+.ainf-col { flex-direction: column; row-gap: 20px; display: flex; }
+.ainf-col_label { color: #8c8c8c; font-size: 14px; font-weight: 500; line-height: 20px; }
+.ainf-col_links { flex-direction: column; align-items: flex-start; row-gap: 12px; display: flex; }
+.ainf-link { color: #111; font-size: 18px; font-weight: 500; line-height: 24px; text-decoration: none; }
+.ainf-panel_line { background-color: #e0e0e0; width: 100%; height: 1px; }
+.ainf-panel_bottom { grid-column-gap: 24px; grid-row-gap: 12px; grid-template-rows: auto; grid-template-columns: minmax(0, 316fr) minmax(0, 1324fr); display: grid; }
+.ainf-copy { color: #8c8c8c; font-size: 14px; font-weight: 500; line-height: 20px; }
+.ainf-legal { color: #8c8c8c; font-size: 14px; font-weight: 400; line-height: 20px; }
+@media screen and (max-width: 991px) { .ainf-credits_list { grid-template-rows: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 28px; } .ainf-suggest_title { letter-spacing: -.68px; font-size: 34px; line-height: 40px; } .ainf-cards { grid-template-rows: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 48px; } .ainf-panel { padding: 40px 32px 32px; } .ainf-panel_top { grid-template-rows: auto; grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 40px; } .ainf-logo-link { grid-column: 1 / -1; } .ainf-panel_bottom { grid-template-rows: auto; grid-template-columns: minmax(0, 1fr); } }
+@media screen and (max-width: 767px) { .ainf-credits { row-gap: 20px; padding-bottom: 32px; } .ainf-credits_list { grid-column-gap: 16px; grid-row-gap: 24px; grid-template-rows: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); } .ainf-credit_name { font-size: 15px; } .ainf-suggest { row-gap: 24px; } .ainf-suggest_title { letter-spacing: -.56px; font-size: 28px; line-height: 34px; } .ainf-all, .ainf-suggest_line { display: none; } .ainf-cards { grid-template-rows: auto; grid-template-columns: minmax(0, 1fr); row-gap: 40px; } .ainf-card { row-gap: 16px; } .ainf-card_meta { column-gap: 10px; } .ainf-card_tag { padding: 5px 10px; font-size: 12px; } .ainf-card_partner { font-size: 13px; } .ainf-card_body { row-gap: 8px; } .ainf-card_title { letter-spacing: -.2px; font-size: 20px; line-height: 26px; } .ainf-card_text { font-size: 15px; line-height: 22px; } .ainf-all-pill { display: flex; } .ainf-panel { border-radius: 20px; row-gap: 32px; padding: 32px 20px 24px; } .ainf-panel_top { grid-column-gap: 16px; grid-row-gap: 32px; grid-template-rows: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); } .ainf-logo { width: 95px; } .ainf-col { row-gap: 14px; } .ainf-col_label { font-size: 13px; line-height: 18px; } .ainf-col_links { row-gap: 10px; } .ainf-link { font-size: 15px; line-height: 22px; } .ainf-copy { font-size: 13px; line-height: 18px; } .ainf-legal { font-size: 13px; line-height: 19px; } }
+@media screen and (max-width: 991px) { .ain-footer { row-gap: 80px; padding: 80px 32px 32px; } }
+@media screen and (max-width: 767px) { .ain-footer { row-gap: 64px; padding: 48px 16px 16px; } }

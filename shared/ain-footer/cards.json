@@ -1,0 +1,42 @@
+{
+ "credit_role": "Дизайн та верстка",
+ "credit_name": "Made by vibecoder Taras 🤖",
+ "cards": [
+  {
+   "url": "https://special.ain.ua/dila-medychna-laboratoria-v-kysheni/",
+   "alt": "Медична лабораторія в кишені — застосунок Діла",
+   "tag": "Спецпроєкт",
+   "partner": "Діла",
+   "title": "Медична лабораторія в кишені",
+   "text": "Як застосунок Діла спрощує контроль здоровʼя: 3 кейси",
+   "image": "assets/mazda-sug-dila.webp"
+  },
+  {
+   "url": "https://special.ain.ua/kibershakhraystvo-v-ukrayini-amd/",
+   "alt": "Як розпізнати кібершахраїв — розслідування AMD та Molfar",
+   "tag": "Спецпроєкт",
+   "partner": "AMD",
+   "title": "Як розпізнати кібершахраїв",
+   "text": "Розслідування AMD та Molfar",
+   "image": "assets/mazda-sug-amd.webp"
+  },
+  {
+   "url": "https://special.ain.ua/import-avto-z-ssha-dlya-dyleriv-vs-brothers/",
+   "alt": "23 роки досвіду — імпорт авто зі США, V&S Brothers",
+   "tag": "Спецпроєкт",
+   "partner": "V&S Brothers",
+   "title": "23 роки досвіду",
+   "text": "Надійний імпорт авто зі США для автобізнесу",
+   "image": "assets/mazda-sug-vs.webp"
+  },
+  {
+   "url": "https://ain.ua/2026/07/31/apart-gotel-circle-servis-lavmarki-komiuniti-v-odnomu-prostori/",
+   "alt": "Апарт-готель Circle",
+   "tag": "Спецпроєкт",
+   "partner": "Circle",
+   "title": "Апарт-готель Circle",
+   "text": "Сервіс, ком’юніті та пасивний дохід",
+   "image": "assets/mazda-sug-circle.webp"
+  }
+ ]
+}
