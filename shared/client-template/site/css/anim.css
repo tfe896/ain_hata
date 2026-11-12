@@ -1,0 +1,12 @@
+/* {{TITLE}}: стани анімацій. Працюють лише коли на <html> стоїть клас {{PREFIX}}-js
+   (його ставить завантажувач у head), тож без скрипта сторінка лишається повністю видимою. */
+
+/* Поява блоків: <div data-anim="reveal"> */
+.{{PREFIX}}-js [data-anim="reveal"] { opacity: 0; translate: 0 44px; transition: opacity 0.8s ease, translate 1s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: var(--d, 0s); }
+.{{PREFIX}}-js [data-anim="reveal"].is-in { opacity: 1; translate: 0 0; }
+
+/* Телефони й планшети: без паралаксу і scale від скролу (див. кореневий CLAUDE.md, «Мобільна версія») */
+.{{PREFIX}}-touch.{{PREFIX}}-js [data-anim="reveal"] { translate: 0 24px; }
+.{{PREFIX}}-touch.{{PREFIX}}-js [data-anim="reveal"].is-in { translate: 0 0; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

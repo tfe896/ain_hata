@@ -17,7 +17,7 @@
 2. У налаштуваннях сайту підставити в підключення скрипта новий файл (і новий SRI-хеш, якщо Webflow його вимагає). Шукати розділ Custom code.
 3. Опублікувати. Для відкату повернути старий файл `v1`.
 
-Файли редагує той, хто знає JavaScript. Джерело: `mazda-landing/site/js/mazda.js` і `css/anim.css` у репозиторії; файли в Assets це зібрана мінімізована копія (`python3 webflow/build_standalone.py files v2`), руками їх правити не варто. Технічні кроки з API: `mazda-landing/README.md`, розділ «Автономна версія».
+Файли редагує той, хто знає JavaScript. Джерело: `mazda-landing/site/js/mazda.js` і `css/anim.css` у репозиторії; файли в Assets це зібрана мінімізована копія (`shared/webflow-tools/build_files.py`), руками їх правити не варто. Технічні кроки з API: `mazda-landing/README.md`, розділ «Автономна версія».
 
 ## 3. Що не чіпати
 - Варіант із GitHub (`/mazda-spivpratsia`) лишається окремо.
