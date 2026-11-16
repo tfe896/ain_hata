@@ -24,6 +24,7 @@ index = f"""<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta nam
 {FONTS}{local_font}<style>*{{box-sizing:border-box}}img{{max-width:100%}}</style><link rel="stylesheet" href="css/layout.css"><link rel="stylesheet" href="css/anim.css">{GUARD}</head>
 <body>
 {body.replace("{{A}}", "assets/")}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="js/mazda.js"></script></body></html>
 """
 (HERE / "index.html").write_text(index, encoding="utf-8")
