@@ -29,7 +29,7 @@
 | **Немає технічних дублів** (index.html, .html) | перевіряє приймальник | вручну |
 
 ## Як поставити canonical, robots і GTM
-`python3 -I shared/webflow-tools/head_snippet.py https://special.ain.ua/<url>/` друкує готовий блок (кожен тег у рядку). Його вставляє людина: Webflow Designer → сторінка → Page settings → Custom code → Head code. API це не пише (`set_page_freeform_code` → 404, перевірено повторно 17.11.2026; читання працює). noscript GTM іде одразу після `<body>` при експорті.
+`python3 -I shared/webflow-tools/head_snippet.py https://special.ain.ua/<url>/` друкує готовий блок (кожен тег у рядку). Його вставляє людина: Webflow Designer → сторінка → Page settings → Custom code. **Увага: це поле відкривається лише на сайті з платним Site plan** (на безкоштовному Designer показує «To unlock custom code, upgrade your Site plan», тому й API дає 404). Без тарифу ці теги додає той, хто експортує спешал на special.ain.ua. API це не пише (`set_page_freeform_code` → 404, перевірено повторно 17.11.2026; читання працює). noscript GTM іде одразу після `<body>` при експорті.
 
 ## Що лишається людині (не робиться через API)
 1. Кінцевий URL спешала (для canonical, `mainEntityOfPage`, `datePublished` у Schema.org).
