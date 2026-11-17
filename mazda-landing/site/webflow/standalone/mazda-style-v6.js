@@ -1,0 +1,118 @@
+/* Mazda x Spivpratsia: стилі анімацій + запобіжник (підключається в head).
+   Джерело: mazda-landing/site/css/anim.css
+
+   ЯК ПРАВИТИ РУКАМИ: нижче, між зворотними лапками `...`, лежить звичайний CSS. Міняйте його як у
+   будь-якому файлі стилів (не можна лише ставити зворотну лапку ` всередині). Після правки файл
+   заливається в Assets з наступною версією в назві (-v2, -v3…) і підключається замість старого. */
+(function () {
+  var d = document, h = d.documentElement;
+
+  // ===== ШРИФТИ =====
+  var font0 = d.createElement("link");
+  font0.rel = "stylesheet";
+  font0.href = "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Montserrat:wght@400;500;600&display=swap";
+  d.head.appendChild(font0);
+
+  // ===== МОВА СТОРІНКИ =====
+  // Webflow сам не виводить <html lang>, а чекліст редакції це вимагає (мова сторінки).
+  // Для пошуковиків lang додатково ставлять у код сторінки при вивантаженні на special.ain.ua.
+  h.lang = "uk";
+
+  // ===== ЗАПОБІЖНИК =====
+  // Клас mz-js вмикає стилі анімацій. Якщо скрипт анімацій не запустився за 5 секунд,
+  // клас знімається, і сторінка лишається повністю видимою.
+  var GUARD_MS = 5000;
+  h.classList.add("mz-js");
+  setTimeout(function () { if (!window.__mazdaReady) h.classList.remove("mz-js"); }, GUARD_MS);
+
+  // ===== СТИЛІ =====
+  var CSS = `
+/* Mazda × Співпраця — стилі анімацій.
+   Сам рух (появи, текст, лічильники, паралакс, заставка) робить GSAP у js/mazda.js: швидкість і затримки
+   правляться там, у блоці «НАЛАШТУВАННЯ». Тут лише те, що належить стилям: вигляд завіси, карта,
+   реакції на наведення, структура розбитого тексту.
+   Правила з .mz-js працюють, лише поки на <html> стоїть цей клас (його ставить запобіжник у head),
+   тож без скрипта сторінка лишається повністю видимою. */
+
+@font-face { font-family: "GT Pressura LC"; src: local("GT Pressura LC Bold"), local("GTPressuraLC-Bold"); font-weight: 700; font-style: normal; font-display: swap; }
+
+html { scroll-behavior: smooth; }
+body { margin: 0; background-color: #fff9d9; -webkit-font-smoothing: antialiased; }
+
+/* ---------- заставка першого екрана ---------- */
+/* Помаранчеве тло з першого кадру: поки скрипт ще вантажиться, сторінку закриває цей шар, і завіса
+   не «вистрибує» зненацька. Скрипт додає mz-curtain-on, коли будує справжню завісу такого самого кольору. */
+.mz-js:not(.mz-curtain-on):not(.mz-ready)::before { content: ""; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: #ef6320; z-index: 999; }
+.mz-curtain { position: fixed; left: -24px; top: -24px; width: calc(100% + 48px); height: calc(100% + 48px); z-index: 1000; background-color: #ef6320; display: flex; flex-direction: column; align-items: center; justify-content: center; row-gap: 3vh; will-change: transform; }
+.mz-curtain-count { font-family: "GT Pressura LC", "Inter Tight", Arial, sans-serif; font-weight: 700; font-size: clamp(72px, 15vw, 220px); line-height: 0.9; color: #000; text-transform: uppercase; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.mz-curtain-cap { text-align: center; padding: 0 24px; max-width: 520px; font-family: "Inter Tight", Arial, sans-serif; font-weight: 600; font-size: clamp(14px, 1.4vw, 20px); letter-spacing: 0.03em; color: #000; opacity: 0; }
+.mz-curtain-slot { width: clamp(220px, 34vw, 520px); aspect-ratio: 585 / 151; }
+.mz-stamp-fly { position: fixed; left: 0; top: 0; z-index: 1001; opacity: 0; max-width: none; will-change: transform, opacity; pointer-events: none; }
+
+/* ---------- перший екран ---------- */
+.mz-hero-video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; opacity: 0; transition: opacity 0.8s ease; }
+.mz-hero-video.is-on { opacity: 1; }
+.mz-js .mz-hero-stamp { opacity: 0; }
+.mz-js.mz-intro-done .mz-hero-stamp { opacity: 1; }
+.mz-line { display: block; overflow: hidden; padding-top: 0.12em; margin-top: -0.12em; }
+.mz-li { display: block; }
+
+/* ---------- тексти ---------- */
+.mz-w { display: inline-block; overflow: hidden; vertical-align: top; padding-top: 0.14em; margin-top: -0.14em; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.mz-i, .mz-c { display: inline-block; }
+.mz-s { will-change: opacity; }
+
+/* ---------- фактоїди, полароїди, фото ---------- */
+/* наведення на полароїд: вмикається після появи (клас is-set ставить скрипт) */
+[data-shot].is-set { transition: scale 0.5s ease, rotate 0.5s ease; }
+[data-shot].is-set:hover { scale: 1.04; rotate: 2deg; z-index: 3; }
+.mz-fact-num, .mz-plate-num { font-variant-numeric: tabular-nums; }
+.mz-cta { transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease; }
+.mz-cta:hover { background-color: #fff9d9; color: #000; transform: translateY(-2px); }
+
+/* ---------- карта маршруту ---------- */
+.mz-map { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+.mz-obl { opacity: 0; transition: opacity 0.7s ease; }
+.mz-obl.is-on { opacity: 1; }
+.mz-pin { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background-color: #000; border: 4px solid #fff9d9; box-sizing: border-box; scale: 0; transition: scale 0.5s cubic-bezier(0.34, 1.7, 0.64, 1); z-index: 2; }
+.mz-pin.is-on { scale: 1; }
+.mz-lbl { position: absolute; padding: 4px 9px; border-radius: 999px; background-color: #000; color: #fff9d9; font-family: "Inter Tight", Arial, sans-serif; font-weight: 500; font-size: 15px; line-height: 1.2; letter-spacing: 0.02em; white-space: nowrap; opacity: 0; scale: 0.8; transition: opacity 0.4s ease 0.1s, scale 0.5s cubic-bezier(0.34, 1.5, 0.64, 1) 0.1s; z-index: 3; }
+.mz-lbl.is-on { opacity: 1; scale: 1; }
+.mz-lbl-right { transform: translate(16px, -50%); }
+.mz-lbl-above { transform: translate(11px, calc(-100% - 11px)); }
+.mz-lbl-below { transform: translate(-18px, 0); }
+.mz-lbl-between { transform: translate(0, -50%); }
+.mz-js .mz-stop { background-color: #ffc08a; transition: background-color 0.6s ease; }
+.mz-js .mz-stop.is-on { background-color: #ef6320; }
+
+/* ---------- футер AIN: «Читайте також» і панель (розмітка й розміри — класи .ainf-* у Webflow) ---------- */
+.ainf-arrow { isolation: isolate; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.ainf-arrow::before { content: ""; position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 12'%3E%3Cpath d='M1 6h14M10 1l5 5-5 5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 40% auto no-repeat; }
+.ainf-all:hover .ainf-arrow, .ainf-all-pill:hover .ainf-arrow { transform: translateX(4px); }
+.ainf-card_img { transition: scale 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.ainf-card:hover .ainf-card_img { scale: 1.05; }
+.ainf-link { transition: opacity 0.25s ease; }
+.ainf-link:hover { opacity: 0.55; }
+
+/* ---------- індикатор прокрутки ---------- */
+.mz-bar { position: fixed; left: 0; top: 0; height: 4px; width: 100%; background-color: #ef6320; transform-origin: 0 50%; transform: scaleX(0); z-index: 900; pointer-events: none; }
+
+@media screen and (max-width: 767px) {
+  .mz-pin { width: 10px; height: 10px; margin: -5px 0 0 -5px; border-width: 2px; }
+  .mz-lbl { font-size: 10px; padding: 2px 6px; }
+  .mz-lbl-right { transform: translate(9px, -50%); }
+  .mz-lbl-above { transform: translate(6px, calc(-100% - 6px)); }
+  .mz-lbl-below { transform: translate(-8px, 0); }
+}
+
+/* ---------- телефони й планшети: без наведення ---------- */
+.mz-touch [data-shot].is-set:hover { scale: none; rotate: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+`;
+  var s = d.createElement("style");
+  s.textContent = CSS;
+  d.head.appendChild(s);
+})();

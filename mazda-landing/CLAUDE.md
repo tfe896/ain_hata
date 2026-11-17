@@ -5,7 +5,7 @@
 ## Ключові дані
 - Папка: `mazda-landing/`; префікс класів Webflow `mz-`, прапорець запобіжника `window.__mazdaReady`, клас на `<html>` `mz-js`.
 - Webflow: сайт `6aec9fbcb1bc39fcfd02af09` (той самий, що й Godlike), живий домен `tarass-beautiful-site-32778b.webflow.io`.
-  - **`/mazda-spivpratsia-standalone` (id `6af57eecd17e817cf8a30486`) — єдина жива сторінка.** Автономна версія: файли `mazda-style-vN.js` / `mazda-anim-vN.js` у Webflow Assets (поточні з 16.11.2026: style v5 (`mazdastylev5`) у head; `gsap3125` → `scrolltrigger3125` → anim v5 (`mazdaanimv5`) у кінці body; анімації на GSAP + ScrollTrigger, файли читабельні; відкат: `mazdastylev4` + `mazdaanimv4`), кінцевий блок. Користувач уже розіслав її посилання, **адресу не міняти**.
+  - **`/mazda-spivpratsia-standalone` (id `6af57eecd17e817cf8a30486`) — єдина жива сторінка.** Автономна версія: файли `mazda-style-vN.js` / `mazda-anim-vN.js` у Webflow Assets (поточні з 17.11.2026: style v6 (`mazdastylev6`, додає `<html lang="uk">`) у head; `gsap3125` → `scrolltrigger3125` → anim v5 (`mazdaanimv5`) у кінці body; анімації на GSAP + ScrollTrigger, файли читабельні; відкат: `mazdastylev5` або `mazdastylev4` + `mazdaanimv4`), кінцевий блок. Користувач уже розіслав її посилання, **адресу не міняти**.
   - `/mazda-spivpratsia` (id `6af4b6b58b371d14f88324e3`): старий варіант з GitHub через jsDelivr (коміт `9afc0e3`, скрипти `mazda_loader` 1.1.0 + `mazda_animations` 1.1.0). **Знято з публікації (draft) 12.11.2026 за проханням користувача, щоб не плутатися; не видалено.** Повернути: `update_page_settings` з `draft: false` і Publish.
 - Figma: файл «Figma basics» (`2b48eEi84CQEBvbbgIDDlo`): r2 — перші три екрани (сторінки з «· r2»), r3 — повний концепт за повним текстом (сторінки з «· r3»; користувач написав «Мені це дуже подобається»); вихідний макет і коментарі дизайнерки — «Godlike — мудборд» (`aM68cqYhlkCv3iwm7vCwrk`, сторінки 25:41–25:43). Генератор концепту: `figma-plugin/`, збірка сторінки Webflow: `site/build.py`.
 - Айдентика «Співпраці»: помаранчевий `#EF6320`, кремовий `#FFF9D9`, бежевий `#F3E6BF`, світло-помаранчевий `#FFC08A`; GT Pressura LC Bold + Inter Tight (Onest не використовуємо); чорні пігулки як «Спецпроєкт», полароїди під нахилом, лого партнера в рамці-штампі. Файл шрифта GT Pressura ліцензійний: лише локально в `site/fonts/`, у репозиторій не комітимо.
@@ -19,6 +19,7 @@
 - Кінцевий блок: титри «Made by vibecoder Taras 🤖», 4 картки (Діла, AMD, V&S Brothers, Circle), плашки партнера немає.
 
 ## Відкрито
+- Чекліст редакції (див. кореневий `CLAUDE.md`, `shared/qa/CHECKLIST-special.md`): справжній URL кнопки «Більше про Mazda CX-90 →» (зараз `#`), ім'я автора тексту, кінцевий URL спешала; canonical, robots, GTM ставляться при експорті.
 - Перший екран на десктопі: чи зсувати машину відносно заголовка (запропоновано збільшити відео ×1,45 з притиском ліворуч і трохи менший заголовок). **Чекаємо рішення користувача щодо відео, до того нічого не міняти.**
 - Дрижання фото й заставки перевірено лише в емуляції: справжній iPhone Safari і тачпад дивиться користувач.
 - Перелік тегів і назв карток перелінковки перевірити з користувачем.

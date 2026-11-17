@@ -13,7 +13,7 @@ set_page_scripts, Publish (див. shared/README.md).
 
 Приклад (Mazda):
   python3 shared/webflow-tools/build_files.py --name mazda --prefix mz \\
-      --title "Mazda x Spivpratsia" --src mazda-landing/site --version v5 --readable \\
+      --title "Mazda x Spivpratsia" --src mazda-landing/site --version v6 --readable --lang uk \\
       --font "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Montserrat:wght@400;500;600&display=swap" \\
       --out mazda-landing/site/webflow/standalone
 
@@ -57,12 +57,14 @@ def minify_css(src: str) -> str:
     return src.replace(";}", "}").strip()
 
 
-def readable_style(title, src, css_path, prefix, name, fonts, css):
+def readable_style(title, src, css_path, prefix, name, fonts, css, lang=None):
     """Файл стилів, який можна читати й правити руками: стилі лежать як звичайний CSS усередині `...`."""
     css = css.strip().replace("\\", "\\\\").replace("`", "\\`").replace("${", "\\${")
     font_lines = "".join(
         "  var font%d = d.createElement(\"link\");\n  font%d.rel = \"stylesheet\";\n  font%d.href = %s;\n  d.head.appendChild(font%d);\n"
         % (i, i, i, json.dumps(u), i) for i, u in enumerate(fonts))
+    lang_block = ("  // ===== МОВА СТОРІНКИ =====\n  // Webflow сам не виводить <html lang>, а чекліст редакції це вимагає (мова сторінки).\n"
+                  "  // Для пошуковиків lang додатково ставлять у код сторінки при вивантаженні на special.ain.ua.\n  h.lang = %s;\n\n" % json.dumps(lang)) if lang else ""
     return ("""/* %(title)s: стилі анімацій + запобіжник (підключається в head).
    Джерело: %(src)s/%(css)s
 
@@ -74,7 +76,7 @@ def readable_style(title, src, css_path, prefix, name, fonts, css):
 
   // ===== ШРИФТИ =====
 %(fonts)s
-  // ===== ЗАПОБІЖНИК =====
+%(lang)s  // ===== ЗАПОБІЖНИК =====
   // Клас %(prefix)s-js вмикає стилі анімацій. Якщо скрипт анімацій не запустився за 5 секунд,
   // клас знімається, і сторінка лишається повністю видимою.
   var GUARD_MS = 5000;
@@ -89,7 +91,7 @@ def readable_style(title, src, css_path, prefix, name, fonts, css):
   s.textContent = CSS;
   d.head.appendChild(s);
 })();
-""" % {"title": title, "src": src, "css": css_path, "prefix": prefix, "name": name, "fonts": font_lines, "body": css})
+""" % {"title": title, "src": src, "css": css_path, "prefix": prefix, "name": name, "fonts": font_lines, "lang": lang_block, "body": css})
 
 
 def main():
@@ -103,6 +105,7 @@ def main():
     ap.add_argument("--version", required=True, help="v1, v2 ...")
     ap.add_argument("--font", action="append", default=[], help="посилання на Google Fonts (можна кілька)")
     ap.add_argument("--out", required=True, help="куди писати файли")
+    ap.add_argument("--lang", default=None, help="код мови сторінки (uk, en, ru, pl): ставить <html lang> зі стилів у head (лише з --readable)")
     ap.add_argument("--readable", action="store_true",
                     help="не мінімізувати: файли з коментарями й блоком налаштувань, які можна правити руками (стандарт)")
     a = ap.parse_args()
@@ -113,7 +116,7 @@ def main():
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     if a.readable:
-        style = readable_style(title, a.src, a.css, a.prefix, a.name, a.font, (root / a.css).read_text(encoding="utf-8"))
+        style = readable_style(title, a.src, a.css, a.prefix, a.name, a.font, (root / a.css).read_text(encoding="utf-8"), a.lang)
         anim = (root / a.js).read_text(encoding="utf-8")
         (out / ("%s-style-%s.js" % (a.name, a.version))).write_text(style, encoding="utf-8")
         (out / ("%s-anim-%s.js" % (a.name, a.version))).write_text(anim, encoding="utf-8")
