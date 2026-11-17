@@ -28,6 +28,9 @@
 | **Мовна папка** (укр: `/native-ua/`, англ: `/en/…`, рос: `/ru/…`), **hreflang** для багатомовних, переклад SEO-параметрів | вирішує приймальник при завантаженні; для багатомовного спешалу заздалегідь узгодити | вручну |
 | **Немає технічних дублів** (index.html, .html) | перевіряє приймальник | вручну |
 
+## Як поставити canonical, robots і GTM
+`python3 -I shared/webflow-tools/head_snippet.py https://special.ain.ua/<url>/` друкує готовий блок (кожен тег у рядку). Його вставляє людина: Webflow Designer → сторінка → Page settings → Custom code → Head code. API це не пише (`set_page_freeform_code` → 404, перевірено повторно 17.11.2026; читання працює). noscript GTM іде одразу після `<body>` при експорті.
+
 ## Що лишається людині (не робиться через API)
 1. Кінцевий URL спешала (для canonical, `mainEntityOfPage`, `datePublished` у Schema.org).
 2. Canonical, robots, GTM, lang у коді сторінки при вивантаженні на special.ain.ua.
