@@ -1,0 +1,156 @@
+/* AIN × MII — «Автономна далекобійна зброя РФ», версія 2 (КАЙТ 2.0).
+   Макет і типографіка живуть у класах Webflow; тут лише анімаційні стани, мотив смужок МІІ і HUD-деталі.
+   Усе, що ховає контент до анімації, працює тільки коли скрипт додав html.js-anim: без скрипта сторінка завжди видима.
+   Жодне зображення чи відео тут не обрізається: ні cover, ні zoom. */
+:root{--g:#55BFAC;--dg:#0C5350;--k:#141414;--y:#FCE881;--paper:#F4F2EC}
+html{scroll-behavior:smooth}
+[id]{scroll-margin-top:60px}
+
+/* логотип МІІ зі смужок */
+.mii-mark{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 102 70'%3E%3Cg fill='%2355BFAC'%3E%3Crect width='21' height='18'/%3E%3Crect x='81' width='21' height='18'/%3E%3Crect y='27' width='42' height='17'/%3E%3Crect x='60' y='27' width='42' height='17'/%3E%3Crect y='53' width='102' height='17'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;display:block}
+
+/* верхня панель */
+.top{-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.top.hide{transform:translateY(-100%)}
+.prog{transform-origin:0 50%;transform:scaleX(0)}
+.top-cta{transition:transform .25s,background-color .25s}
+.top-cta:hover{background-color:#fff;transform:translateY(-1px)}
+
+/* ───────── перший екран: рельєф зі смужок ───────── */
+.hero{isolation:isolate}
+.terrain{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(12,83,80,.94) 0%,rgba(12,83,80,.7) 38%,rgba(12,83,80,0) 74%),linear-gradient(0deg,rgba(12,83,80,.7) 0%,rgba(12,83,80,0) 34%)}
+.hero-in{will-change:transform,opacity}
+.scroll-cue{animation:cue 2.4s ease-in-out infinite}
+@keyframes cue{50%{transform:translateY(7px);opacity:1}}
+
+/* ───────── «розсекречування»: смужка закреслює слово, потім відкриває його ───────── */
+.rw{position:relative;display:inline-block;vertical-align:top;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em}
+.rw>i{display:inline-block;font-style:normal}
+.js-anim [data-anim="redact"] .rw>i{opacity:0}
+.js-anim [data-anim="redact"] .rw::after{content:"";position:absolute;left:0;right:0;top:0;bottom:0;background:var(--bar,#FCE881);transform:scaleX(0);transform-origin:0 50%}
+.js-anim [data-anim="redact"].is-in .rw>i{animation:rwshow .01s linear forwards;animation-delay:calc(var(--i,0)*80ms + .46s)}
+.js-anim [data-anim="redact"].is-in .rw::after{animation:rwbar .95s cubic-bezier(.76,0,.24,1) forwards;animation-delay:calc(var(--i,0)*80ms)}
+@keyframes rwshow{to{opacity:1}}
+@keyframes rwbar{0%{transform:scaleX(0);transform-origin:0 50%}48%{transform:scaleX(1);transform-origin:0 50%}52%{transform:scaleX(1);transform-origin:100% 50%}100%{transform:scaleX(0);transform-origin:100% 50%}}
+
+/* слова з маски */
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.1em;margin-bottom:-.1em}
+.wi{display:inline-block}
+.js-anim [data-anim="words"] .wi{transform:translateY(112%);transition:transform .95s cubic-bezier(.2,.75,.15,1);transition-delay:calc(var(--i,0)*36ms + .5s)}
+.js-anim [data-anim="words"].is-in .wi{transform:none}
+
+/* абзаци й блоки */
+.js-anim [data-anim="reveal"]{opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform 1s cubic-bezier(.2,.75,.15,1);transition-delay:calc(var(--d,0)*90ms)}
+.js-anim [data-anim="reveal"].is-in{opacity:1;transform:none}
+
+/* підсвітка слів під час скролу: на папері темніє, на темному білішає */
+.js-anim .sw{color:var(--sw-off,rgba(20,20,20,.17));transition:color .35s}
+.js-anim .sw.on{color:var(--sw-on,#141414)}
+.end-sec,.quote{--sw-off:rgba(255,255,255,.2);--sw-on:#fff}
+
+/* число-маркер у тексті: жовта смужка під цифрою (текст не змінюється) */
+mark.hl{color:inherit;background:linear-gradient(var(--y),var(--y)) 0 90%/0 .5em no-repeat;padding:0 .08em;margin:0 -.08em;transition:background-size .9s cubic-bezier(.2,.7,.2,1) .45s}
+.is-in mark.hl,.li mark.hl{background-size:100% .5em}
+
+/* ───────── зображення: розгортаються «скан-лінією», нічого не обрізається ───────── */
+@property --p{syntax:"<number>";inherits:true;initial-value:0}
+.fig{will-change:transform;transform:translate3d(0,var(--ty,0px),0)}
+.js-anim [data-img]{--p:0;transition:--p 1.5s cubic-bezier(.25,.7,.2,1)}
+.js-anim [data-img].is-in{--p:1}
+.js-anim [data-img] .fig-img{clip-path:inset(0 0 calc((1 - var(--p)) * 100%) 0)}
+.js-anim [data-img]::after{content:"";position:absolute;left:0;right:0;height:3px;top:calc(var(--p) * 100%);margin-top:-2px;background:var(--y);box-shadow:0 0 22px 3px rgba(252,232,129,.75);opacity:calc(1 - var(--p));pointer-events:none}
+
+/* ───────── глави ───────── */
+.chap-head-g::before,.chap-head-k::before{content:"";position:absolute;left:-4%;right:-4%;top:-35%;bottom:-35%;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(85,191,172,.2) 0,rgba(85,191,172,.2) 3px,transparent 3px,transparent 14px);-webkit-mask-image:radial-gradient(ellipse 58% 62% at 80% 50%,#000 0,transparent 78%);mask-image:radial-gradient(ellipse 58% 62% at 80% 50%,#000 0,transparent 78%);transform:translate3d(0,var(--ps,0px),0)}
+.chap-head-k::before{background:repeating-linear-gradient(to bottom,rgba(252,232,129,.16) 0,rgba(252,232,129,.16) 3px,transparent 3px,transparent 14px)}
+.chap-num{transition:color .8s}
+.rail-fill{transition:height .15s linear}
+.chap-body{position:relative}
+.chap-body::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background-image:repeating-linear-gradient(90deg,var(--dg) 0,var(--dg) 90px,transparent 90px,transparent 130px);background-size:260px 6px;opacity:.5;animation:band 18s linear infinite}
+@keyframes band{to{background-position:260px 0}}
+
+/* виносна цитата */
+.pull{position:relative}
+
+/* ───────── сцена «людина в петлі» ───────── */
+.dg-node{transition:background-color .5s,color .5s,border-color .5s,box-shadow .5s,opacity .5s,transform .5s}
+.dg-link{transition:opacity .5s,height .5s,background-color .5s}
+.dg-link::after{content:"";position:absolute;top:50%;margin-top:-6px;left:0;width:12px;height:12px;background:var(--y);animation:pkt 2.2s linear infinite}
+.dg-link::before{content:"";position:absolute;left:50%;top:50%;width:4px;height:34px;margin:-17px 0 0 -2px;background:var(--y);opacity:0;transition:opacity .4s}
+@keyframes pkt{0%{left:0;opacity:0}12%{opacity:1}88%{opacity:1}100%{left:calc(100% - 12px);opacity:0}}
+@keyframes pktr{0%{left:calc(100% - 12px);opacity:0}12%{opacity:1}88%{opacity:1}100%{left:0;opacity:0}}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(252,232,129,.55)}100%{box-shadow:0 0 0 26px rgba(252,232,129,0)}}
+[data-diagram="0"] [data-node="h"]{background:var(--y);color:var(--k);border-color:var(--y);animation:ring 1.8s ease-out infinite}
+[data-diagram="0"] [data-node="a"]{background:var(--g);color:var(--k);border-color:var(--g)}
+[data-diagram="0"] [data-link="1"]{background:var(--y)}
+[data-diagram="0"] [data-link="1"]::after{animation:pktr 1.8s linear infinite}
+[data-diagram="0"] [data-link="2"]{background:repeating-linear-gradient(90deg,rgba(255,255,255,.35) 0 10px,transparent 10px 20px);height:3px}
+[data-diagram="0"] [data-link="2"]::after{display:none}
+[data-diagram="0"] [data-link="2"]::before{opacity:1}
+[data-diagram="1"] [data-node="h"]{border-style:dashed;opacity:.85}
+[data-diagram="1"] [data-node="a"]{background:var(--g);color:var(--k);border-color:var(--g)}
+[data-diagram="1"] [data-link="1"]{background:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 8px,transparent 8px 16px)}
+[data-diagram="1"] [data-link="1"]::after{animation-duration:3.4s;opacity:.7}
+[data-diagram="1"] [data-link="2"]{background:var(--g)}
+[data-diagram="1"] [data-link="2"]::after{animation-duration:1.2s}
+[data-diagram="2"] [data-node="h"]{opacity:.16}
+[data-diagram="2"] [data-link="1"]{opacity:0}
+[data-diagram="2"] [data-node="a"]{background:var(--y);color:var(--k);border-color:var(--y)}
+[data-diagram="2"] [data-link="2"]{background:var(--y);height:5px}
+[data-diagram="2"] [data-link="2"]::after{animation-duration:.7s;background:#fff}
+[data-diagram="2"] [data-node="t"]{background:var(--y);color:var(--k);border-color:var(--y);animation:ring 1.1s ease-out infinite}
+.mode{transition:opacity .5s,transform .5s}
+.mode.on{opacity:1;transform:translateX(10px)}
+.mode.on .mode-n{color:var(--y)}
+
+/* ───────── відео: рамка-візир, повний кадр без обрізання ───────── */
+.vid-frame{position:relative;background:#000;line-height:0}
+.vid-frame::before{content:"";position:absolute;left:16px;right:16px;top:16px;bottom:16px;pointer-events:none;z-index:2;background:linear-gradient(var(--y),var(--y)) 0 0/26px 2px no-repeat,linear-gradient(var(--y),var(--y)) 0 0/2px 26px no-repeat,linear-gradient(var(--y),var(--y)) 100% 0/26px 2px no-repeat,linear-gradient(var(--y),var(--y)) 100% 0/2px 26px no-repeat,linear-gradient(var(--y),var(--y)) 0 100%/26px 2px no-repeat,linear-gradient(var(--y),var(--y)) 0 100%/2px 26px no-repeat,linear-gradient(var(--y),var(--y)) 100% 100%/26px 2px no-repeat,linear-gradient(var(--y),var(--y)) 100% 100%/2px 26px no-repeat;opacity:.9}
+.vid-tc{position:absolute;left:34px;top:30px;z-index:3;font:600 13px/1 "JetBrains Mono",monospace;letter-spacing:.1em;color:var(--y);text-shadow:0 1px 8px rgba(0,0,0,.8);display:flex;align-items:center;gap:9px;pointer-events:none}
+.vid-tc i{display:block;width:9px;height:9px;border-radius:50%;background:#ff5a4d;animation:blink 1.2s steps(2,start) infinite}
+@keyframes blink{50%{opacity:.15}}
+
+/* ───────── шкали з боків: смужкові стовпчики ───────── */
+.bar{background-color:transparent;background-image:repeating-linear-gradient(to bottom,var(--dg) 0,var(--dg) 6px,transparent 6px,transparent 9px)}
+.js-anim [data-bar]{width:0;transition:width 1.4s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--d,0)*120ms)}
+
+/* бігучий рядок */
+.marq{user-select:none}
+.marq .track{width:max-content;animation:mq var(--dur,34s) linear infinite}
+.marq .track>span{display:inline-flex;align-items:center}
+.marq .track>span::after{content:"";display:inline-block;width:48px;height:6px;margin:0 52px;background:currentColor}
+@keyframes mq{to{transform:translateX(calc(-100% / var(--n,6)))}}
+.marq:hover .track{animation-play-state:paused}
+
+.stat-n{font-variant-numeric:tabular-nums}
+.li::before{content:"";position:absolute;left:0;top:36px;width:24px;height:5px;background:var(--y);box-shadow:0 0 0 1px rgba(20,20,20,.25)}
+.band::before,.end-sec::before,.chart-band::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background-image:repeating-linear-gradient(90deg,var(--g) 0,var(--g) 90px,transparent 90px,transparent 130px);background-size:260px 6px;opacity:.6;animation:band 16s linear infinite}
+.chart-band::before{background-image:repeating-linear-gradient(90deg,var(--dg) 0,var(--dg) 90px,transparent 90px,transparent 130px)}
+
+/* ───────── приціл (курсор) ───────── */
+.reticle{position:fixed;left:0;top:0;z-index:60;pointer-events:none;opacity:0;transition:opacity .25s;will-change:transform,width,height}
+.reticle.on{opacity:1}
+.reticle i{position:absolute;width:12px;height:12px;border:2px solid var(--y);box-shadow:0 0 0 1px rgba(20,20,20,.35)}
+.reticle .tl{left:0;top:0;border-right:0;border-bottom:0}
+.reticle .tr{right:0;top:0;border-left:0;border-bottom:0}
+.reticle .bl{left:0;bottom:0;border-right:0;border-top:0}
+.reticle .br{right:0;bottom:0;border-left:0;border-top:0}
+.reticle b{position:absolute;left:0;top:100%;margin-top:8px;padding:4px 7px;font:600 11px/1 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;background:var(--y);color:var(--k);opacity:0;transform:translateY(-4px);transition:opacity .2s,transform .2s}
+.reticle.lock b{opacity:1;transform:none}
+@media (hover:none),(pointer:coarse){.reticle{display:none}}
+
+/* ───────── бічний індекс глав ───────── */
+.edge{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:45;display:none;flex-direction:column;align-items:flex-end;gap:13px}
+@media (min-width:1180px){.edge{display:flex}}
+.edge a{display:block;width:24px;height:4px;background:#fff;box-shadow:0 0 0 1px rgba(20,20,20,.55);transition:width .3s,background-color .3s;position:relative}
+.edge a.past{background:var(--g)}
+.edge a.on{width:46px;background:var(--y)}
+.edge a b{position:absolute;right:calc(100% + 12px);top:50%;transform:translateY(-50%);padding:5px 8px;font:600 11px/1 "JetBrains Mono",monospace;letter-spacing:.08em;white-space:nowrap;background:var(--k);color:#fff;opacity:0;pointer-events:none;transition:opacity .2s}
+.edge a:hover b{opacity:1}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .marq .track,.scroll-cue,.dg-link::after,.chap-body::before,.band::before,.end-sec::before,.chart-band::before{animation:none}
+  .fig{transform:none}
+}
