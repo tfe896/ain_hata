@@ -46,7 +46,7 @@
   function stagger(list) {
     var groups = new Map();
     list.forEach(function (e) { var p = e.parentNode; if (!groups.has(p)) groups.set(p, []); groups.get(p).push(e); });
-    groups.forEach(function (g) { g.forEach(function (e, k) { e.style.setProperty("--d", String(Math.min(k, 4))); }); });
+    groups.forEach(function (g) { g.forEach(function (e, k) { e.style.setProperty("--d", String(Math.min(k, 3))); }); });
   }
 
   /* --- розбір тексту на слова --- */
@@ -90,7 +90,7 @@
   });
   step("reveal", function () {
     var list = $$('[data-anim="reveal"]');
-    stagger(list.filter(function (e) { return e.matches(".stat"); }));
+    stagger(list);
     list.forEach(watch);
   });
 
@@ -177,6 +177,7 @@
   step("images", function () { $$("[data-img]").forEach(watch); });
 
   /* --- бігучі рядки --- */
+  var tracks = [];
   step("marquees", function () {
     $$("[data-marquee]").forEach(function (m) {
       var tr = m.querySelector(".track") || m;
@@ -190,7 +191,16 @@
       tr.style.setProperty("--dur", Math.round(items.length * 10) + "s");
       if (m.getAttribute("data-marquee") === "r") tr.style.animationDirection = "reverse";
       m.setAttribute("aria-hidden", "true");
+      tracks.push(tr);
     });
+    if (reduce || !tracks.length) return;
+    var lastMY = w.pageYOffset || 0, rate = 1, tgt = 1;
+    scrollFns.push(function () { var y = w.pageYOffset || 0; tgt = clamp(1 + Math.abs(y - lastMY) / 9, 1, 7); lastMY = y; });
+    (function spin() {
+      rate += (tgt - rate) * 0.1; tgt += (1 - tgt) * 0.05;
+      tracks.forEach(function (tr) { var an = tr.getAnimations ? tr.getAnimations()[0] : null; if (an) an.playbackRate = rate; });
+      requestAnimationFrame(spin);
+    })();
   });
 
   /* --- закріплена сцена «людина в петлі» --- */
@@ -223,21 +233,33 @@
     });
   });
 
-  /* --- глави: заповнення рейки, паралакс смужок на панелі --- */
+  /* --- глави: паралакс смужок на панелі, заповнення хронологічної стрічки --- */
   step("chapters", function () {
-    var grids = $$(".chap-grid"), heads = $$(".chap-head-g, .chap-head-k");
+    var tls = $$(".tl"), heads = $$(".chap-head-g, .chap-head-k");
     scrollFns.push(function () {
       var vh = w.innerHeight;
-      grids.forEach(function (g) {
-        var r = g.getBoundingClientRect(), fill = g.querySelector(".rail-fill");
-        if (!fill || r.bottom < -50 || r.top > vh) return;
-        fill.style.height = clamp((vh * 0.55 - r.top) / r.height, 0, 1) * 100 + "%";
+      tls.forEach(function (t) {
+        var r = t.getBoundingClientRect();
+        if (r.bottom < -50 || r.top > vh) return;
+        t.style.setProperty("--tlh", (clamp((vh * 0.62 - r.top) / r.height, 0, 1) * (r.height - 20)).toFixed(0) + "px");
       });
       heads.forEach(function (h) {
         var r = h.getBoundingClientRect();
         if (r.bottom < -50 || r.top > vh + 50) return;
         h.style.setProperty("--ps", (((r.top + r.height / 2) - vh / 2) * -0.22).toFixed(1) + "px");
       });
+    });
+  });
+
+  /* --- фото: легкий нахил за курсором --- */
+  step("tilt", function () {
+    if (!fine || reduce) return;
+    $$(".fx-fig:not(.viewer), .tl-fig").forEach(function (f) {
+      f.addEventListener("mousemove", function (e) {
+        var r = f.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+        f.style.setProperty("--ty", (x * 6).toFixed(2) + "deg"); f.style.setProperty("--tx", (-y * 4).toFixed(2) + "deg");
+      });
+      f.addEventListener("mouseleave", function () { f.style.setProperty("--tx", "0deg"); f.style.setProperty("--ty", "0deg"); });
     });
   });
 
@@ -259,6 +281,7 @@
     function load(v) { if (!v.src && v.getAttribute("data-src")) v.src = v.getAttribute("data-src"); }
     function play(v) { load(v); var p = v.play(); if (p && p.catch) p.catch(function () {}); }
     function setMain(k, go) {
+      var first = go ? tiles.map(function (t) { return t.getBoundingClientRect(); }) : null;
       mainIdx = k;
       if (grid) grid.setAttribute("data-main", String(k + 1));
       tiles.forEach(function (t, i) {
@@ -266,9 +289,15 @@
         t.classList.toggle("is-main", i === k);
         if (i === k) v.setAttribute("controls", ""); else { v.removeAttribute("controls"); if (!v.paused) v.pause(); }
       });
+      if (first && !reduce) tiles.forEach(function (t, i) {
+        var a = first[i], b = t.getBoundingClientRect();
+        if (!a.width || !b.width || !t.animate) return;
+        t.animate([{ transformOrigin: "0 0", transform: "translate(" + (a.left - b.left) + "px," + (a.top - b.top) + "px) scale(" + a.width / b.width + "," + a.height / b.height + ")" }, { transformOrigin: "0 0", transform: "none" }], { duration: 700, easing: "cubic-bezier(.2,.75,.15,1)" });
+      });
       if (go) play(tiles[k].querySelector("video"));
     }
     if (tiles.length) {
+      tiles.forEach(function (t, i) { t.style.setProperty("--d", String(i)); watch(t); });
       setMain(0, false);
       tiles.forEach(function (t, i) {
         t.addEventListener("click", function (e) { if (i !== mainIdx) { e.preventDefault(); setMain(i, true); } });
@@ -413,7 +442,7 @@
   step("viewer", function () {
     var vw = $$("[data-viewer]")[0];
     if (!vw) return;
-    var host = vw.querySelector(".viewer-stage"), split = vw.closest ? vw.closest(".split") : vw.parentNode;
+    var host = vw.querySelector(".viewer-stage"), split = vw.closest ? vw.closest(".fx") : vw.parentNode;
     if (!host || !split) return;
     var ctx = null, loaded = false, near = false, running = false, t0 = performance.now(), mx = 0, drag = null, dyaw = 0, cur = { yaw: 0.6 }, tgt = { yaw: 0.6 };
     function progress() {
@@ -457,30 +486,26 @@
       var L = 10, R = 0.415, g = new THREE.Group();
       var X = function (a) { return L * (0.5 - a); };
       var bodyMap = canvasTex(THREE, 512, 1024, function (c, W, H) {
-        c.fillStyle = "#8f958d"; c.fillRect(0, 0, W, H);
+        c.fillStyle = "#677068"; c.fillRect(0, 0, W, H);
         var gr = c.createLinearGradient(0, 0, W, 0); gr.addColorStop(0, "rgba(255,255,255,.08)"); gr.addColorStop(0.5, "rgba(0,0,0,.05)"); gr.addColorStop(1, "rgba(255,255,255,.08)");
         c.fillStyle = gr; c.fillRect(0, 0, W, H);
         for (var s = 0; s < 70; s++) { c.fillStyle = "rgba(20,24,20," + (0.03 + Math.random() * 0.05) + ")"; c.fillRect(Math.random() * W, Math.random() * H * 0.9, 1 + Math.random() * 2, 40 + Math.random() * 220); }
         noise(c, W, H, 16);
-        seams(c, W, H, [0.1, 0.27, 0.43, 0.6, 0.76, 0.9], [0.25, 0.75], 0, "rgba(40,44,40,.75)", "rgba(255,255,255,.16)", "rgba(40,44,40,.55)");
+        seams(c, W, H, [0.1, 0.27, 0.43, 0.6, 0.76, 0.9], [0.25, 0.75], 0, "rgba(14,18,14,.85)", "rgba(255,255,255,.11)", "rgba(14,18,14,.6)");
       }, true);
       var bodyBump = canvasTex(THREE, 512, 1024, function (c, W, H) {
         c.fillStyle = "#808080"; c.fillRect(0, 0, W, H); noise(c, W, H, 12);
         seams(c, W, H, [0.1, 0.27, 0.43, 0.6, 0.76, 0.9], [0.25, 0.75], 0, "#3a3a3a", "#b0b0b0", "#d8d8d8");
       }, false);
       var wingMap = canvasTex(THREE, 512, 512, function (c, W, H) {
-        c.fillStyle = "#979d95"; c.fillRect(0, 0, W, H); noise(c, W, H, 16);
-        seams(c, W, H, [0.0, 0.5], [0.0, 0.5], 0, "rgba(40,44,40,.7)", "rgba(255,255,255,.14)", "rgba(40,44,40,.5)");
+        var gr = c.createLinearGradient(0, 0, W, H); gr.addColorStop(0, "#737b73"); gr.addColorStop(1, "#5f675f"); c.fillStyle = gr; c.fillRect(0, 0, W, H); noise(c, W, H, 14);
       }, true);
-      var wingBump = canvasTex(THREE, 512, 512, function (c, W, H) {
-        c.fillStyle = "#808080"; c.fillRect(0, 0, W, H); noise(c, W, H, 12);
-        seams(c, W, H, [0.0, 0.5], [0.0, 0.5], 0, "#3a3a3a", "#b0b0b0", "#d8d8d8");
-      }, false);
+      var wingBump = canvasTex(THREE, 512, 512, function (c, W, H) { c.fillStyle = "#808080"; c.fillRect(0, 0, W, H); noise(c, W, H, 18); }, false);
       wingMap.repeat.set(0.22, 0.22); wingBump.repeat.set(0.22, 0.22);
-      var body = new THREE.MeshStandardMaterial({ color: 0xffffff, map: bodyMap, bumpMap: bodyBump, bumpScale: 1.4, roughness: 0.62, metalness: 0.18, envMapIntensity: 0.85 });
-      var cone = new THREE.MeshStandardMaterial({ color: 0xd9d5cb, map: bodyMap, bumpMap: bodyBump, bumpScale: 1.0, roughness: 0.55, metalness: 0.2, envMapIntensity: 0.9 });
-      var wing = new THREE.MeshStandardMaterial({ color: 0xffffff, map: wingMap, bumpMap: wingBump, bumpScale: 1.2, roughness: 0.66, metalness: 0.15, envMapIntensity: 0.8 });
-      var yel = new THREE.MeshStandardMaterial({ color: 0xd9c458, roughness: 0.55, metalness: 0.1, envMapIntensity: 0.7 });
+      var body = new THREE.MeshStandardMaterial({ color: 0xffffff, map: bodyMap, bumpMap: bodyBump, bumpScale: 1.4, roughness: 0.6, metalness: 0.28, envMapIntensity: 0.55 });
+      var cone = new THREE.MeshStandardMaterial({ color: 0xbdb7a8, map: bodyMap, bumpMap: bodyBump, bumpScale: 1.0, roughness: 0.5, metalness: 0.3, envMapIntensity: 0.6 });
+      var wing = new THREE.MeshStandardMaterial({ color: 0xffffff, map: wingMap, bumpMap: wingBump, bumpScale: 0.5, roughness: 0.62, metalness: 0.25, envMapIntensity: 0.5 });
+      var yel = new THREE.MeshStandardMaterial({ color: 0xc9b247, roughness: 0.55, metalness: 0.15, envMapIntensity: 0.6 });
       var dark = new THREE.MeshStandardMaterial({ color: 0x1b1e1f, roughness: 0.8, metalness: 0.3 });
       function rad(a) {
         if (a < 0.3) { var u = (0.3 - a) / 0.3; return R * Math.sqrt(Math.max(0, 1 - u * u)); }
@@ -489,7 +514,7 @@
       }
       function lathe(a0, a1, n, mat) {
         var pts = [], i, a;
-        for (i = 0; i <= n; i++) { a = a0 + (a1 - a0) * i / n; pts.push(new THREE.Vector2(rad(a), X(a))); }
+        for (i = n; i >= 0; i--) { a = a0 + (a1 - a0) * i / n; pts.push(new THREE.Vector2(rad(a), X(a))); } /* від хвоста до носа: нормалі дивляться назовні */
         var geo = new THREE.LatheGeometry(pts, 64); geo.rotateZ(-Math.PI / 2);
         return new THREE.Mesh(geo, mat);
       }
@@ -518,6 +543,13 @@
         f.scale.set(0.46, 0.12, 0.1); f.position.set(X(0.74), -0.05, s * (R - 0.012)); g.add(f);
       });
       var hatch = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.034, 0.22), yel); hatch.position.set(X(0.545), R + 0.004, 0); g.add(hatch);
+      /* суцільний темний контур навколо силуету: ракета читається «цілою» на будь-якому тлі */
+      var olm = new THREE.MeshBasicMaterial({ color: 0x0c1412, side: THREE.BackSide });
+      olm.onBeforeCompile = function (sh) { sh.vertexShader = sh.vertexShader.replace("#include <begin_vertex>", "vec3 transformed = vec3(position) + normalize(normal) * 0.016;"); };
+      g.children.slice().forEach(function (m) {
+        if (!m.isMesh || m.material === dark || m.material === yel) return;
+        var o = new THREE.Mesh(m.geometry, olm); o.position.copy(m.position); o.rotation.copy(m.rotation); o.scale.copy(m.scale); g.add(o);
+      });
       return g;
     }
 
@@ -555,7 +587,7 @@
       var sc = d.createElement("canvas"); sc.width = 256; sc.height = 64;
       var sg = sc.getContext("2d"), grd = sg.createRadialGradient(128, 32, 4, 128, 32, 128); grd.addColorStop(0, "rgba(0,0,0,.7)"); grd.addColorStop(1, "rgba(0,0,0,0)");
       sg.setTransform(1, 0, 0, 0.5, 0, 16); sg.fillStyle = grd; sg.fillRect(0, 0, 256, 128);
-      var shadow = new THREE.Mesh(new THREE.PlaneGeometry(11, 2.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false, opacity: 0.42 }));
+      var shadow = new THREE.Mesh(new THREE.PlaneGeometry(8.5, 2.0), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false, opacity: 0.38 }));
       shadow.rotation.x = -Math.PI / 2; shadow.position.y = -1.85; yaw.add(shadow);
 
       function size() {

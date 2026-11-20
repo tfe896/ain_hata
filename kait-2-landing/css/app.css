@@ -1,4 +1,4 @@
-/* AIN × MII — «Автономна далекобійна зброя РФ», версія 3 (КАЙТ 2.0): стиль «досьє».
+/* AIN × MII — «Автономна далекобійна зброя РФ», версія 4 (КАЙТ 2.0): стиль «досьє», композиція блоків.
    Макет і типографіка живуть у класах Webflow; тут лише стани анімацій і дрібні деталі.
    Усе, що ховає контент до анімації, працює тільки коли скрипт додав html.js-anim: без скрипта сторінка завжди видима.
    Жодне фото чи відео тут не обрізається: ні cover, ні zoom. */
@@ -118,34 +118,98 @@ html{scroll-behavior:smooth}
 .mode.on{opacity:1;transform:translateX(10px)}
 .mode.on .mode-n{color:var(--y)}
 
-/* ───────── ракета: без рамки, прямо на тлі сторінки ───────── */
-.split-pin::before{content:"";position:absolute;left:2%;right:2%;top:12%;bottom:14%;border-radius:50%;pointer-events:none;background:radial-gradient(closest-side,rgba(12,83,80,.13),rgba(12,83,80,.05) 55%,rgba(12,83,80,0))}
+/* ───────── v4: композиція блоків (перекриває базові класи Webflow; усе в одному місці) ───────── */
+.chap-body{padding:104px 0 56px;z-index:1}
+.chap-text,.chap-grid,.chap-rail{display:none}
+.fx{display:grid;grid-template-columns:minmax(0,500px) minmax(0,1fr);column-gap:72px;align-items:start;margin-bottom:76px}
+.fx-m{grid-template-columns:minmax(0,1fr) minmax(0,500px)}
+.fx-m .fx-text{grid-column:2;grid-row:1}
+.fx-m .fx-fig{grid-column:1;grid-row:1}
+.fx-text{min-width:0}
+.fx-text .p{max-width:none;font-size:19px}
+.fx-text .p:last-child{margin-bottom:0}
+.fx-fig{position:sticky;top:13vh;margin:0;width:auto}
+.fx-fig .fig-img{box-shadow:0 24px 60px rgba(20,20,20,.16)}
+@media (min-width:1300px){.fx:not(.fx-m) .fx-fig{margin-right:-90px}.fx-m .fx-fig{margin-left:-90px}}
+.cols{column-count:2;column-gap:80px}
+.cols .p{max-width:none;orphans:3;widows:3}
+.cols .pull,.cols .quote{column-span:all;max-width:none}
+.cols .quote{margin:20px 0 52px}
+.p-w{max-width:900px;font-size:27px;line-height:1.5;margin-bottom:0}
+
+/* хронологічна стрічка (розділ 04) */
+.tl{position:relative;padding-left:76px;max-width:920px}
+.tl::before{content:"";position:absolute;left:19px;top:10px;bottom:10px;width:2px;background:rgba(20,20,20,.14)}
+.tl::after{content:"";position:absolute;left:19px;top:10px;width:2px;height:var(--tlh,0px);background:var(--dg)}
+.tl .p{position:relative;max-width:none}
+.tl .p::before{content:"";position:absolute;left:-65px;top:.55em;width:14px;height:14px;border-radius:50%;background:var(--paper);border:2px solid var(--dg);transition:background .5s,transform .5s}
+.js-anim .tl .p.is-in::before,.tl .p:not([data-anim])::before{background:var(--dg);transform:scale(1.18)}
+.tl-fig{margin:44px 0 64px -76px;width:calc(100% + 76px);max-width:none}
+.tl-fig .fig-img{box-shadow:0 24px 60px rgba(20,20,20,.16)}
+
+/* ───────── ракета: стоїть прямо на тлі сторінки ───────── */
+.viewer{position:sticky;top:calc(50vh - 260px);height:520px;margin:0;width:auto}
+.viewer-pin{position:relative;height:100%}
+.viewer-pin::before{content:"";position:absolute;left:0;right:0;top:10%;bottom:14%;border-radius:50%;pointer-events:none;background:radial-gradient(closest-side,rgba(12,83,80,.16),rgba(12,83,80,.06) 55%,rgba(12,83,80,0))}
 .viewer-cv{position:absolute;left:0;top:0;width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y}
 .viewer-cv:active{cursor:grabbing}
 .js-anim .viewer-cap{opacity:0;transition:opacity 1s ease .4s}
-.js-anim .split.gl-on .viewer-cap{opacity:1}
+.js-anim .fx.gl-on .viewer-cap{opacity:1}
 
-/* ───────── відеостіна: усі три відео на одному екрані, повний кадр ───────── */
-.vgrid[data-main="2"] .vt-2{grid-column:1 / 2;grid-row:1 / 3}
-.vgrid[data-main="2"] .vt-1{grid-column:2 / 3;grid-row:1 / 2}
+/* ───────── відеостіна ───────── */
+.vwall{background:radial-gradient(70% 90% at 80% 40%,rgba(85,191,172,.12),rgba(14,19,19,0) 70%),#0e1313;padding:120px 0 128px;overflow:hidden;z-index:1;position:relative}
+.vw-grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);column-gap:64px;align-items:center}
+.vw-text .p{max-width:none;font-size:18.5px;color:rgba(255,255,255,.86)}
+.vw-text .p:last-child{margin-bottom:0}
+.vgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:16px;row-gap:16px;align-items:start;perspective:1400px}
+.vt{padding:8px 8px 4px;background:#080b0b;border:1px solid rgba(255,255,255,.09);border-radius:8px;box-shadow:0 30px 60px rgba(0,0,0,.5)}
+.vt-1{grid-column:1 / 3;grid-row:1 / 2}
+.vt-2{grid-column:1 / 2;grid-row:2 / 3}
+.vt-3{grid-column:2 / 3;grid-row:2 / 3}
+.vgrid[data-main="2"] .vt-2{grid-column:1 / 3;grid-row:1 / 2}
+.vgrid[data-main="2"] .vt-1{grid-column:1 / 2;grid-row:2 / 3}
 .vgrid[data-main="2"] .vt-3{grid-column:2 / 3;grid-row:2 / 3}
-.vgrid[data-main="3"] .vt-3{grid-column:1 / 2;grid-row:1 / 3}
-.vgrid[data-main="3"] .vt-1{grid-column:2 / 3;grid-row:1 / 2}
+.vgrid[data-main="3"] .vt-3{grid-column:1 / 3;grid-row:1 / 2}
+.vgrid[data-main="3"] .vt-1{grid-column:1 / 2;grid-row:2 / 3}
 .vgrid[data-main="3"] .vt-2{grid-column:2 / 3;grid-row:2 / 3}
-@media screen and (max-width:991px){
-  .vgrid[data-main="2"] .vt-2,.vgrid[data-main="3"] .vt-3{grid-column:1 / 3;grid-row:1 / 2}
-  .vgrid[data-main="2"] .vt-1{grid-column:1 / 2;grid-row:2 / 3}
-  .vgrid[data-main="2"] .vt-3{grid-column:2 / 3;grid-row:2 / 3}
-  .vgrid[data-main="3"] .vt-1{grid-column:1 / 2;grid-row:2 / 3}
-  .vgrid[data-main="3"] .vt-2{grid-column:2 / 3;grid-row:2 / 3}
-}
-.vt .vid-el{transition:filter .4s}
+.vt .vid-cap{padding:10px 2px 6px;display:flex;align-items:center;gap:9px}
+.vt .vid-cap::before{content:"";width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35)}
+.vt.is-main .vid-cap::before{background:#ff5a4d}
+.js-anim .vt{opacity:0;transform:rotateX(14deg) translateY(70px) scale(.97);transform-origin:50% 100%}
+.js-anim .vt.is-in{opacity:1;transform:none;transition:opacity .9s ease,transform 1.2s cubic-bezier(.2,.75,.15,1);transition-delay:calc(var(--d,0)*140ms)}
+.vt{position:relative}
 .vt:not(.is-main){cursor:pointer}
-.vt:not(.is-main) .vid-el{filter:saturate(.7) brightness(.82)}
+.vt:not(.is-main) .vid-el{filter:saturate(.75) brightness(.8);transition:filter .4s}
 .vt:not(.is-main):hover .vid-el{filter:none}
-.vt:not(.is-main)::after{content:"";position:absolute;left:50%;top:calc(50% - 20px);width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(20,20,20,.55) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M9 6.5v11l9-5.5z'/%3E%3C/svg%3E") center/26px no-repeat;border:1px solid rgba(255,255,255,.55);pointer-events:none;transition:transform .3s,background-color .3s}
+.vt:not(.is-main)::after{content:"";position:absolute;left:50%;top:calc(50% - 18px);width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:rgba(20,20,20,.55) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M9 6.5v11l9-5.5z'/%3E%3C/svg%3E") center/24px no-repeat;border:1px solid rgba(255,255,255,.55);pointer-events:none;transition:transform .3s,background-color .3s}
 .vt:not(.is-main):hover::after{transform:scale(1.1);background-color:rgba(20,20,20,.8)}
 .vt.is-main .vid-cap{color:var(--y)}
+
+/* ───────── перехід розділів: заголовок «приклеєний», тіло заїжджає зверху ───────── */
+.marq-d{background:var(--dg);color:#fff}
+.scene{z-index:1}
+@media (min-width:992px) and (min-height:640px){
+  .js-anim .chap-head-g,.js-anim .chap-head-k{position:sticky;top:0;z-index:0}
+}
+
+/* фото: легкий нахил за курсором */
+.fx-fig,.tl-fig{transform:perspective(1100px) rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg));transition:transform .25s ease-out}
+
+@media screen and (max-width:991px){
+  .chap-body{padding:72px 0 28px}
+  .fx{display:block;margin-bottom:40px}
+  .fx-fig{position:relative;top:0;margin:28px 0 0 !important}
+  .fx-m .fx-fig{margin-top:28px !important}
+  .cols{column-count:1}
+  .p-w{font-size:21px}
+  .tl{padding-left:44px}
+  .tl::before,.tl::after{left:9px}
+  .tl .p::before{left:-43px}
+  .tl-fig{margin-left:-44px;width:calc(100% + 44px)}
+  .viewer{position:relative;top:0;height:380px;margin-top:20px}
+  .vw-grid{grid-template-columns:1fr;row-gap:32px}
+  .vwall{padding:80px 0}
+}
 
 /* ───────── шкали: смужкові стовпчики ───────── */
 .bar{background-color:transparent;background-image:repeating-linear-gradient(to bottom,var(--dg) 0,var(--dg) 6px,transparent 6px,transparent 9px)}
