@@ -24,6 +24,7 @@
   var fine = w.matchMedia && w.matchMedia("(hover:hover) and (pointer:fine)").matches;
   var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
   var failed = [], scrollFns = [];
+  var stagePinned = function () { return false; };
   function step(name, fn) {
     try { fn(); } catch (e) { failed.push(name); if (w.console) console.error("[kait2] " + name + " failed", e); }
   }
@@ -97,12 +98,13 @@
     $$('[data-anim="scrub"]').forEach(function (el) {
       var c = { list: [] };
       wrapTextWords(el, "sw", c);
-      scrubs.push({ el: el, words: c.list });
+      scrubs.push({ el: el, words: c.list, stage: !!(el.closest && el.closest("[data-stage]")) });
     });
   });
   scrollFns.push(function () {
     var vh = w.innerHeight;
     scrubs.forEach(function (s) {
+      if (s.stage && stagePinned()) return;
       var r = s.el.getBoundingClientRect();
       if (r.bottom < -50 || r.top > vh + 50) { if (r.top > vh) return; }
       var p = clamp((vh * 0.88 - r.top) / (r.height + vh * 0.12), 0, 1);
@@ -476,6 +478,193 @@
         if (on && !run) { run = true; last = performance.now(); requestAnimationFrame(frame); } else if (!on) run = false;
       }, { threshold: 0 }).observe(host);
     } else { run = true; requestAnimationFrame(frame); }
+  });
+
+  /* --- ракета: 3D-модель, зібрана за ілюстрацією з матеріалу (вид зверху, збоку, у ракурсі).
+         Обертається скролом, курсором (або пальцем) і сама. Three.js вантажиться лише коли сцена поруч. --- */
+  step("stage", function () {
+    var st = $$("[data-stage]")[0];
+    if (!st) return;
+    var pin = st.querySelector(".stage-pin"), host = st.querySelector("[data-missile]");
+    var txt = st.querySelector('[data-anim="scrub"]'), words = null;
+    if (!host) return;
+    scrubs.forEach(function (s) { if (s.el === txt) words = s.words; });
+    var pinned = function () { return !!pin && getComputedStyle(pin).position === "sticky"; };
+    stagePinned = pinned;
+    function progress() {
+      var r = st.getBoundingClientRect(), vh = w.innerHeight;
+      if (pinned()) { var total = r.height - vh; return total > 0 ? clamp(-r.top / total, 0, 1) : 0; }
+      return clamp((vh - r.top) / (vh + r.height), 0, 1);
+    }
+    function paintText(p) {
+      if (!words || !pinned()) return;
+      var upto = Math.round(clamp(p / 0.78, 0, 1) * words.length);
+      words.forEach(function (x, i) { x.classList.toggle("on", i < upto); });
+    }
+
+    var T = null, ctx = null, hud = {}, loaded = false, near = false, running = false;
+    $$("[data-hud]", host).forEach(function (n) { hud[n.getAttribute("data-hud")] = n; });
+    var cur = { yaw: -0.8, roll: 0, pit: 0.16 }, tg = { yaw: -0.8, roll: 0, pit: 0.16 }, mx = 0, my = 0, drag = null, dyaw = 0, dpit = 0, t0 = performance.now(), hudT = 0;
+
+    /* модель: пропорції знято з ілюстрації (L ≈ 12 діаметрів; стрілоподібне крило з прямою задньою кромкою, хвостове оперення, бічні обтічники, жовте сопло) */
+    function build(THREE) {
+      var L = 10, R = 0.415, g = new THREE.Group();
+      var X = function (a) { return L * (0.5 - a); };
+      var body = new THREE.MeshStandardMaterial({ color: 0xdadcd5, roughness: 0.55, metalness: 0.08 });
+      var cone = new THREE.MeshStandardMaterial({ color: 0xc9cdc4, roughness: 0.42, metalness: 0.14 });
+      var yel = new THREE.MeshStandardMaterial({ color: 0xfce881, roughness: 0.45, metalness: 0.05, emissive: 0x4a4210, emissiveIntensity: 0.55 });
+      var dark = new THREE.MeshStandardMaterial({ color: 0x24282a, roughness: 0.7, metalness: 0.2 });
+      function rad(a) {
+        if (a < 0.3) { var u = (0.3 - a) / 0.3; return R * Math.sqrt(Math.max(0, 1 - u * u)); }
+        if (a <= 0.8) return R;
+        var t = (a - 0.8) / 0.155; return R * (1 - 0.3 * Math.pow(Math.min(1, t), 1.4));
+      }
+      function lathe(a0, a1, n, mat) {
+        var pts = [], i, a;
+        for (i = 0; i <= n; i++) { a = a0 + (a1 - a0) * i / n; pts.push(new THREE.Vector2(rad(a), X(a))); }
+        var geo = new THREE.LatheGeometry(pts, 56); geo.rotateZ(-Math.PI / 2);
+        return new THREE.Mesh(geo, mat);
+      }
+      /* фюзеляж: головний обтічник (a 0…0.15) і корпус (0.15…0.955) */
+      g.add(lathe(0.0, 0.15, 26, cone));
+      g.add(lathe(0.15, 0.955, 44, body));
+      var tailCap = new THREE.Mesh(new THREE.CircleGeometry(rad(0.955), 40), dark); tailCap.rotation.y = -Math.PI / 2; tailCap.position.x = X(0.955) - 0.01; g.add(tailCap);
+      /* шов обтічника — жовте кільце */
+      var ring = new THREE.Mesh(new THREE.TorusGeometry(rad(0.15) * 1.004, 0.014, 8, 48), yel); ring.rotation.y = Math.PI / 2; ring.position.x = X(0.15); g.add(ring);
+      /* сопло */
+      var noz = new THREE.Mesh(new THREE.CylinderGeometry(rad(0.955) * 0.98, R * 0.52, L * 0.052, 36, 1, true), yel);
+      noz.rotation.z = -Math.PI / 2; noz.position.x = X(0.981); g.add(noz);
+      var inner = new THREE.Mesh(new THREE.CircleGeometry(R * 0.5, 32), dark); inner.rotation.y = -Math.PI / 2; inner.position.x = X(1.0) + 0.02; g.add(inner);
+      /* плоска пластина: контур у площині (вздовж корпуса, розмах) → товщина */
+      function slab(poly, thick, mat, flat) {
+        var sh = new THREE.Shape();
+        poly.forEach(function (p, i) { if (i) sh.lineTo(p[0], p[1]); else sh.moveTo(p[0], p[1]); });
+        var geo = new THREE.ExtrudeGeometry(sh, { depth: thick, bevelEnabled: true, bevelThickness: thick * 0.45, bevelSize: thick * 0.45, bevelSegments: 2, steps: 1 });
+        geo.translate(0, 0, -thick / 2);
+        var m = new THREE.Mesh(geo, mat); if (flat) m.rotation.x = -Math.PI / 2;
+        m.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 35), new THREE.LineBasicMaterial({ color: 0x0c5350, transparent: true, opacity: 0.55 })));
+        return m;
+      }
+      var S = 2.32;
+      g.add(slab([[X(0.475), 0], [X(0.588), S], [X(0.634), S], [X(0.642), 0], [X(0.634), -S], [X(0.588), -S]], 0.1, body, true));
+      var St = 1.0;
+      g.add(slab([[X(0.852), 0], [X(0.905), St], [X(0.928), St], [X(0.934), 0], [X(0.928), -St], [X(0.905), -St]], 0.075, body, true));
+      g.add(slab([[X(0.85), 0.18], [X(0.905), 0.72], [X(0.935), 0.72], [X(0.942), 0.18]], 0.07, yel, false));
+      /* бічні обтічники повітрозабірників */
+      [-1, 1].forEach(function (s) {
+        var f = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 16), body);
+        f.scale.set(0.46, 0.12, 0.1); f.position.set(X(0.74), -0.05, s * (R - 0.012)); g.add(f);
+      });
+      /* верхній жовтий люк */
+      var hatch = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.034, 0.22), yel); hatch.position.set(X(0.545), R + 0.004, 0); g.add(hatch);
+      return g;
+    }
+
+    function init() {
+      var THREE = w.THREE;
+      if (!THREE) return fail();
+      var cv = d.createElement("canvas"), renderer;
+      cv.className = "stage-cv"; cv.setAttribute("aria-hidden", "true");
+      try { renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, powerPreference: "high-performance" }); }
+      catch (e) { return fail(); }
+      host.insertBefore(cv, host.firstChild);
+      renderer.setClearColor(0x000000, 0);
+      var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(26, 1, 0.1, 200);
+      var rig = new THREE.Group(), roll = new THREE.Group(), yaw = new THREE.Group();
+      var missile = build(THREE);
+      roll.add(missile); yaw.add(roll); rig.add(yaw); scene.add(rig);
+      scene.add(new THREE.HemisphereLight(0xcfeee8, 0x0c5350, 0.5));
+      var key = new THREE.DirectionalLight(0xffffff, 1.25); key.position.set(3, 7, 5); scene.add(key);
+      var rimT = new THREE.DirectionalLight(0x55bfac, 1.5); rimT.position.set(-6, 2, -5); scene.add(rimT);
+      var rimY = new THREE.DirectionalLight(0xfce881, 0.9); rimY.position.set(6, -2, -3); scene.add(rimY);
+      /* поворотний круг: кільце з рисками */
+      var floor = new THREE.Group(), lm = new THREE.LineBasicMaterial({ color: 0x55bfac, transparent: true, opacity: 0.5 }), i, pts = [];
+      for (i = 0; i <= 120; i++) pts.push(new THREE.Vector3(Math.cos(i / 120 * 6.2832) * 5.3, 0, Math.sin(i / 120 * 6.2832) * 5.3));
+      floor.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lm));
+      var tk = [];
+      for (i = 0; i < 72; i++) { var an = i / 72 * 6.2832, r1 = 5.3, r2 = i % 6 === 0 ? 5.85 : 5.56; tk.push(new THREE.Vector3(Math.cos(an) * r1, 0, Math.sin(an) * r1), new THREE.Vector3(Math.cos(an) * r2, 0, Math.sin(an) * r2)); }
+      floor.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(tk), new THREE.LineBasicMaterial({ color: 0xfce881, transparent: true, opacity: 0.55 })));
+      var in2 = []; for (i = 0; i <= 120; i++) in2.push(new THREE.Vector3(Math.cos(i / 120 * 6.2832) * 3.6, 0, Math.sin(i / 120 * 6.2832) * 3.6));
+      var l2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(in2), new THREE.LineBasicMaterial({ color: 0x55bfac, transparent: true, opacity: 0.22 })); floor.add(l2);
+      floor.position.y = -2.3; scene.add(floor);
+
+      function size() {
+        var W = host.clientWidth, H = host.clientHeight; if (!W || !H) return;
+        var dpr = Math.min(w.devicePixelRatio || 1, 1.75);
+        renderer.setPixelRatio(dpr); renderer.setSize(W, H, false);
+        cam.aspect = W / H;
+        var visW = W < 700 ? 11.4 : 13.4, dist = visW / (2 * Math.tan(cam.fov * Math.PI / 360) * cam.aspect);
+        var sh = W < 700 ? 0 : visW * 0.075; cam.position.set(-sh, dist * 0.2, dist); cam.lookAt(-sh, -0.35, 0); cam.updateProjectionMatrix();
+      }
+      size();
+      if ("ResizeObserver" in w) new ResizeObserver(size).observe(host); else w.addEventListener("resize", size);
+
+      function pose() {
+        var p = progress();
+        paintText(p);
+        var idle = reduce ? 0 : (performance.now() - t0) / 1000;
+        tg.yaw = -0.85 + p * 1.7 + mx * 0.38 + dyaw;
+        tg.pit = 0.16 + my * -0.1 + dpit;
+        tg.roll = p * Math.PI * 1.0 + idle * 0.22;
+        var k = reduce ? 1 : 0.085;
+        cur.yaw += (tg.yaw - cur.yaw) * k; cur.pit += (tg.pit - cur.pit) * k; cur.roll += (tg.roll - cur.roll) * k;
+        yaw.rotation.y = cur.yaw; rig.rotation.z = cur.pit; roll.rotation.x = cur.roll;
+        floor.rotation.y = -cur.yaw * 0.6 - idle * 0.05;
+        var now = performance.now();
+        if (now - hudT > 90) {
+          hudT = now;
+          var dg = function (v) { return Math.round(((v * 180 / Math.PI) % 360 + 360) % 360); }, pad3 = function (n, k2) { n = String(n); while (n.length < k2) n = "0" + n; return n; };
+          if (hud.yaw) hud.yaw.textContent = pad3(dg(cur.yaw), 3);
+          if (hud.roll) hud.roll.textContent = pad3(dg(cur.roll), 3);
+          if (hud.pit) hud.pit.textContent = pad3(Math.round(cur.pit * 180 / Math.PI), 2);
+        }
+        renderer.render(scene, cam);
+      }
+      ctx = { pose: pose, renderer: renderer };
+      st.classList.add("gl-on");
+      /* керування: курсор нахиляє, перетягування крутить */
+      if (fine && !reduce) st.addEventListener("mousemove", function (e) {
+        var b = host.getBoundingClientRect();
+        mx = clamp(((e.clientX - b.left) / b.width - 0.5) * 2, -1, 1); my = clamp(((e.clientY - b.top) / b.height - 0.5) * 2, -1, 1);
+      });
+      cv.addEventListener("pointerdown", function (e) { drag = { x: e.clientX, y: e.clientY, yw: dyaw, pt: dpit }; try { cv.setPointerCapture(e.pointerId); } catch (x) {} });
+      cv.addEventListener("pointermove", function (e) {
+        if (!drag) return;
+        dyaw = drag.yw + (e.clientX - drag.x) * 0.007; dpit = clamp(drag.pt + (e.clientY - drag.y) * 0.004, -0.5, 0.5);
+      });
+      var up = function () { drag = null; };
+      cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+      if (w.__KAIT2_DEBUG) w.__kait2 = { set: function (y, p, r) { dyaw = 0; cur.yaw = tg.yaw = y; cur.pit = p; cur.roll = r; ctx.fixed = [y, p, r]; }, rig: rig, yaw: yaw, roll: roll, cam: cam, scene: scene, THREE: THREE, render: function () { renderer.render(scene, cam); } };
+      loop();
+    }
+    function fail() { st.classList.add("no-gl"); }
+    function loop() {
+      if (!ctx || running) return;
+      running = true;
+      (function tick() {
+        if (!near) { running = false; return; }
+        if (ctx.fixed) { yawFix(); } else ctx.pose();
+        if (reduce) { running = false; return; }
+        requestAnimationFrame(tick);
+      })();
+    }
+    function yawFix() { var f = ctx.fixed, a = w.__kait2; a.yaw.rotation.y = f[0]; a.rig.rotation.z = f[1]; a.roll.rotation.x = f[2]; a.render(); }
+    function load() {
+      if (loaded) return; loaded = true;
+      if (w.THREE) { init(); return; }
+      var s = d.createElement("script"); s.src = base + "vendor/three.min.js";
+      s.onload = init; s.onerror = fail; d.head.appendChild(s);
+    }
+    scrollFns.push(function () {
+      paintText(progress());
+      if (reduce && ctx && near) ctx.pose();
+    });
+    if ("IntersectionObserver" in w) {
+      new IntersectionObserver(function (es) {
+        near = es[0].isIntersecting && !d.hidden;
+        if (near) { load(); if (ctx) { t0 = performance.now() - 1; loop(); } }
+      }, { rootMargin: "60% 0px 60% 0px" }).observe(st);
+    } else { near = true; load(); }
   });
 
   /* --- приціл-рамка за курсором (захоплює елементи з data-target) --- */

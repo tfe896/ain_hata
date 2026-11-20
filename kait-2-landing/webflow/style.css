@@ -21,7 +21,17 @@
 .intro{background-color:#F4F2EC;padding:140px 0 120px;position:relative}
 .intro-in{max-width:960px}
 .p-lg{font-size:25px;line-height:1.55;margin-top:0;margin-bottom:32px;color:rgba(20,20,20,0.88)}
-.statement{font-family:Unbounded,Onest,Arial,sans-serif;font-size:42px;line-height:1.28;font-weight:600;letter-spacing:-0.03em;margin-top:56px;margin-bottom:56px;color:#141414}
+.intro-b{padding-top:110px}
+.stage{height:260vh;background-color:#0B1413;color:#ffffff;position:relative}
+.stage-pin{position:sticky;top:0;height:100vh;overflow:hidden}
+.stage-bg{position:absolute;left:0;top:0;right:0;bottom:0}
+.stage-wrap{position:relative;z-index:3;height:100%;display:flex;align-items:center}
+.stage-text{max-width:470px}
+.stage-st{font-family:Unbounded,Onest,Arial,sans-serif;font-size:31px;line-height:1.3;font-weight:600;letter-spacing:-0.03em;margin:0;color:#ffffff}
+.stage-view{position:absolute;right:0;top:0;bottom:0;width:68%;z-index:2}
+.stage-hud{position:absolute;right:40px;bottom:34px;display:flex;grid-column-gap:30px;font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#55BFAC;z-index:3}
+.stage-hud b{color:#FCE881;font-weight:600}
+.stage-cap{position:absolute;right:84px;top:96px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.5);z-index:3}
 .chap{position:relative}
 .chap-head-g{background-color:#0C5350;color:#ffffff;padding:120px 0 104px;position:relative;overflow:hidden}
 .chap-head-k{background-color:#141414;color:#ffffff;padding:120px 0 104px;position:relative;overflow:hidden}
@@ -79,6 +89,6 @@
 .end{font-family:Unbounded,Onest,Arial,sans-serif;font-size:40px;line-height:1.3;font-weight:600;letter-spacing:-0.03em;max-width:1040px;margin:0}
 .foot{background-color:#0a0a0a;color:rgba(255,255,255,0.7);padding:52px 0;font-size:14px}
 .foot-in{display:flex;justify-content:space-between;align-items:center}
-@media screen and (max-width:991px){.wrap{padding-left:28px;padding-right:28px}.top-in{padding:12px 28px}.h1{font-size:56px}.hero-grid{grid-template-columns:1fr;max-width:640px}.h1-sub{font-size:24px}.chap-head-in{grid-template-columns:1fr;grid-row-gap:20px}.chap-num{font-size:110px}.chap-title{font-size:32px}.chap-grid{grid-template-columns:1fr}.chap-rail{display:none}.chap-body{padding:64px 0 24px}.statement{font-size:30px}.p-lg{font-size:21px}.pull{font-size:28px}.scene{height:auto}.scene-pin{position:static;height:auto;padding:80px 0}.scene-in{grid-template-columns:1fr;grid-row-gap:48px}.dg-node{width:96px;height:96px;font-size:10px}.mode{opacity:1}.stats3{grid-template-columns:1fr}.stat-n{font-size:56px}.bar-row{grid-template-columns:170px 1fr 90px}.end{font-size:30px}.intro,.band,.chart-band{padding-top:88px;padding-bottom:88px}.end-sec{padding:110px 0}}
+@media screen and (max-width:991px){.stage{height:auto}.stage-pin{position:static;height:auto;padding:84px 0 40px;display:flex;flex-direction:column}.stage-wrap{height:auto;order:1}.stage-text{max-width:640px}.stage-st{font-size:26px}.stage-view{position:relative;width:100%;height:420px;order:2;margin-top:24px}.stage-hud{right:20px;bottom:18px;grid-column-gap:16px;font-size:10px}.stage-cap{right:20px;top:10px;font-size:10px}.intro-b{padding-top:72px}.wrap{padding-left:28px;padding-right:28px}.top-in{padding:12px 28px}.h1{font-size:56px}.hero-grid{grid-template-columns:1fr;max-width:640px}.h1-sub{font-size:24px}.chap-head-in{grid-template-columns:1fr;grid-row-gap:20px}.chap-num{font-size:110px}.chap-title{font-size:32px}.chap-grid{grid-template-columns:1fr}.chap-rail{display:none}.chap-body{padding:64px 0 24px}.p-lg{font-size:21px}.pull{font-size:28px}.scene{height:auto}.scene-pin{position:static;height:auto;padding:80px 0}.scene-in{grid-template-columns:1fr;grid-row-gap:48px}.dg-node{width:96px;height:96px;font-size:10px}.mode{opacity:1}.stats3{grid-template-columns:1fr}.stat-n{font-size:56px}.bar-row{grid-template-columns:170px 1fr 90px}.end{font-size:30px}.intro,.band,.chart-band{padding-top:88px;padding-bottom:88px}.end-sec{padding:110px 0}}
 @media screen and (max-width:767px){.h1{font-size:42px}.brand-mii{display:none}.p{font-size:18px}.quote{padding:26px 24px}.quote-t{font-size:19px}.pull{font-size:23px}.mode-t{font-size:24px}.scroll-cue{display:none}.end{font-size:25px}.chap-num{font-size:84px}.chap-title{font-size:26px}}
 @media screen and (max-width:479px){.wrap{padding-left:20px;padding-right:20px}.top-in{padding:12px 20px}.h1{font-size:34px}.bar-row{grid-template-columns:1fr 100px;grid-row-gap:8px}.bar-track{grid-column:1 / span 2}.dg-node{width:76px;height:76px;font-size:9px}.stat-n{font-size:44px}}
