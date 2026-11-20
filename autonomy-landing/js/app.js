@@ -13,6 +13,8 @@
    data-video           відео: data-name="файл" (папка video/ у репозиторії), грає лише на екрані
    data-target="Назва"  мітка прицілу, коли курсор над елементом
    data-menu            назва секції (для аналітики/меню)
+   mark.hl              скрипт сам підсвічує числа з одиницями в тексті (текст не міняється)
+   .rail                бічний індекс розділів будується з усіх section із заголовком .h2-art
 
    Кожен крок ізольований: помилка пишеться в консоль як [ain-mii] і не зупиняє решту. Скрол ніколи не блокується. */
 (function () {
@@ -218,7 +220,7 @@
         v.setAttribute("poster", base + "poster/" + name + ".jpg");
         v.setAttribute("data-src", base + "video/" + name + ".mp4");
       }
-      v.muted = true; v.setAttribute("playsinline", "");
+      v.muted = true; v.setAttribute("playsinline", ""); v.setAttribute("controls", "");
     });
     if (reduce || !("IntersectionObserver" in w)) {
       vids.forEach(function (v) { v.setAttribute("controls", ""); var s = v.getAttribute("data-src"); if (s) v.src = s; });
@@ -263,7 +265,7 @@
     function draw(now) {
       var t = (now - t0) / 1000;
       ctx.clearRect(0, 0, W, H);
-      var cx = W * (W > 800 ? 0.78 : 0.5), cy = H * 0.42, R = Math.min(W * (W > 800 ? 0.17 : 0.42), H * 0.32);
+      var cx = W * (W > 800 ? 0.78 : 0.5), cy = H * 0.42, R = Math.min(W * (W > 800 ? 0.22 : 0.42), H * 0.4);
       var sweep = ((t * 0.16) % 1.4 - 0.2) * 2 * R + cy - R; /* смуга сканування вниз по колу */
       rows.forEach(function (r, i) {
         var y = r.y, near = Math.max(0, 1 - Math.abs(y - my) / 110);
@@ -281,7 +283,7 @@
           var half = Math.sqrt(R * R - dy * dy), x0 = cx - half, ln = half * 2;
           var cut = 0.25 + rnd(i, 21) * 0.5, gap = 10 + rnd(i, 22) * 30;
           var lit = Math.max(0, 1 - Math.abs(y - sweep) / 46);
-          var a2 = 0.16 + lit * 0.5;
+          var a2 = 0.2 + lit * 0.62;
           ctx.fillStyle = "rgba(" + (lit > 0.5 ? Y : G) + "," + a2 + ")";
           ctx.fillRect(x0, y - TH / 2, ln * cut, TH);
           ctx.fillRect(x0 + ln * cut + gap, y - TH / 2, Math.max(0, ln * (1 - cut) - gap), TH);
@@ -335,6 +337,85 @@
     })();
   });
 
+
+  /* --- підсвітка чисел з одиницями (лише обгортка, текст не змінюється) --- */
+  step("marks", function () {
+    var re = /(\d[\d  ]*(?:,\d+)?(?:[–-]\d[\d  ]*(?:,\d+)?)?\s?(?:млн рублів|тис\. рублів|тисяч|млн|кг|км\/год|км|ГБ|GHz|MHz|Gb|Mb|%|годин|метрів|метра|пікселів|ліцензій|авторів))/g;
+    $$(".p, .p-dark, .mode-p, .li").forEach(function (el) {
+      var nodes = [], tw = d.createTreeWalker(el, NodeFilter.SHOW_TEXT), n;
+      while ((n = tw.nextNode())) nodes.push(n);
+      nodes.forEach(function (t) {
+        var v = t.nodeValue;
+        re.lastIndex = 0;
+        if (!re.test(v)) return;
+        re.lastIndex = 0;
+        var frag = d.createDocumentFragment(), last = 0, m;
+        while ((m = re.exec(v))) {
+          if (m.index > last) frag.appendChild(d.createTextNode(v.slice(last, m.index)));
+          var mk = d.createElement("mark");
+          mk.className = "hl";
+          mk.textContent = m[0];
+          frag.appendChild(mk);
+          last = m.index + m[0].length;
+        }
+        if (last < v.length) frag.appendChild(d.createTextNode(v.slice(last)));
+        t.parentNode.replaceChild(frag, t);
+      });
+    });
+  });
+
+  /* --- бічний індекс розділів --- */
+  var railLinks = [];
+  step("rail", function () {
+    var secs = $$("section[id]").filter(function (s) { return s.querySelector(".h2-art"); });
+    if (secs.length < 2) return;
+    var nav = d.createElement("nav");
+    nav.className = "rail";
+    nav.setAttribute("aria-label", "Розділи");
+    secs.forEach(function (s, i) {
+      var h = s.querySelector(".h2-art"), a = d.createElement("a");
+      a.href = "#" + s.id;
+      a.innerHTML = "<b></b><i></i>";
+      a.querySelector("b").textContent = (i + 1 < 10 ? "0" : "") + (i + 1) + " · " + h.textContent.replace(/\s+/g, " ").trim().slice(0, 34);
+      nav.appendChild(a);
+      railLinks.push({ a: a, s: s });
+    });
+    d.body.appendChild(nav);
+    if (!("IntersectionObserver" in w)) return;
+    var rio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        railLinks.forEach(function (x) { x.a.classList.toggle("on", x.s === e.target); });
+        nav.classList.toggle("light", e.target.classList.contains("sec-light"));
+      });
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    secs.forEach(function (s) { rio.observe(s); });
+  });
+
+  /* --- паралакс: hero та зображення --- */
+  var figs = [], hero = null;
+  step("parallax", function () {
+    if (reduce) return;
+    figs = $$("[data-img]").map(function (f) { return { f: f, im: f.querySelector(".fig-img") }; }).filter(function (x) { return x.im; });
+    hero = d.querySelector(".hero-in");
+  });
+  function updateParallax() {
+    var vh = w.innerHeight;
+    figs.forEach(function (x) {
+      var r = x.f.getBoundingClientRect();
+      if (r.bottom < -100 || r.top > vh + 100) return;
+      var k = ((r.top + r.height / 2) - vh / 2) / vh;
+      x.im.style.setProperty("--py", (k * -34).toFixed(1) + "px");
+    });
+    if (hero) {
+      var y = w.pageYOffset || root.scrollTop;
+      if (y < vh * 1.2) {
+        hero.style.transform = "translate3d(0," + (y * 0.28).toFixed(1) + "px,0)";
+        hero.style.opacity = String(Math.max(0, 1 - y / (vh * 0.85)));
+      }
+    }
+  }
+
   /* --- прогрес скролу, панель, плавне виділення --- */
   var prog = null, top = null, lastY = 0, ticking = false;
   step("chrome", function () { prog = d.querySelector(".prog"); top = d.querySelector(".top"); });
@@ -348,12 +429,14 @@
       if (top) top.classList.toggle("hide", y > lastY && y > 240);
       lastY = y;
       if (scrubs.length) updateScrub();
+      updateParallax();
     });
   }
   w.addEventListener("scroll", onScroll, { passive: true });
   w.addEventListener("resize", onScroll);
   onScroll();
   if (scrubs.length) updateScrub();
+  updateParallax();
 
   clearTimeout(safety);
   root.setAttribute("data-ain-mii", failed.length ? "partial" : "ok");

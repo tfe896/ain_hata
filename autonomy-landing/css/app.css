@@ -29,8 +29,8 @@ html{scroll-behavior:smooth}
 .js-anim [data-anim="words"].is-in .wi{transform:none}
 
 /* поява: блоки */
-.js-anim [data-anim="reveal"]{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .9s cubic-bezier(.2,.75,.15,1);transition-delay:calc(var(--d,0)*90ms)}
-.js-anim [data-anim="reveal"].is-in{opacity:1;transform:none}
+.js-anim [data-anim="reveal"]{opacity:0;transform:translateY(34px);filter:blur(7px);transition:opacity .9s ease,transform 1s cubic-bezier(.2,.75,.15,1),filter .9s ease;transition-delay:calc(var(--d,0)*90ms)}
+.js-anim [data-anim="reveal"].is-in{opacity:1;transform:none;filter:none}
 
 /* підсвітка слів під час скролу */
 .js-anim .sw{color:rgba(255,255,255,.2);transition:color .35s}
@@ -103,3 +103,36 @@ html{scroll-behavior:smooth}
 
 /* список договорів: маркер-смужка (мотив МІІ) */
 .li::before{content:"";position:absolute;left:0;top:31px;width:22px;height:5px;background:var(--y)}
+
+/* ---- v2: розкладка й живіші анімації ---- */
+/* смужки під заголовками (мотив МІІ) */
+.h2-art::after{content:"";display:block;width:190px;height:15px;margin-top:30px;background:repeating-linear-gradient(to bottom,var(--y) 0 4px,transparent 4px 8px)}
+.js-anim .h2-art::after{width:0;transition:width 1.2s cubic-bezier(.2,.7,.2,1) .35s}
+.js-anim .h2-art.is-in::after{width:190px}
+/* рухома смужка на стику секцій */
+.sec-dark::before,.sec-green::before,.sec-light::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;pointer-events:none;opacity:.6;background-image:repeating-linear-gradient(90deg,var(--g) 0,var(--g) 90px,transparent 90px,transparent 130px);background-size:260px 6px;animation:band 16s linear infinite}
+.sec-light::before{background-image:repeating-linear-gradient(90deg,var(--dg) 0,var(--dg) 90px,transparent 90px,transparent 130px)}
+@keyframes band{to{background-position:260px 0}}
+/* підсвітка ключових цифр у тексті */
+mark.hl{color:inherit;background:linear-gradient(var(--y),var(--y)) 0 100%/0 .36em no-repeat;padding:0 .06em;transition:background-size .9s cubic-bezier(.2,.7,.2,1) .4s}
+.is-in mark.hl,.mode.on mark.hl,.li mark.hl{background-size:100% .36em}
+.sec-light mark.hl{background-image:linear-gradient(rgba(252,232,129,.95),rgba(252,232,129,.95))}
+/* зображення: паралакс усередині рамки */
+.fig-img{transform:scale(1.14) translate3d(0,var(--py,0px),0);transform-origin:50% 50%}
+/* відео */
+.vid{position:relative}
+.vid-el{background:#000}
+/* зсув hero при скролі */
+.hero-in{will-change:transform,opacity}
+/* бічний індекс розділів */
+.rail{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:45;display:none;flex-direction:column;gap:14px;align-items:flex-end}
+@media (min-width:1280px){.rail{display:flex}}
+.rail a{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font:600 11px/1 "JetBrains Mono",monospace;letter-spacing:.1em;opacity:.55;transition:opacity .25s}
+.rail a i{display:block;width:20px;height:4px;background:currentColor;transition:width .3s,background-color .3s}
+.rail a b{font-weight:600;max-width:0;overflow:hidden;white-space:nowrap;transition:max-width .35s ease;text-transform:uppercase}
+.rail a:hover,.rail a.on{opacity:1}
+.rail a.on i{width:38px;background:var(--y)}
+.rail a:hover b{max-width:260px;padding:5px 8px;background:#141414;border-radius:3px}
+.rail.light a{color:#141414}
+.rail.light a:hover b{background:#fff}
+@media (prefers-reduced-motion:reduce){.sec-dark::before,.sec-green::before,.sec-light::before{animation:none}.fig-img{transform:none}}
