@@ -31,3 +31,9 @@ Dark Green `#0C5350`, Light Green `#55BFAC`, Black `#141414`, White, Yellow `#FC
 
 ## Оновлення коду
 Змінити `js/` або `css/`, закомітити й запушити, у Embed замінити хеш коміту в посиланнях.
+
+## Webflow (сайт `kayt`)
+- Site ID `6b002fe2f872cb4141509843`, сторінка `/autonomous-weapons` (ID `6b0032586b57fb3e3396506e`), не опублікована.
+- Два Code Embed: перший у `page` (шрифти Google + `css/app.css`), другий унизу `body` (`js/app.js`). У обох посилання на jsDelivr з комітом `08b83f28162eed1bc2330450134d1a1032315d0d`.
+- 12 зображень лежать в Assets сайту й прив'язані до Image-елементів.
+- Відео та постери віддає jsDelivr із папок `video/` і `poster/` (шлях береться від адреси `app.js`).
