@@ -112,3 +112,20 @@
 @media screen and (max-width:767px){.quote-t-dark{font-size:22px}}
 .leg-a{color:#0C5350;font-weight:600}
 .leg-b{color:#9c8523;font-weight:600}
+.art{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);grid-column-gap:72px;align-items:start}
+.art-head{position:sticky;top:96px;align-self:start}
+.art-body{display:flex;flex-direction:column;min-width:0}
+.h2-art{font-size:44px;line-height:1.08;font-weight:700;letter-spacing:-0.03em;margin-top:0;margin-bottom:0}
+.intro{max-width:1000px}
+.p-lg{font-size:22px;line-height:1.6;margin-top:0;margin-bottom:28px;color:rgba(255,255,255,0.86)}
+.pull{border-left:4px solid #FCE881;padding:6px 0 6px 28px;margin:16px 0 40px 0;font-size:30px;line-height:1.3;font-weight:700;letter-spacing:-0.02em}
+.list{margin:0 0 28px 0;padding:0;list-style:none}
+.li{position:relative;padding:18px 0 18px 40px;border-top:1px solid rgba(255,255,255,0.2);font-size:18px;line-height:1.6;color:rgba(255,255,255,0.9)}
+.stats3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-column-gap:32px;grid-row-gap:48px}
+.chart-title{font-family:"JetBrains Mono",monospace;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:#0C5350}
+@media screen and (max-width:991px){.art{grid-template-columns:1fr;grid-row-gap:28px}.art-head{position:static}.h2-art{font-size:36px}.stats3{grid-template-columns:1fr}.pull{font-size:24px}.p-lg{font-size:19px}}
+@media screen and (max-width:479px){.h2-art{font-size:30px}.pull{font-size:21px}}
+.loop{display:block;margin-top:32px;grid-template-columns:none}
+.loop-stage{top:92px;height:260px;background-color:#141414;z-index:3}
+.mode{min-height:52vh}
+.h1{font-size:92px}

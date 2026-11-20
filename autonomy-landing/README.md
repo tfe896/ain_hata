@@ -4,10 +4,10 @@
 
 ## Що де
 - `webflow/style.css` — класи Webflow (макет, типографіка, адаптив). Джерело для Designer.
-- `webflow/sections/*.html` — розмітка секцій (та сама, що вставлена у Webflow).
 - `css/app.css`, `js/app.js` — анімації й фірмовий мотив МІІ (смужки). Підключаються Embed-ом.
 - `video/`, `poster/` — стиснені відео тестів «Альбатроса» й постери (грають на сторінці).
-- `webflow/build_test.py` → `test/index.html` — локальна імітація сторінки (відкрити у браузері).
+
+**Тексти статті в репозиторії не зберігаються:** репозиторій публічний (потрібно для jsDelivr), а матеріал ще не опублікований. Текст живе лише у Webflow.
 
 ## Бренд (брендбук МІІ)
 Dark Green `#0C5350`, Light Green `#55BFAC`, Black `#141414`, White, Yellow `#FCE881` (акцент). Шрифт брендбуку — Taktika Sans (платний). Зараз Onest + JetBrains Mono (Google Fonts) як заміна; щоб підключити Taktika Sans, завантажити файли шрифту в Webflow → Site settings → Fonts і змінити `font-family` у класі `page`.

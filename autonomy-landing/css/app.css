@@ -100,3 +100,6 @@ html{scroll-behavior:smooth}
   html{scroll-behavior:auto}
   .marq .track,.link,.scroll-cue{animation:none}
 }
+
+/* список договорів: маркер-смужка (мотив МІІ) */
+.li::before{content:"";position:absolute;left:0;top:31px;width:22px;height:5px;background:var(--y)}
