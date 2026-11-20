@@ -14,7 +14,6 @@
    data-viewer          3D-модель ракети (за ілюстрацією з матеріалу) у розділі про ракети; крутиться скролом і курсором
    data-vwall / data-vt відеостіна: усі відео на одному екрані, клік по малому — стає головним
    data-video           відео: data-name="файл" (папка video/), data-ratio="16/9"; повний кадр, без обрізання
-   mark.hl / mark.pat   скрипт сам підсвічує числа з одиницями й номери патентів (лише обгортка, текст не змінюється)
 
    Кожен крок ізольований: помилка пишеться в консоль як [kait2] і не зупиняє решту. Скрол ніколи не блокується. */
 (function () {
@@ -112,31 +111,6 @@
       var p = clamp((vh * 0.88 - r.top) / (r.height + vh * 0.12), 0, 1);
       var upto = Math.round(p * s.words.length);
       s.words.forEach(function (x, i) { x.classList.toggle("on", i < upto); });
-    });
-  });
-
-  /* --- підсвітка чисел з одиницями й номерів патентів (лише обгортка, текст не змінюється) --- */
-  step("marks", function () {
-    var re = /(RU\s?\d{5,7}\s?[A-Z]\d)|(\d[\d  ]*(?:,\d+)?(?:[–-]\d[\d  ]*(?:,\d+)?)?\s?(?:млн рублів|тис\. рублів|тисяч|млн|кг|км\/год|км|ГБ|GHz|MHz|Gb|Mb|%|годин|метрів|метра|пікселів|ліцензій|авторів))/g;
-    $$(".p, .mode-p, .li, .quote-t, .pull").forEach(function (el) {
-      var nodes = [], tw = d.createTreeWalker(el, NodeFilter.SHOW_TEXT), n;
-      while ((n = tw.nextNode())) nodes.push(n);
-      nodes.forEach(function (t) {
-        var v = t.nodeValue;
-        re.lastIndex = 0;
-        if (!re.test(v)) return;
-        re.lastIndex = 0;
-        var frag = d.createDocumentFragment(), last = 0, m;
-        while ((m = re.exec(v))) {
-          if (m.index > last) frag.appendChild(d.createTextNode(v.slice(last, m.index)));
-          var mk = d.createElement("mark");
-          mk.className = m[1] ? "pat" : "hl"; mk.textContent = m[0];
-          frag.appendChild(mk);
-          last = m.index + m[0].length;
-        }
-        if (last < v.length) frag.appendChild(d.createTextNode(v.slice(last)));
-        t.parentNode.replaceChild(frag, t);
-      });
     });
   });
 
@@ -564,7 +538,7 @@
       /* м'яке студійне оточення: градієнтний купол і два софтбокси — дають відблиски на матовій поверхні */
       var pm = new THREE.PMREMGenerator(renderer), es = new THREE.Scene();
       var dg = new THREE.SphereGeometry(30, 32, 16), cols = [], pos = dg.attributes.position, k;
-      for (k = 0; k < pos.count; k++) { var yy = (pos.getY(k) / 30 + 1) / 2, c1 = new THREE.Color(0x0a0e0e).lerp(new THREE.Color(0x4a5a58), Math.pow(yy, 1.4)); cols.push(c1.r, c1.g, c1.b); }
+      for (k = 0; k < pos.count; k++) { var yy = (pos.getY(k) / 30 + 1) / 2, c1 = new THREE.Color(0x1a2220).lerp(new THREE.Color(0x7f908c), Math.pow(yy, 1.3)); cols.push(c1.r, c1.g, c1.b); }
       dg.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3));
       es.add(new THREE.Mesh(dg, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
       function box(wd, ht, x, y, z, col) { var m = new THREE.Mesh(new THREE.PlaneGeometry(wd, ht), new THREE.MeshBasicMaterial({ color: col, side: THREE.DoubleSide })); m.position.set(x, y, z); m.lookAt(0, 0, 0); es.add(m); }
@@ -581,14 +555,14 @@
       var sc = d.createElement("canvas"); sc.width = 256; sc.height = 64;
       var sg = sc.getContext("2d"), grd = sg.createRadialGradient(128, 32, 4, 128, 32, 128); grd.addColorStop(0, "rgba(0,0,0,.7)"); grd.addColorStop(1, "rgba(0,0,0,0)");
       sg.setTransform(1, 0, 0, 0.5, 0, 16); sg.fillStyle = grd; sg.fillRect(0, 0, 256, 128);
-      var shadow = new THREE.Mesh(new THREE.PlaneGeometry(11, 2.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false, opacity: 0.55 }));
-      shadow.rotation.x = -Math.PI / 2; shadow.position.y = -1.9; yaw.add(shadow);
+      var shadow = new THREE.Mesh(new THREE.PlaneGeometry(11, 2.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false, opacity: 0.42 }));
+      shadow.rotation.x = -Math.PI / 2; shadow.position.y = -1.85; yaw.add(shadow);
 
       function size() {
         var W = host.clientWidth, H = host.clientHeight; if (!W || !H) return;
         renderer.setPixelRatio(Math.min(w.devicePixelRatio || 1, 1.75)); renderer.setSize(W, H, false);
         cam.aspect = W / H;
-        var visW = W < 500 ? 11.6 : 11.0, dist = visW / (2 * Math.tan(cam.fov * Math.PI / 360) * cam.aspect);
+        var visW = W < 500 ? 11.2 : 10.4, dist = visW / (2 * Math.tan(cam.fov * Math.PI / 360) * cam.aspect);
         cam.position.set(0, dist * 0.2, dist); cam.lookAt(0, -0.2, 0); cam.updateProjectionMatrix();
       }
       size();
