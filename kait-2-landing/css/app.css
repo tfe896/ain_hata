@@ -131,10 +131,11 @@ html{scroll-behavior:smooth}
 .fx-fig{position:sticky;top:13vh;margin:0;width:auto}
 .fx-fig .fig-img{box-shadow:0 24px 60px rgba(20,20,20,.16)}
 @media (min-width:1300px){.fx:not(.fx-m) .fx-fig{margin-right:-90px}.fx-m .fx-fig{margin-left:-90px}}
-.cols{column-count:2;column-gap:80px}
-.cols .p{max-width:none;orphans:3;widows:3}
-.cols .pull,.cols .quote{column-span:all;max-width:none}
-.cols .quote{margin:20px 0 52px}
+/* суцільний текст: одна колонка читання, виносні цитати — у правому полі поруч з абзацом */
+.cols{display:grid;grid-template-columns:minmax(0,740px) minmax(0,1fr);column-gap:80px;align-items:start}
+.cols>.p{grid-column:1;max-width:none;font-size:20px;line-height:1.72}
+.cols>.pull{grid-column:2;grid-row:span 4;position:sticky;top:20vh;align-self:start;margin:6px 0 0;padding:4px 0 4px 26px;max-width:none;width:auto;font-size:30px;line-height:1.28}
+.cols>.quote{grid-column:1 / -1;max-width:none;margin:20px 0 52px}
 .p-w{max-width:900px;font-size:27px;line-height:1.5;margin-bottom:0}
 
 /* хронологічна стрічка (розділ 04) */
@@ -144,7 +145,7 @@ html{scroll-behavior:smooth}
 .tl .p{position:relative;max-width:none}
 .tl .p::before{content:"";position:absolute;left:-65px;top:.55em;width:14px;height:14px;border-radius:50%;background:var(--paper);border:2px solid var(--dg);transition:background .5s,transform .5s}
 .js-anim .tl .p.is-in::before,.tl .p:not([data-anim])::before{background:var(--dg);transform:scale(1.18)}
-.tl-fig{margin:44px 0 64px -76px;width:calc(100% + 76px);max-width:none}
+.tl-fig{position:relative;z-index:2;margin:44px 0 64px 0;width:100%;max-width:none}
 .tl-fig .fig-img{box-shadow:0 24px 60px rgba(20,20,20,.16)}
 
 /* ───────── ракета: стоїть прямо на тлі сторінки ───────── */
@@ -200,12 +201,14 @@ html{scroll-behavior:smooth}
   .fx{display:block;margin-bottom:40px}
   .fx-fig{position:relative;top:0;margin:28px 0 0 !important}
   .fx-m .fx-fig{margin-top:28px !important}
-  .cols{column-count:1}
+  .cols{display:block}
+  .cols>.p{font-size:18px;line-height:1.7}
+  .cols>.pull{position:static;margin:28px 0 36px;font-size:26px;padding-left:22px}
   .p-w{font-size:21px}
   .tl{padding-left:44px}
   .tl::before,.tl::after{left:9px}
   .tl .p::before{left:-43px}
-  .tl-fig{margin-left:-44px;width:calc(100% + 44px)}
+  .tl-fig{margin-left:0;width:100%}
   .viewer{position:relative;top:0;height:380px;margin-top:20px}
   .vw-grid{grid-template-columns:1fr;row-gap:32px}
   .vwall{padding:80px 0}
