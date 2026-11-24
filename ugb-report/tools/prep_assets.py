@@ -1,5 +1,5 @@
 """Builds data/assets.json for the UGB report Figma plugin.
-Usage: python3 -I prep_assets.py <pages_dir with p-01.png..> <extra_dir with big/, dl/, pi/> <out assets.json> [preview_dir]
+Usage: python3 -I prep_assets.py <pages_dir with p-01.png..> <extra_dir with big/, dl/, pi/, orig/> <out assets.json> [preview_dir]
 Pages are the source PDF rendered at 144 dpi (pdftoppm -r 144 -png deck.pdf pages/p)."""
 import sys, json, base64, io, os
 from PIL import Image, ImageChops
@@ -42,32 +42,65 @@ for name, col in (("logo_k", (0, 0, 0)), ("logo_w", (255, 255, 255))):
     put(name, o, maxw=900, fmt="PNG")
 
 RED = (253, 53, 51)
-put("cover", Image.open(os.path.join(extra, "pi", "x-001-000.jpg")).convert("RGB"), maxw=1700)
-for n in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 24, 25]:
-    put("c%d" % n, crop(n, (0, 118, 1920, 948)), maxw=1800)
-for i, x in enumerate([(80, 620), (680, 1290), (1330, 1915)]):
-    put("c12_%d" % (i + 1), crop(12, (x[0], 125, x[1], 520)), maxw=900)
-put("c12_ga", crop(12, (540, 650, 1420, 860)), maxw=1100)
-put("c13_li", crop(13, (670, 40, 1180, 680)), maxw=900)
-put("c13_r", crop(13, (1190, 112, 1904, 930)), maxw=1000)
-# event photos already in the deck: originals pulled with `pdfimages -j -p` into <extra>/pi
-def pi(name): return Image.open(os.path.join(extra, "pi", name)).convert("RGB")
-for key, f in (("ph_panel1", "x-016-000"), ("ph_panel2", "x-016-002"), ("ph_panel2b", "x-016-004"),
-               ("ph_stage2", "x-016-006"), ("ph_badges", "x-018-000"), ("ph_tv1", "x-019-000"),
-               ("ph_tv2", "x-020-000"), ("ph_stage", "x-021-000"), ("ph_stand1", "x-023-000"),
-               ("ph_stand2", "x-023-006"), ("ph_stand3", "x-023-002")):
-    put(key, pi(f + ".jpg"), maxw=1400, q=82)
-# 3 photos from the event folder (Drive) for backgrounds
+# ---- screenshots: the ORIGINAL images embedded in the PDF (the deck clipped/overlapped some of them) ----
+# <extra>/orig/p-NNN-MMM.jpg are made by `pdfimages -j -p deck.pdf orig/p`; their boxes on the page come from
+# <extra>/orig/boxes.json ({page: [[x0, top, x1, bottom], ...]} in drawing order, from pdfplumber).
+BOX = json.load(open(os.path.join(extra, "orig", "boxes.json")))
+LAYOUT = {}
+for n in [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 24, 25] + list(range(26, 38)):
+    files = sorted(f for f in os.listdir(os.path.join(extra, "orig")) if f.startswith("p-%03d-" % n) and f.endswith(".jpg"))
+    boxes = BOX[str(n)]
+    assert len(files) == len(boxes), (n, files, boxes)
+    LAYOUT[n] = []
+    for i, (f, b) in enumerate(zip(files, boxes)):
+        key = "o%d_%d" % (n, i)
+        put(key, Image.open(os.path.join(extra, "orig", f)).convert("RGB"), maxw=1600, q=84)
+        LAYOUT[n].append([round(v) for v in b] + [key])
+put("c11", crop(11, (0, 118, 1920, 948)), maxw=1800)  # stories stats: render crop (phones are layered images)
+put("c15", crop(15, (0, 118, 1920, 948)), maxw=1800)
+# ---- event photos ----
+# originals already used in the deck were pulled with `pdfimages -j -p` into <extra>/pi,
+# 7 more come from the event folder on Drive (<extra>/big/NNNN.jpg).
+def pi(name): return Image.open(os.path.join(extra, "pi", name + ".jpg")).convert("RGB")
+def drv(name): return Image.open(os.path.join(extra, "big", name + ".jpg")).convert("RGB")
+def cropf(im, aspect=None, cx=0.5, cy=0.5):
+    """Largest region with the given aspect, centred at (cx, cy) as fractions; no aspect = keep whole photo."""
+    if not aspect: return im
+    w, h = im.size
+    if w / h > aspect: cw, ch = round(h * aspect), h
+    else: cw, ch = w, round(w / aspect)
+    x = min(max(0, round(cx * w - cw / 2)), w - cw); y = min(max(0, round(cy * h - ch / 2)), h - ch)
+    return im.crop((x, y, x + cw, y + ch))
+PHOTOS = {
+    # key: (source, aspect, cx, cy)   aspect None = uncropped 3:2
+    "s5_panel1": (drv("0168"), 2.1, 0.5, 0.40),   # slide 5: panel 1 (wide, whole stage)
+    "s5_panel2": (drv("0346"), 2.1, 0.5, 0.50),   # slide 5: panel 2
+    "s6_stand_big": (pi("x-023-006"), None, 0, 0),  # slide 6: stand, whole
+    "s6_stand_a": (drv("0015"), None, 0, 0),         # whole stand, all text visible
+    "s6_stand_b": (pi("x-023-002"), None, 0, 0),
+    "s7_badges": (pi("x-018-000"), None, 0, 0),     # slide 7: the badge photo
+    "s8_stage1": (drv("0249"), 16 / 9, 0.5, 0.5),  # slide 8: stage + screen with logos
+    "s8_stage2": (pi("x-021-000"), 16 / 9, 0.5, 0.45),
+    "s8_tv1": (pi("x-019-000"), 16 / 9, 0.5, 0.42),
+    "s8_tv2": (pi("x-020-000"), 16 / 9, 0.5, 0.45),
+    "s9_1": (pi("x-016-000"), 16 / 9, 0.5, 0.55),  # slide 9 = old "photos from the event" slide
+    "s9_2": (pi("x-016-006"), 16 / 9, 0.5, 0.5),
+    "s9_3": (pi("x-016-004"), 16 / 9, 0.5, 0.55),
+    "s9_4": (pi("x-016-002"), 16 / 9, 0.5, 0.5),
+}
+for key, (im, asp, cx, cy) in PHOTOS.items():
+    put(key, cropf(im, asp, cx, cy), maxw=1400, q=82)
+put("cover", pi("x-001-000"), maxw=1700)
+# full-bleed backgrounds of slides 2-4 (Drive)
 for k, f in (("bg2", "0116"), ("bg3", "0248"), ("bg4", "0135")):
-    put(k, Image.open(os.path.join(extra, "big", f + ".jpg")).convert("RGB"), maxw=1920, q=80)
+    put(k, drv(f), maxw=1920, q=80)
 for i in (1, 2, 3):
     put("story%d" % i, Image.open(os.path.join(extra, "dl", "st%d.jpg" % i)).convert("RGB"), maxw=600)
 for i in (1, 2):
     put("mail%d" % i, tight(Image.open(os.path.join(extra, "dl", "mail-%d.png" % i)).convert("RGB")), maxw=900)
-# unchanged slides 26..38 as full images
-for n in range(26, 39):
-    im, s = page(n)
-    put("full%d" % n, im, maxw=1920, q=82)
+# slide 38 stays a full image
+im38, _ = page(38)
+put("full38", im38, maxw=1920, q=82)
 
-json.dump({"img": A, "size": SIZES}, open(out, "w"))
+json.dump({"img": A, "size": SIZES, "layout": LAYOUT}, open(out, "w"))
 print(len(A), "assets", os.path.getsize(out) // 1024, "KB")

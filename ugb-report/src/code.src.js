@@ -29,6 +29,8 @@ const URL = {
   mail: "https://drive.google.com/file/d/1bZCsLWzq8OC7Tw7URMKredvv-YYqi_Mo/view?usp=sharing",
   invite: "https://eventmate.app/events/share/ukrainska-energetika-prezentacia-doslidzenna-ain?locale=ru",
   photos: "https://drive.google.com/drive/folders/1gukXvwZxfC_0g_sXK_UoTkuDgeArkJ00",
+  fbPage: "https://www.facebook.com/ainukraine",
+  site: "https://ain.ua/",
 };
 
 /* ---------------- токени ---------------- */
@@ -117,7 +119,7 @@ function text(parent, runs, o) {
   }
   parent.appendChild(t);
   if (o.w) { t.resize(o.w, 10); t.textAutoResize = "HEIGHT"; } else t.textAutoResize = "WIDTH_AND_HEIGHT";
-  t.x = o.x || 0; t.y = o.y || 0;
+  if (!parent.layoutMode || parent.layoutMode === "NONE") { t.x = o.x || 0; t.y = o.y || 0; }
   return t;
 }
 
@@ -151,27 +153,27 @@ function place(node, x, y, anchor) {
 /* ---------------- елементи слайда ---------------- */
 let PAGE = null, N = 0;
 const SLIDES = figma.editorType === "slides";
-let ROW = null;
+const MINE = [];
 function slide(name, bg) {
   N++;
   const label = String(N).padStart(2, "0") + " — " + name;
+  let f;
   if (SLIDES) {
-    // Figma Slides: справжній слайд 1920×1080 у новому ряду сітки (в кінці презентації)
-    const f = figma.createSlide();
-    if (ROW) { try { ROW.appendChild(f); } catch (e) { LOG.push("Ряд слайдів: " + e.message); } }
-    else { try { ROW = f.parent && f.parent.type === "SLIDE_ROW" ? f.parent : null; } catch (e) {} }
+    // Figma Slides: справжній слайд 1920×1080; порядок і окремий ряд задаються в кінці через setSlideGrid
+    f = figma.createSlide();
     f.name = label;
     try { f.fills = [solid(bg || C.white)]; } catch (e) { LOG.push("Фон слайда: " + e.message); }
-    return f;
+  } else {
+    f = figma.createFrame();
+    f.name = label;
+    f.resize(W, H);
+    f.fills = [solid(bg || C.white)];
+    f.clipsContent = true;
+    const col = (N - 1) % 4, row = Math.floor((N - 1) / 4);
+    f.x = col * (W + 160); f.y = row * (H + 200);
+    PAGE.appendChild(f);
   }
-  const f = figma.createFrame();
-  f.name = label;
-  f.resize(W, H);
-  f.fills = [solid(bg || C.white)];
-  f.clipsContent = true;
-  const col = (N - 1) % 4, row = Math.floor((N - 1) / 4);
-  f.x = col * (W + 160); f.y = row * (H + 200);
-  PAGE.appendChild(f);
+  MINE.push(f);
   return f;
 }
 function logos(s, white) {
@@ -198,29 +200,28 @@ function header(s, tag, linkLabel, url, o) {
   return g;
 }
 const PARTNER = "Прояви партнера Укргазбанк";
-/* заголовок: «Прояви партнера Укргазбанк» — червоним, решта — чорним */
+/* назва слайда: «Прояви партнера Укргазбанк» — червоним, решта — чорним */
 function title(s, str, o) {
   o = o || {};
   const runs = [];
   if (str.indexOf(PARTNER) === 0) { runs.push({ t: PARTNER, c: o.white ? C.white : C.red, f: "b" }); runs.push({ t: str.slice(PARTNER.length) }); }
   else runs.push({ t: str });
-  const t = text(s, runs, { size: o.size || 34, f: "s", lh: 1.22, w: o.w || W - 2 * M, x: M, y: o.y || 130, color: o.white ? C.white : C.black, name: "title" });
-  return t;
+  return text(s, runs, { size: o.size || 34, f: "s", lh: 1.22, w: o.w || W - 2 * M, x: M, y: o.y || 130, color: o.white ? C.white : C.black, name: "title" });
 }
-/* видимий гіперлінк під картинкою */
+/* видимий гіперлінк окремим рядком */
 function linkLine(s, url, x, y, o) {
   o = o || {};
   const runs = [{ t: o.prefix == null ? "Посилання: " : o.prefix, c: o.white ? C.white : C.black, f: "m" }];
   if (url) runs.push({ t: o.label || url, u: url, c: o.white ? C.white : C.link });
   else runs.push({ t: "[додайте посилання]", c: C.ph, f: "b" });
   const t = text(s, runs, { size: o.size || 22, w: o.w, lh: 1.3, name: url ? "link → " + url : "link (порожнє)", align: o.align });
-  if (o.center) { t.textAlignHorizontal = "CENTER"; }
   place(t, x, y, o.anchor || "tl");
   return t;
 }
+const PILL_TOP = H - 40 - 70; // верх нижньої пігулки
 function bottomPill(s, str) {
   const p = pill(s, str, { size: 40, padH: 28, padV: 8, name: "bottom pill" });
-  place(p, W / 2, H - 44, "bc");
+  place(p, W / 2, H - 40, "bc");
   return p;
 }
 function darkOverlay(s, a0, a1) {
@@ -231,41 +232,79 @@ function darkOverlay(s, a0, a1) {
   }], "overlay");
 }
 function card(s, x, y, w, h, a) {
-  const r = rect(s, x, y, w, h, [{ type: "SOLID", color: { r: 0, g: 0, b: 0 }, opacity: a == null ? 0.72 : a }], "card", 32);
+  return rect(s, x, y, w, h, [{ type: "SOLID", color: { r: 0, g: 0, b: 0 }, opacity: a == null ? 0.72 : a }], "card", 32);
+}
+/* фото з підписом-пігулкою в лівому нижньому куті */
+function photo(s, key, x, y, w, h, label) {
+  const r = image(s, key, Math.round(x), Math.round(y), Math.round(w), Math.round(h), { radius: 24, name: label || key });
+  if (label) {
+    const p = pill(s, label, { size: 22, padH: 16, padV: 4, name: "підпис" });
+    p.x = Math.round(x) + 18; p.y = Math.round(y + h) - 18 - p.height;
+  }
   return r;
 }
-function placeholder(s, x, y, w, h, label) {
-  const f = figma.createFrame();
-  f.name = "⚠ ПІДСТАВИТИ ФОТО";
-  f.resize(w, h); f.x = x; f.y = y;
-  f.cornerRadius = 24;
-  f.fills = [solid(C.ph, 0.08)];
-  f.strokes = [solid(C.ph)]; f.strokeWeight = 3; f.dashPattern = [16, 12];
-  s.appendChild(f);
-  const t = text(f, label, { size: 28, f: "s", color: C.ph, w: w - 80, align: "CENTER", lh: 1.3 });
-  t.x = 40; t.y = Math.round(h / 2 - t.height / 2);
-  return f;
+/* сітка фото без обрізки: всі картинки однакової пропорції q, rows×cols, вписана й центрована в коробку */
+function photoGrid(s, keys, labels, cols, bx, by, bw, bh, gap) {
+  const rows = Math.ceil(keys.length / cols), q = ratio(keys[0]);
+  let w = (bw - gap * (cols - 1)) / cols, h = w / q;
+  if (h * rows + gap * (rows - 1) > bh) { h = (bh - gap * (rows - 1)) / rows; w = h * q; }
+  const gw = w * cols + gap * (cols - 1), gh = h * rows + gap * (rows - 1);
+  const x0 = bx + (bw - gw) / 2, y0 = by + (bh - gh) / 2;
+  keys.forEach((k, i) => photo(s, k, x0 + (i % cols) * (w + gap), y0 + Math.floor(i / cols) * (h + gap), w, h, labels && labels[i]));
+  return { x: x0, y: y0, w: gw, h: gh };
 }
 
-/* ---------------- стандартний «старий» слайд: шапка + назва + скрін + посилання + нижня пігулка ---------------- */
+/* скріни зі старого слайда n: оригінальні (повні) картинки з PDF у тих самих відносних позиціях,
+   масштабовані у зону [bx..bx+bw] × [by..by+bh] */
+function collage(s, n, bx, by, bw, bh) {
+  const L = (A.layout || {})[n] || [];
+  if (!L.length) { LOG.push("Немає скрінів слайда " + n); return by; }
+  const ux0 = Math.min(...L.map((b) => b[0])), uy0 = Math.min(...L.map((b) => b[1]));
+  const ux1 = Math.max(...L.map((b) => b[2])), uy1 = Math.max(...L.map((b) => b[3]));
+  const k = Math.min(bw / (ux1 - ux0), bh / (uy1 - uy0), 1.2);
+  const ox = bx + (bw - (ux1 - ux0) * k) / 2, oy = by + (bh - (uy1 - uy0) * k) / 2;
+  let end = by;
+  for (const [x0, y0, x1, y1, key] of L) {
+    const r = image(s, key, Math.round(ox + (x0 - ux0) * k), Math.round(oy + (y0 - uy0) * k), Math.round((x1 - x0) * k), Math.round((y1 - y0) * k), { mode: "FIT", radius: 12, name: "скрін" });
+    end = Math.max(end, r.y + r.height);
+  }
+  return end;
+}
+/* сітка скрінів різної пропорції: кожен вписаний у свою клітинку */
+function shotGrid(s, keys, cols, bx, by, bw, bh, gap) {
+  const rows = Math.ceil(keys.length / cols), cw = (bw - gap * (cols - 1)) / cols, ch = (bh - gap * (rows - 1)) / rows;
+  let end = by;
+  keys.forEach((k, i) => {
+    const r = fitImage(s, k, bx + (i % cols) * (cw + gap), by + Math.floor(i / cols) * (ch + gap), cw, ch, { mode: "FIT", radius: 12, name: "скрін" });
+    end = Math.max(end, r.y + r.height);
+  });
+  return end;
+}
+
+/* ---------------- стандартний слайд: шапка + назва + картинки + посилання + нижня пігулка ---------------- */
+/* o.draw(s, top, bottom) малює вміст у зоні [top, bottom] і повертає нижню межу намальованого;
+   під нею ставиться посилання o.under (за замовчуванням — o.url) */
 function classic(o) {
   const s = slide(o.name);
   logos(s);
   header(s, o.tag, o.linkLabel, o.url);
   const t = title(s, o.title);
-  const top = Math.round(t.y + t.height + 28);
-  const hasLink = o.under !== false;
-  const bottom = H - 44 - 72 - 22 - (hasLink ? 44 : 0);
-  if (o.draw) o.draw(s, top, bottom);
-  else {
-    const im = fitImage(s, o.img, M, top, W - 2 * M, bottom - top, { mode: "FIT", name: "скріншоти" });
-    if (hasLink) linkLine(s, o.url, W / 2, im.y + im.height + 14, { anchor: "tc" });
-  }
+  const top = Math.round(t.y + t.height + 26);
+  const links = o.links || (o.under === false ? [] : [[o.linkPrefix || "Посилання: ", o.under || o.url]]);
+  const linkH = links.length * 32;
+  const bottom = (o.pill ? PILL_TOP - 18 : H - 40) - (links.length ? linkH + 12 : 0);
+  let end;
+  if (o.draw) end = o.draw(s, top, bottom);
+  else if (o.page) end = collage(s, o.page, M, top, W - 2 * M, bottom - top);
+  else { const im = fitImage(s, o.img, M, top, W - 2 * M, bottom - top, { mode: "FIT", name: "скріншоти" }); end = im.y + im.height; }
+  let y = Math.round(end + 12);
+  for (const [prefix, url] of links) { const l = linkLine(s, url, W / 2, y, { anchor: "tc", prefix }); y += l.height + 4; }
   if (o.pill) bottomPill(s, o.pill);
   return s;
 }
 
 /* ================= СЛАЙДИ ================= */
+const EV = "«Енергетика 2030: зелені рішення, відновлення й інвестиції»";
 async function build() {
   /* 1. Обкладинка */
   {
@@ -281,23 +320,27 @@ async function build() {
   {
     const s = slide("Подія AIN.UA", C.black);
     image(s, "bg2", 0, 0, W, H, { name: "фото події" });
-    darkOverlay(s, 0.25, 0.85);
+    darkOverlay(s, 0.2, 0.88);
     logos(s, true);
     header(s, "Подія AIN.UA", "Фото з події", URL.photos, { invert: true });
-    const k = text(s, "Подія від AIN.UA", { size: 34, f: "m", color: C.white, x: M + 12, y: 0, name: "kicker" });
-    const e = text(s, "«Енергетика 2030: зелені рішення, відновлення й інвестиції»", { size: 76, f: "b", color: C.white, x: M + 12, y: 0, w: 1600, lh: 1.08, name: "event" });
+    const l = linkLine(s, URL.photos, M + 12, 0, { prefix: "Фото з події: ", white: true, size: 22 });
+    l.y = H - 48 - l.height;
     const d = text(s, "проведена у Києві 21 жовтня 2026 року", { size: 36, f: "m", color: C.white, x: M + 12, y: 0, name: "date" });
-    d.y = H - 90 - d.height; e.y = d.y - 24 - e.height; k.y = e.y - 16 - k.height;
+    d.y = l.y - 40 - d.height;
+    const e = text(s, EV, { size: 76, f: "b", color: C.white, x: M + 12, y: 0, w: 1600, lh: 1.08, name: "event" });
+    e.y = d.y - 20 - e.height;
+    const k = text(s, "Подія від AIN.UA", { size: 34, f: "m", color: C.white, x: M + 12, y: 0, name: "kicker" });
+    k.y = e.y - 16 - k.height;
   }
 
   /* 3. Подія — параметри */
   {
     const s = slide("Подія — формат, локація, ЦА", C.black);
     image(s, "bg3", 0, 0, W, H, { name: "фото події" });
-    darkOverlay(s, 0.45, 0.7);
+    darkOverlay(s, 0.45, 0.75);
     logos(s, true);
     header(s, "Подія AIN.UA", "Фото з події", URL.photos, { invert: true });
-    const c = card(s, M, 140, 1180, 880);
+    const c = card(s, M, 140, 1180, 800);
     const x = M + 56, w = 1070;
     let y = 190;
     const row = (k, v) => { const t = text(s, [{ t: k + ": ", f: "b" }, { t: v }], { size: 30, color: C.white, x, y, w, lh: 1.3 }); y += t.height + 14; };
@@ -313,14 +356,16 @@ async function build() {
       "CFO та інвестиційні аналітики.",
       "Профільні юристи, регулятори та експерти галузі.",
     ]) { const t = text(s, [{ t: "▪  ", c: C.red, f: "b" }, { t: b }], { size: 27, color: C.white, x: x + 10, y, w: w - 10, lh: 1.3 }); y += t.height + 10; }
-    c.resize(c.width, y - 140 + 40);
+    c.resize(c.width, y - 140 + 36);
+    const l = linkLine(s, URL.photos, M + 12, 0, { prefix: "Фото з події: ", white: true });
+    l.y = H - 48 - l.height;
   }
 
-  /* 4. Програма */
+  /* 4. Програма (посилання вгорі й унизу) */
   {
     const s = slide("Програма події", C.black);
     image(s, "bg4", 0, 0, W, H, { name: "фото події" });
-    darkOverlay(s, 0.55, 0.7);
+    darkOverlay(s, 0.55, 0.75);
     logos(s, true);
     header(s, "Програма", "Запрошення та програма", URL.invite, { invert: true });
     const c = card(s, M, 130, W - 2 * M, 870, 0.8);
@@ -341,112 +386,115 @@ async function build() {
       const d = text(s, runs, { size: 25, color: C.white, x: x + 200, y, w: w - 200, lh: 1.35 });
       y += Math.max(tt.height, d.height) + 12;
     }
-    y += 10;
+    y += 14;
     const l = linkLine(s, URL.invite, x, y, { prefix: "Запрошення та програма: ", white: true, size: 24, w });
     y += l.height + 40;
     c.resize(c.width, y - 130);
   }
 
-  /* 5. Учасники програми */
+  /* 5. Учасники програми: дві панелі, текст ліворуч, фото праворуч */
   {
     const s = slide("Учасники програми (спікери)");
     logos(s);
     header(s, "Учасники програми", "Фото з події", URL.photos);
-    text(s, "Учасники програми", { size: 40, f: "b", x: M, y: 128 });
-    text(s, [{ t: "Ведуча: ", f: "b" }, { t: "Анастасія Іванцова — економічна журналістка та редакторка" }], { size: 24, x: M, y: 186 });
-    const colW = (W - 2 * M - 40) / 2;
+    text(s, "Учасники програми", { size: 40, f: "b", x: M, y: 126 });
+    text(s, [{ t: "Ведуча: ", f: "s", c: C.red }, { t: "Анастасія Іванцова", f: "s" }, { t: " — економічна журналістка та редакторка" }], { size: 22, x: M, y: 186, w: 1200 });
     const panels = [
       {
-        img: "ph_panel1",
+        img: "s5_panel1",
         name: "Панельна дискусія «Інвестиційний клімат: огляд надходжень та перспектива у повоєнний час»",
-        mod: "Валерій Безус — віцепрезидент Energy Club.",
+        mod: ["Валерій Безус", " — віцепрезидент Energy Club."],
         sp: [
-          "Андріан Прокіп — доктор економічних наук, керівник енергетичних програм Українського інституту майбутнього, позаштатний дослідник Інституту Кеннана (Вашингтон, США).",
-          "Роман Ємець — керуючий директор PowerU.",
-          "Максим Дробязгін — заступник директора Департаменту фінансової стабільності НБУ.",
-          "Андрій Грис — начальник Управління соціальних та екологічних ризиків АБ «УКРГАЗБАНК», голова ESG-комітету Національної асоціації банків України.",
+          ["Андріан Прокіп", " — доктор економічних наук, керівник енергетичних програм Українського інституту майбутнього, позаштатний дослідник Інституту Кеннана (Вашингтон, США)."],
+          ["Роман Ємець", " — керуючий директор PowerU."],
+          ["Максим Дробязгін", " — заступник директора Департаменту фінансової стабільності НБУ."],
+          ["Андрій Грис", " — начальник Управління соціальних та екологічних ризиків АБ «УКРГАЗБАНК», голова ESG-комітету Національної асоціації банків України."],
         ],
       },
       {
-        img: "ph_panel2",
+        img: "s5_panel2",
         name: "Панельна дискусія «Захист, відбудова та децентралізація: як зберегти українську енергосистему в умовах постійних атак»",
-        mod: "Артем Мартинюк — віцепрезидент Energy Club, в. о. гендиректора АТ «Українські розподільчі мережі» (2023–2025 рр.).",
+        mod: ["Артем Мартинюк", " — віцепрезидент Energy Club, в. о. гендиректора АТ «Українські розподільчі мережі» (2023–2025 рр.)."],
         sp: [
-          "Тетяна Духова — CEO Ecotech Invest.",
-          "Михайло Бабійчук — генеральний менеджер у сфері безпеки та стійкості DiXi Group.",
-          "Володимир Гаджулов — директор департаменту клієнтської підтримки KTS Engineering.",
+          ["Тетяна Духова", " — CEO Ecotech Invest."],
+          ["Михайло Бабійчук", " — генеральний менеджер у сфері безпеки та стійкості DiXi Group."],
+          ["Володимир Гаджулов", " — директор департаменту клієнтської підтримки KTS Engineering."],
         ],
       },
     ];
+    const pw = 720, ph = Math.round(pw / ratio("s5_panel1")), tw = W - 2 * M - pw - 40;
+    let y = 238;
     panels.forEach((p, i) => {
-      const x = M + i * (colW + 40);
-      let y = 240;
-      image(s, p.img, x, y, colW, 300, { radius: 24, name: "фото панелі " + (i + 1) });
-      y += 300 + 20;
-      const n = text(s, p.name, { size: 23, f: "b", x, y, w: colW, lh: 1.25 }); y += n.height + 12;
-      const m = text(s, [{ t: "Модератор: ", f: "s", c: C.red }, { t: p.mod }], { size: 20, x, y, w: colW, lh: 1.3 }); y += m.height + 10;
-      const sp = text(s, [{ t: "Спікери:", f: "s", c: C.red }], { size: 20, x, y }); y += sp.height + 4;
-      for (const line of p.sp) {
-        const dash = line.indexOf(" — ");
-        const t = text(s, [{ t: "• ", c: C.red, f: "b" }, { t: line.slice(0, dash), f: "s" }, { t: line.slice(dash) }], { size: 20, x, y, w: colW, lh: 1.3 });
-        y += t.height + 6;
+      const y0 = y;
+      const n = text(s, p.name, { size: 23, f: "b", x: M, y, w: tw, lh: 1.25 }); y += n.height + 10;
+      const m = text(s, [{ t: "Модератор: ", f: "s", c: C.red }, { t: p.mod[0], f: "s" }, { t: p.mod[1] }], { size: 20, x: M, y, w: tw, lh: 1.3 }); y += m.height + 8;
+      const sp = text(s, [{ t: "Спікери:", f: "s", c: C.red }], { size: 20, x: M, y }); y += sp.height + 2;
+      for (const [nm, role] of p.sp) {
+        const t = text(s, [{ t: "• ", c: C.red, f: "b" }, { t: nm, f: "s" }, { t: role }], { size: 20, x: M, y, w: tw, lh: 1.3 });
+        y += t.height + 4;
       }
+      photo(s, p.img, W - M - pw, y0, pw, ph);
+      y = Math.max(y, y0 + ph) + 34;
     });
+    const l = linkLine(s, URL.photos, M, 0, { prefix: "Фото з події: " });
+    l.y = H - 40 - l.height;
   }
 
-  const EV = "«Енергетика 2030: зелені рішення, відновлення й інвестиції»";
-  /* 6. Стенд */
-  {
-    const s = slide("Стенд партнера");
-    logos(s);
-    header(s, "Подія AIN.UA", "Фото з події", URL.photos);
-    const t = title(s, PARTNER + " на події: " + EV + ": розміщення найменування та торговельних марок на стенді");
-    const top = t.y + t.height + 32, gap = 24, w = Math.floor((W - 2 * M - 2 * gap) / 3), h = 700;
-    ["ph_stand2", "ph_stand1", "ph_stand3"].forEach((k, i) => image(s, k, M + i * (w + gap), top, w, h, { radius: 24, name: "стенд " + (i + 1) }));
-    linkLine(s, URL.photos, W / 2, top + h + 18, { anchor: "tc", prefix: "Усі фото з події: " });
-  }
-
-  /* 7. Бейджі, запрошення, програма */
-  {
-    const s = slide("Бейджі, запрошення, програма");
-    logos(s);
-    header(s, "Подія AIN.UA", "Запрошення", URL.invite);
-    const t = title(s, PARTNER + " на події: " + EV + ": розміщення торговельних марок: на бейджах, запрошення та програмі");
-    const top = t.y + t.height + 32, gap = 24, h = 700;
-    const w1 = 1000, w2 = W - 2 * M - gap - w1;
-    image(s, "ph_badges", M, top, w1, h, { radius: 24, name: "бейджі" });
-    placeholder(s, M + w1 + gap, top, w2, h, "Сюди — нове фото бейджа крупним планом (перефотографувати в офісі). Виділіть рамку → Fill → Image.");
-    linkLine(s, URL.invite, W / 2, top + h + 18, { anchor: "tc", prefix: "Запрошення та програма: " });
-  }
-
-  /* 8. Сцена та фотозона (екрани) */
-  {
-    const s = slide("Сцена та екрани");
-    logos(s);
-    header(s, "Подія AIN.UA", "Фото з події", URL.photos);
-    const t = title(s, PARTNER + " на події: " + EV + ": розміщення торговельних марок: на сцені та фотозоні (екрани)");
-    const top = t.y + t.height + 28, gap = 20, w = (W - 2 * M - gap) / 2, h = 330;
-    const cells = [["ph_stage2", "Сцена"], ["ph_stage", "Сцена"], ["ph_tv1", "Екрани"], ["ph_tv2", "Екрани"]];
-    cells.forEach(([k, lbl], i) => {
-      const x = M + (i % 2) * (w + gap), y = top + Math.floor(i / 2) * (h + gap);
-      image(s, k, x, y, w, h, { radius: 24, name: lbl });
-      const p = pill(s, lbl, { size: 22, padH: 16, padV: 4, name: "підпис" });
-      place(p, x + 20, y + h - 20, "tl"); p.y = y + h - 20 - p.height;
-    });
-    linkLine(s, URL.photos, W / 2, top + 2 * h + gap + 16, { anchor: "tc", prefix: "Усі фото з події: " });
-  }
-
-  /* 9. Запрошення (перенесено з кінця) */
+  /* 6. Стенд — фото цілі, без обрізки */
   classic({
-    name: "Запрошення на подію", tag: "Дослідження", linkLabel: "Запрошення", url: URL.invite,
-    title: PARTNER + " на події: " + EV + ": запрошення на подію", img: "c15", pill: "Запрошення на подію",
+    name: "Стенд партнера", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
+    title: PARTNER + " на події: " + EV + ": розміщення найменування та торговельних марок на стенді",
+    pill: "Закритий захід | стенд",
+    draw(s, top, bottom) {
+      const gap = 20, H0 = bottom - top, q = ratio("s6_stand_big");
+      const hs = (H0 - gap) / 2, wb = H0 * q, ws = hs * q, total = wb + gap + ws, x0 = (W - total) / 2;
+      photo(s, "s6_stand_big", x0, top, wb, H0);
+      photo(s, "s6_stand_a", x0 + wb + gap, top, ws, hs);
+      photo(s, "s6_stand_b", x0 + wb + gap, top + hs + gap, ws, hs);
+      return top + H0;
+    },
+  });
+
+  /* 7. Бейдж — одне фото, ціле */
+  classic({
+    name: "Бейджі, запрошення, програма", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos,
+    title: PARTNER + " на події: " + EV + ": розміщення торговельних марок: на бейджах, запрошення та програмі",
+    pill: "Закритий захід | бейджі учасників",
+    links: [["Фото з події: ", URL.photos], ["Запрошення та програма: ", URL.invite]],
+    draw(s, top, bottom) {
+      const h = bottom - top, w = h * ratio("s7_badges");
+      photo(s, "s7_badges", (W - w) / 2, top, w, h);
+      return bottom;
+    },
+  });
+
+  /* 8. Сцена та екрани: 2 фото сцени з лого + 2 фото телевізорів */
+  classic({
+    name: "Сцена та екрани", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
+    title: PARTNER + " на події: " + EV + ": розміщення торговельних марок: на сцені та фотозоні (екрани)",
+    pill: "Закритий захід | сцена та екрани",
+    draw(s, top, bottom) {
+      const g = photoGrid(s, ["s8_stage1", "s8_stage2", "s8_tv1", "s8_tv2"], ["Сцена", "Сцена", "Екрани", "Екрани"], 2, M, top, W - 2 * M, bottom - top, 20);
+      return g.y + g.h;
+    },
+  });
+
+  /* 9. Фото з події (старий слайд «Закритий захід | виступ» перенесено сюди) */
+  classic({
+    name: "Фото з події", tag: "Дослідження", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
+    title: "Фото з події " + EV,
+    pill: "Закритий захід | виступ",
+    draw(s, top, bottom) {
+      const g = photoGrid(s, ["s9_1", "s9_2", "s9_3", "s9_4"], null, 2, M, top, W - 2 * M, bottom - top, 16);
+      return g.y + g.h;
+    },
   });
 
   /* 10. Інформаційні матеріали — загальні цифри AIN */
   {
     const s = slide("Інформаційні матеріали — цифри AIN", C.black);
     image(s, "cover", 0, 0, W, H, { name: "фон: обкладинка дослідження" });
-    darkOverlay(s, 0.55, 0.85);
+    darkOverlay(s, 0.74, 0.9);
     logos(s, true);
     header(s, "Дослідження", "Сайт AIN", URL.research, { invert: true });
     title(s, PARTNER + ": розміщення торговельних марок в інформаційних матеріалах: дослідження, сайт AIN, соцмережі AIN (Fb, TG, X, Instagram)", { white: true, size: 40, y: 150, w: 1500 });
@@ -457,28 +505,31 @@ async function build() {
       ["45 000", "X", "охоплень"],
       ["8 500", "Telegram", "охоплень"],
     ];
-    const gap = 20, w = (W - 2 * M - 4 * gap) / 5, y = 640, h = 300;
+    const gap = 20, w = (W - 2 * M - 4 * gap) / 5, y = 600, h = 280;
     stats.forEach(([n, k, d], i) => {
       const x = M + i * (w + gap);
       const c = rect(s, x, y, w, h, [{ type: "SOLID", color: { r: 0, g: 0, b: 0 }, opacity: 0.6 }], "stat " + k, 28);
       c.strokes = [solid(C.white, 0.25)]; c.strokeWeight = 1;
       text(s, k, { size: 26, f: "s", color: C.red, x: x + 32, y: y + 32 });
-      text(s, n, { size: 64, f: "b", color: C.white, x: x + 32, y: y + 82 });
-      text(s, d, { size: 24, color: C.white, x: x + 32, y: y + 180, w: w - 64 });
+      text(s, n, { size: 64, f: "b", color: C.white, x: x + 32, y: y + 80 });
+      text(s, d, { size: 24, color: C.white, x: x + 32, y: y + 178, w: w - 64 });
     });
+    let ly = y + h + 40;
+    const l1 = linkLine(s, URL.research, M, ly, { prefix: "Дослідження: ", white: true }); ly += l1.height + 6;
+    linkLine(s, URL.site, M, ly, { prefix: "Сайт AIN: ", white: true });
   }
 
-  /* 11–23. Інформаційні матеріали */
+  /* 11–23. Інформаційні матеріали: нові назви + посилання окремим рядком під картинками */
   const IM = PARTNER + ": розміщення торговельних марок в інформаційних матеріалах: дослідження ";
-  classic({ name: "Сайт AIN", tag: "Дослідження", linkLabel: "Сайт AIN", url: URL.research, title: IM + "на сайті AIN", img: "c2", pill: "Результат прочитань: 9.427" });
-  classic({ name: "Facebook 1", tag: "Дослідження", linkLabel: "Facebook", url: URL.fb1, title: IM + "у Facebook AIN", img: "c3", pill: "Результат охоплень (органіка+реклама): 600,733" });
-  classic({ name: "Facebook 2", tag: "Дослідження", linkLabel: "Facebook", url: URL.fb2, title: IM + "у Facebook AIN", img: "c4", pill: "Результат охоплень: 1,047" });
-  classic({ name: "Facebook 3", tag: "Дослідження", linkLabel: "Facebook", url: URL.fb3, title: IM + "у Facebook AIN", img: "c5", pill: "Результат охоплень: 1,076" });
-  classic({ name: "Facebook — рекламні креативи", tag: "Рекламні креативи", linkLabel: "Facebook", url: null, title: IM + "у Facebook AIN", img: "c6", pill: "Результат охоплень реклама: 973,690" });
-  classic({ name: "Telegram", tag: "Дослідження", linkLabel: "Telegram", url: URL.tg, title: IM + "у Telegram AIN", img: "c7", pill: "Результат переглядів: 910" });
-  classic({ name: "Instagram post 1", tag: "Дослідження", linkLabel: "Instagram post", url: URL.ig1, title: IM + "в Instagram post", img: "c8", pill: "Результат переглядів: 1,031" });
-  classic({ name: "Instagram post 2", tag: "Дослідження", linkLabel: "Instagram post", url: URL.ig2, title: IM + "в Instagram post", img: "c9", pill: "Результат переглядів: 912" });
-  classic({ name: "Instagram post 3", tag: "Дослідження", linkLabel: "Instagram post", url: URL.ig3, title: IM + "в Instagram post", img: "c10", pill: "Результат переглядів: 1,565" });
+  classic({ name: "Сайт AIN", tag: "Дослідження", linkLabel: "Сайт AIN", url: URL.research, title: IM + "на сайті AIN", page: 2, pill: "Результат прочитань: 9.427" });
+  classic({ name: "Facebook 1", tag: "Дослідження", linkLabel: "Facebook", url: URL.fb1, title: IM + "в Facebook AIN", page: 3, pill: "Результат охоплень (органіка+реклама): 600,733" });
+  classic({ name: "Facebook 2", tag: "Дослідження", linkLabel: "Facebook", url: URL.fb2, title: IM + "в Facebook AIN", page: 4, pill: "Результат охоплень: 1,047" });
+  classic({ name: "Facebook 3", tag: "Дослідження", linkLabel: "Facebook", url: URL.fb3, title: IM + "в Facebook AIN", page: 5, pill: "Результат охоплень: 1,076" });
+  classic({ name: "Facebook — рекламні креативи", tag: "Рекламні креативи", linkLabel: "Facebook", url: URL.fbPage, linkPrefix: "Facebook AIN: ", title: IM + "в Facebook AIN", page: 6, pill: "Результат охоплень реклама: 973,690" });
+  classic({ name: "Telegram", tag: "Дослідження", linkLabel: "Telegram", url: URL.tg, title: IM + "в Telegram AIN", page: 7, pill: "Результат переглядів: 910" });
+  classic({ name: "Instagram post 1", tag: "Дослідження", linkLabel: "Instagram post", url: URL.ig1, title: IM + "в Instagram post", page: 8, pill: "Результат переглядів: 1,031" });
+  classic({ name: "Instagram post 2", tag: "Дослідження", linkLabel: "Instagram post", url: URL.ig2, title: IM + "в Instagram post", page: 9, pill: "Результат переглядів: 912" });
+  classic({ name: "Instagram post 3", tag: "Дослідження", linkLabel: "Instagram post", url: URL.ig3, title: IM + "в Instagram post", page: 10, pill: "Результат переглядів: 1,565" });
   classic({
     name: "Instagram Stories", tag: "Дослідження", linkLabel: "Insta Stories", url: URL.stories, title: IM + "в Instagram Stories", pill: "Результат переглядів: 343",
     draw(s, top, bottom) {
@@ -486,49 +537,52 @@ async function build() {
       const sw = Math.round(h * ratio("story1"));
       for (let i = 0; i < 3; i++) image(s, "story" + (i + 1), M + i * (sw + gap), top, sw, h, { radius: 24, name: "сторіз " + (i + 1) });
       const x0 = M + 3 * (sw + gap) + 20;
-      const im = fitImage(s, "c11", x0, top, W - M - x0, h, { mode: "FIT", name: "статистика сторіз" });
-      linkLine(s, URL.stories, W / 2, bottom + 14, { anchor: "tc" });
+      fitImage(s, "c11", x0, top, W - M - x0, h, { mode: "FIT", name: "статистика сторіз" });
+      return bottom;
     },
   });
   classic({
-    name: "Статті з інсайтами", tag: "Статті з інсайтами Дослідження", linkLabel: "Сайт AIN", url: null,
+    name: "Статті з інсайтами", tag: "Статті з інсайтами Дослідження", linkLabel: "Сайт AIN", url: URL.research, under: false,
     title: PARTNER + ": розміщення торговельних марок в інформаційних матеріалах: інсайти з дослідження на сайті AIN", pill: "Статті з інсайтами Дослідження | Результат охоплень: 2.570",
     draw(s, top, bottom) {
       const gap = 30, w = (W - 2 * M - 2 * gap) / 3, ih = 330;
-      [["c12_1", URL.art1], ["c12_2", URL.art2], ["c12_3", URL.art3]].forEach(([k, u], i) => {
+      let lb = 0;
+      [["o12_3", URL.art1], ["o12_0", URL.art2], ["o12_1", URL.art3]].forEach(([k, u], i) => {
         const x = M + i * (w + gap);
-        fitImage(s, k, x, top, w, ih, { mode: "FIT", name: "стаття " + (i + 1) });
-        linkLine(s, u, x, top + ih + 10, { w, size: 17, prefix: "" });
+        const im = fitImage(s, k, x, top, w, ih, { mode: "FIT", radius: 12, name: "стаття " + (i + 1) });
+        const l = linkLine(s, u, x, im.y + im.height + 10, { w, size: 17, prefix: "Стаття: " });
+        lb = Math.max(lb, l.y + l.height);
       });
-      const gy = top + ih + 90;
-      fitImage(s, "c12_ga", M, gy, W - 2 * M, bottom - gy + 40, { mode: "FIT", name: "Google Analytics" });
+      const gy = lb + 24;
+      const ga = fitImage(s, "o12_2", M, gy, W - 2 * M, bottom - gy, { mode: "FIT", name: "Google Analytics" });
+      return ga.y + ga.height;
     },
   });
-  /* ЗМІ */
-  {
-    const s = classic({
-      name: "ЗМІ про подію та дослідження", tag: "Дослідження", linkLabel: "Media", url: URL.media,
-      title: "ЗМІ про нашу подію та дослідження", pill: "Скріншоти публікацій, поширення від ЗМІ", under: false,
-      draw(s, top, bottom) {
-        const items = [
-          [{ t: "European Business Association: ", f: "m" }, { t: "Site", u: URL.eba, c: C.link }],
-          [{ t: "KSE BS: ", f: "m" }, { t: "Site", u: URL.kse, c: C.link }, { t: ", " }, { t: "Insta Stories", u: URL.kseStories, c: C.link }],
-          [{ t: "GreenEnergyEfficiency: ", f: "m" }, { t: "Facebook", u: URL.gee, c: C.link }],
-        ];
-        let y = top + 120;
-        for (const runs of items) {
-          rect(s, M + 20, y + 8, 30, 40, [solid("#FFD400")], "маркер", 15);
-          const t = text(s, runs, { size: 38, x: M + 80, y, w: 560, lh: 1.2 });
-          y += t.height + 50;
-        }
-        const h = bottom - top + 40;
-        fitImage(s, "c13_li", 700, top, 520, h, { mode: "FIT", name: "LinkedIn" });
-        fitImage(s, "c13_r", 1250, top, W - M - 1250, h, { mode: "FIT", name: "EBA / KSE" });
-      },
-    });
-  }
   classic({
-    name: "Розсилка AIN", tag: "Анонс події", linkLabel: "Розсилка", url: URL.mail,
+    name: "ЗМІ про подію та дослідження", tag: "Дослідження", linkLabel: "Media", url: URL.media, linkPrefix: "Скріншоти публікацій: ",
+    title: "ЗМІ про нашу подію та дослідження", pill: "Скріншоти публікацій, поширення від ЗМІ",
+    draw(s, top, bottom) {
+      const items = [
+        [{ t: "European Business Association: ", f: "m" }, { t: "Site", u: URL.eba, c: C.link }],
+        [{ t: "KSE BS: ", f: "m" }, { t: "Site", u: URL.kse, c: C.link }, { t: ", " }, { t: "Insta Stories", u: URL.kseStories, c: C.link }],
+        [{ t: "GreenEnergyEfficiency: ", f: "m" }, { t: "Facebook", u: URL.gee, c: C.link }],
+      ];
+      let y = top + 110;
+      for (const runs of items) {
+        rect(s, M + 20, y + 8, 30, 40, [solid("#FFD400")], "маркер", 15);
+        const t = text(s, runs, { size: 38, x: M + 80, y, w: 560, lh: 1.2 });
+        y += t.height + 50;
+      }
+      const h = bottom - top;
+      const a = fitImage(s, "o13_0", 700, top, 500, h, { mode: "FIT", radius: 12, name: "LinkedIn" });
+      const rx = 1230, rw = W - M - rx, rh = (h - 20) / 2;
+      const b = fitImage(s, "o13_1", rx, top, rw, rh, { mode: "FIT", radius: 12, name: "EBA" });
+      const c = fitImage(s, "o13_2", rx, top + rh + 20, rw, rh, { mode: "FIT", radius: 12, name: "KSE" });
+      return Math.max(a.y + a.height, c.y + c.height);
+    },
+  });
+  classic({
+    name: "Розсилка AIN", tag: "Анонс події", linkLabel: "Розсилка", url: URL.mail, linkPrefix: "Розсилка: ",
     title: PARTNER + ": розміщення торговельних марок в інформаційних матеріалах: розсилка AIN", pill: "Закритий захід | Охоплення: 2.129",
     draw(s, top, bottom) {
       const h = bottom - top, gap = 16;
@@ -538,24 +592,28 @@ async function build() {
       const b = image(s, "mail2", M + w1 + gap, top, w2, h, { mode: "FIT", name: "розсилка 2" });
       b.strokes = [solid("#DDDDDD")]; b.strokeWeight = 1;
       const x0 = M + w1 + w2 + gap + 40;
-      fitImage(s, "c14", x0, top, W - M - x0, h, { mode: "FIT", name: "статистика розсилки" });
-      linkLine(s, URL.mail, M, bottom + 14, { prefix: "Розсилка: ", size: 20 });
+      fitImage(s, "o14_0", x0, top, W - M - x0, h, { mode: "FIT", name: "статистика розсилки" });
+      return bottom;
     },
   });
 
-  /* 24–25. Дослідження */
-  classic({ name: "Логотипи в дослідженні 1", tag: "Дослідження", linkLabel: "Сайт AIN", url: URL.research, title: PARTNER + ": розміщення торговельних марок у дослідженні", img: "c24", pill: "Логотипи в дослідженні" });
-  classic({ name: "Логотипи в дослідженні 2", tag: "Дослідження", linkLabel: "Сайт AIN", url: URL.research, title: PARTNER + ": розміщення торговельних марок у дослідженні", img: "c25", pill: "Логотипи в дослідженні", under: false });
+  /* 24–37. Дослідження: назви + посилання на дослідження під картинками */
+  const RS = PARTNER + ": розміщення торговельних марок у дослідженні";
+  classic({ name: "Логотипи в дослідженні 1", tag: "Дослідження", linkLabel: "Сайт AIN", url: URL.research, linkPrefix: "Дослідження: ", title: RS, pill: "Логотипи в дослідженні",
+    draw: (s, top, bottom) => shotGrid(s, ["o24_0", "o24_3", "o24_1", "o24_2"], 2, M, top, W - 2 * M, bottom - top, 16) });
+  classic({ name: "Логотипи в дослідженні 2", tag: "Дослідження", linkLabel: "Сайт AIN", url: URL.research, linkPrefix: "Дослідження: ", title: RS, pill: "Логотипи в дослідженні",
+    draw: (s, top, bottom) => shotGrid(s, ["o25_1", "o25_0"], 2, M, top, W - 2 * M, bottom - top, 24) });
+  for (let n = 26; n <= 37; n++) {
+    classic({
+      name: "Експертиза в дослідженні " + (n - 25), tag: "Дослідження", linkLabel: "Сайт AIN", url: URL.research, linkPrefix: "Дослідження: ",
+      title: PARTNER + ": експертиза UGB у дослідженні", page: n, pill: "Експертиза в дослідженні",
+    });
+  }
 
-  /* 26–38. Без змін (оригінальні слайди 26–38 як зображення) */
-  for (let n = 26; n <= 38; n++) {
-    const s = slide(n === 38 ? "Підсумок (без змін)" : "Експертиза в дослідженні (без змін)");
-    image(s, "full" + n, 0, 0, W, H, { name: "оригінальний слайд " + n });
-    if (n !== 38) {
-      // на картинці посилання не клікається — перекриваємо стару шапку живими пігулками
-      rect(s, 1240, 30, W - 1240, 100, [solid(C.white)], "підкладка шапки");
-      header(s, "Дослідження", "Сайт AIN", URL.research);
-    }
+  /* 38. Підсумок — без змін */
+  {
+    const s = slide("Підсумок (без змін)", C.red);
+    image(s, "full38", 0, 0, W, H, { name: "оригінальний слайд 38" });
   }
 }
 
@@ -563,17 +621,21 @@ async function build() {
 (async () => {
   try {
     await loadFonts();
-    const d = new Date();
     let where;
     if (SLIDES) {
-      // окремий новий ряд у сітці, щоб нові слайди не змішались зі старими
-      try { ROW = figma.createSlideRow(); } catch (e) { ROW = null; LOG.push("Новий ряд: " + e.message); }
+      const before = figma.getSlideGrid().map((r) => r.slice()).filter((r) => r.length);
       await build();
+      // старі ряди без змін + один новий ряд з 38 слайдами в правильному порядку
+      try {
+        const ids = new Set(MINE.map((n) => n.id));
+        const old = before.map((r) => r.filter((n) => !ids.has(n.id))).filter((r) => r.length);
+        figma.setSlideGrid(old.concat([MINE]));
+      } catch (e) { LOG.push("Порядок слайдів: " + e.message); }
       try { figma.viewport.slidesView = "grid"; } catch (e) {}
-      where = "в кінці презентації (окремий ряд у сітці слайдів)";
+      where = "окремим рядом у кінці сітки слайдів";
     } else {
       PAGE = figma.createPage();
-      PAGE.name = "Звіт UGB — оновлено " + d.toLocaleDateString("uk-UA");
+      PAGE.name = "Звіт UGB — оновлено " + new Date().toLocaleDateString("uk-UA");
       await figma.setCurrentPageAsync(PAGE);
       await build();
       figma.viewport.scrollAndZoomIntoView(PAGE.children);
