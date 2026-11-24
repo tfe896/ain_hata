@@ -1,13 +1,16 @@
 {
-  "name": "AIN × UGB — звіт (оновлення презентації)",
+  "name": "AIN × UGB — звіт (фінал, 39 слайдів)",
   "id": "ain-ugb-report-update",
   "api": "1.0.0",
   "main": "code.js",
-  "editorType": ["figma", "slides"],
+  "editorType": [
+    "figma",
+    "slides"
+  ],
   "documentAccess": "dynamic-page",
-  "networkAccess": { "allowedDomains": ["none"] },
-  "menu": [
-    { "name": "Усі 39 слайдів", "command": "all" },
-    { "name": "Лише виправлені слайди: 6, 9, 10", "command": "fix" }
-  ]
+  "networkAccess": {
+    "allowedDomains": [
+      "none"
+    ]
+  }
 }
