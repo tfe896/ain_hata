@@ -1,0 +1,9 @@
+{
+  "name": "AIN × UGB — звіт (оновлення презентації)",
+  "id": "ain-ugb-report-update",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": { "allowedDomains": ["none"] }
+}
