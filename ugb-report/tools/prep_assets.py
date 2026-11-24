@@ -60,7 +60,7 @@ put("c11", crop(11, (0, 118, 1920, 948)), maxw=1800)  # stories stats: render cr
 put("c15", crop(15, (0, 118, 1920, 948)), maxw=1800)
 # ---- event photos ----
 # originals already used in the deck were pulled with `pdfimages -j -p` into <extra>/pi,
-# 7 more come from the event folder on Drive (<extra>/big/NNNN.jpg).
+# 4 more come from the event folder on Drive (<extra>/big/NNNN.jpg).
 def pi(name): return Image.open(os.path.join(extra, "pi", name + ".jpg")).convert("RGB")
 def drv(name): return Image.open(os.path.join(extra, "big", name + ".jpg")).convert("RGB")
 def cropf(im, aspect=None, cx=0.5, cy=0.5):
@@ -76,7 +76,7 @@ PHOTOS = {
     "s5_panel1": (drv("0168"), 2.1, 0.5, 0.40),   # slide 5: panel 1 (wide, whole stage)
     "s5_panel2": (drv("0346"), 2.1, 0.5, 0.50),   # slide 5: panel 2
     "s6_stand_big": (pi("x-023-006"), None, 0, 0),  # slide 6: stand, whole
-    "s6_stand_a": (drv("0015"), None, 0, 0),         # whole stand, all text visible
+    "s6_stand_a": (pi("x-023-000"), None, 0, 0),      # old slide 23 originals
     "s6_stand_b": (pi("x-023-002"), None, 0, 0),
     "s7_badges": (pi("x-018-000"), None, 0, 0),     # slide 7: the badge photo
     "s9_1": (pi("x-016-000"), None, 0, 0),  # slide 9 = old "photos from the event" slides 16-17, uncropped
@@ -97,11 +97,14 @@ def zoom(im, x0, x1, cy, aspect=0.92):
     w, h = im.size; cw = (x1 - x0) * w; ch = cw / aspect
     y0 = min(max(0, cy * h - ch / 2), h - ch)
     return im.crop((round(x0 * w), round(y0), round(x1 * w), round(y0 + ch)))
-put("s8_stage1", zoom(drv("0249"), 0.0, 0.60, 0.58), maxw=1400, q=84)       # stage + "Панель 1" screen
-put("s8_stage2", zoom(pi("x-021-000"), 0.55, 1.0, 0.47), maxw=1400, q=84)   # screen with speakers (UGB)
-put("s8_tv", zoom(pi("x-019-000"), 0.17, 0.73, 0.45), maxw=1400, q=84)      # TV with the cover
-# slide 7: the invitation page with the programme (old slide 15, original image)
+# originals of old slides 21, 22 (stage) and 19 (TV); old 20 is the same TV shot, left out on request
+put("s8_stage1", zoom(pi("x-021-000"), 0.55, 1.0, 0.47), maxw=1400, q=84)   # old 21: panel + screen with speakers (UGB)
+put("s8_stage2", zoom(pi("x-022-000"), 0.22, 0.82, 0.50), maxw=1400, q=84)  # old 22: presenter + screen with logos and QR
+put("s8_tv", zoom(pi("x-019-000"), 0.17, 0.73, 0.45), maxw=1400, q=84)      # old 19: TV with the cover
+# invitation slide (old slide 15): both original screenshots in the old layout (frames p-015-000/004 skipped)
 put("inv_full", Image.open(os.path.join(extra, "orig", "p-015-006.jpg")).convert("RGB"), maxw=1000, q=86)
+put("inv_top", Image.open(os.path.join(extra, "orig", "p-015-002.jpg")).convert("RGB"), maxw=1400, q=86)
+LAYOUT[15] = [[49, 165, 768, 914, "inv_full"], [807, 168, 1884, 815, "inv_top"]]
 # slide 21: the three articles without the right sidebar of the site (bigger on the slide)
 # (left menu and right column of the site cut off: only the article itself, so it can be big)
 for key, f in {"art1": "p-012-006", "art2": "p-012-000", "art3": "p-012-002"}.items():

@@ -1,6 +1,6 @@
-/* AIN × UGB — звіт «Українська енергетика»: оновлена презентація (38 слайдів).
+/* AIN × UGB — звіт «Українська енергетика»: оновлена презентація (39 слайдів).
    Запуск: Figma Desktop → Plugins → Development → Import plugin from manifest… → ugb-report/manifest.json → Run.
-   Працює у Figma Slides (додає 38 слайдів окремим рядом у кінці) і у Figma Design (створює нову сторінку).
+   Працює у Figma Slides (додає 39 слайдів окремим рядом у кінці) і у Figma Design (створює нову сторінку).
    Наявні слайди/сторінки не змінює.
    Згенерований файл: картинки вбудовує ugb-report/build.py. Правте src/code.src.js, а не code.js. */
 const A = __ASSETS__;
@@ -270,7 +270,7 @@ function photoGrid(s, keys, labels, cols, bx, by, bw, bh, gap) {
 
 /* скріни зі старого слайда n: оригінальні (повні) картинки з PDF у тих самих відносних позиціях,
    масштабовані у зону [bx..bx+bw] × [by..by+bh] */
-function collage(s, n, bx, by, bw, bh) {
+function collage(s, n, bx, by, bw, bh, frame) {
   const L = (A.layout || {})[n] || [];
   if (!L.length) { LOG.push("Немає скрінів слайда " + n); return by; }
   const ux0 = Math.min(...L.map((b) => b[0])), uy0 = Math.min(...L.map((b) => b[1]));
@@ -279,7 +279,8 @@ function collage(s, n, bx, by, bw, bh) {
   const ox = bx + (bw - (ux1 - ux0) * k) / 2, oy = by + (bh - (uy1 - uy0) * k) / 2;
   let end = by;
   for (const [x0, y0, x1, y1, key] of L) {
-    const r = image(s, key, Math.round(ox + (x0 - ux0) * k), Math.round(oy + (y0 - uy0) * k), Math.round((x1 - x0) * k), Math.round((y1 - y0) * k), { mode: "FIT", radius: 12, name: "скрін" });
+    const r = image(s, key, Math.round(ox + (x0 - ux0) * k), Math.round(oy + (y0 - uy0) * k), Math.round((x1 - x0) * k), Math.round((y1 - y0) * k), { mode: "FIT", radius: frame ? 24 : 12, name: "скрін" });
+    if (frame) { r.strokes = [solid(C.black)]; r.strokeWeight = 2; }
     end = Math.max(end, r.y + r.height);
   }
   return end;
@@ -309,7 +310,7 @@ function classic(o) {
   const bottom = (o.pill ? PILL_TOP - 18 : H - 40) - (links.length ? linkH + 12 : 0);
   let end;
   if (o.draw) end = o.draw(s, top, bottom);
-  else if (o.page) end = collage(s, o.page, M, top, W - 2 * M, bottom - top);
+  else if (o.page) end = collage(s, o.page, M, top, W - 2 * M, bottom - top, o.frame);
   else { const im = fitImage(s, o.img, M, top, W - 2 * M, bottom - top, { mode: "FIT", name: "скріншоти" }); end = im.y + im.height; }
   let y = Math.round(end + 12);
   for (const [prefix, url] of links) { const l = linkLine(s, url, W / 2, y, { anchor: "tc", prefix }); y += l.height + 4; }
@@ -469,25 +470,26 @@ async function build() {
     },
   });
 
-  /* 7. Бейдж (одне фото, ціле) + запрошення з програмою (старий слайд 15) */
+  /* 7. Бейдж — одне фото, ціле (старий слайд 18) */
   classic({
-    name: "Бейджі, запрошення, програма", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos,
-    title: PARTNER + " на події: " + EV + ": розміщення торговельних марок: на бейджах, запрошення та програмі",
-    pill: "Закритий захід | бейджі, запрошення, програма",
-    links: [["Фото з події: ", URL.photos], ["Запрошення та програма: ", URL.invite]],
+    name: "Бейджі", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
+    title: PARTNER + " на події: " + EV + ": розміщення торговельних марок: на бейджах",
+    pill: "Закритий захід | бейджі учасників",
     draw(s, top, bottom) {
-      const h = bottom - top, gap = 24;
-      const w1 = h * ratio("s7_badges"), w2 = h * ratio("inv_full"), x0 = (W - (w1 + gap + w2)) / 2;
-      photo(s, "s7_badges", x0, top, w1, h, "Бейдж");
-      const inv = image(s, "inv_full", Math.round(x0 + w1 + gap), top, Math.round(w2), h, { mode: "FIT", radius: 24, name: "запрошення з програмою" });
-      inv.strokes = [solid("#DDDDDD")]; inv.strokeWeight = 1;
-      const p = pill(s, "Запрошення та програма", { size: 22, padH: 16, padV: 4, name: "підпис" });
-      p.x = inv.x + 18; p.y = inv.y + h - 18 - p.height;
+      const h = bottom - top, w = h * ratio("s7_badges");
+      photo(s, "s7_badges", (W - w) / 2, top, w, h);
       return bottom;
     },
   });
 
-  /* 8. Сцена та екрани: 2 фото сцени + 1 телевізор, наближені так, щоб було видно лого */
+  /* 8. Запрошення на подію (старий слайд 15, обидва скріни) */
+  classic({
+    name: "Запрошення на подію", tag: "Дослідження", linkLabel: "Запрошення", url: URL.invite,
+    title: PARTNER + " на події: " + EV + ": запрошення на подію",
+    page: 15, frame: true, pill: "Запрошення на подію",
+  });
+
+  /* 9. Сцена та екрани: 2 фото сцени (старі слайди 21, 22) + 1 телевізор (старий 19), наближені, щоб було видно лого */
   classic({
     name: "Сцена та екрани", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
     title: PARTNER + " на події: " + EV + ": розміщення торговельних марок: на сцені та фотозоні (екрани)",
@@ -498,7 +500,7 @@ async function build() {
     },
   });
 
-  /* 9. Фото з події: сюди перенесено старі слайди 16 і 17 «Закритий захід | виступ» (8 фото) */
+  /* 10. Фото з події: сюди перенесено старі слайди 16 і 17 «Закритий захід | виступ» (8 фото) */
   classic({
     name: "Фото з події", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
     title: "Фото з події " + EV,
@@ -509,7 +511,7 @@ async function build() {
     },
   });
 
-  /* 10. Інформаційні матеріали — загальні цифри AIN */
+  /* 11. Інформаційні матеріали — загальні цифри AIN */
   {
     const s = slide("Інформаційні матеріали — цифри AIN", C.black);
     image(s, "cover", 0, 0, W, H, { name: "фон: обкладинка дослідження" });
@@ -538,7 +540,7 @@ async function build() {
     linkLine(s, URL.site, M, ly, { prefix: "Сайт AIN: ", white: true });
   }
 
-  /* 11–23. Інформаційні матеріали: нові назви + посилання окремим рядком під картинками */
+  /* 12–24. Інформаційні матеріали: нові назви + посилання окремим рядком під картинками */
   const IM = PARTNER + ": розміщення торговельних марок в інформаційних матеріалах: дослідження ";
   const IE = PARTNER + ": розміщення торговельних марок в інформаційних матеріалах: івент "; // пости про подію
   classic({ name: "Сайт AIN", tag: "Дослідження", linkLabel: "Сайт AIN", url: URL.research, title: IM + "на сайті AIN", page: 2, pill: "Результат прочитань: 9.427" });
@@ -618,7 +620,7 @@ async function build() {
     },
   });
 
-  /* 24–37. Дослідження: назви + посилання на дослідження під картинками */
+  /* 25–38. Дослідження: назви + посилання на дослідження під картинками */
   const RS = PARTNER + ": розміщення торговельних марок у дослідженні";
   classic({ name: "Логотипи в дослідженні 1", tag: "Дослідження", linkLabel: "Сайт AIN", url: URL.research, linkPrefix: "Дослідження: ", title: RS, pill: "Логотипи в дослідженні",
     draw: (s, top, bottom) => shotGrid(s, ["o24_0", "o24_3", "o24_1", "o24_2"], 2, M, top, W - 2 * M, bottom - top, 16) });
@@ -634,7 +636,7 @@ async function build() {
     });
   }
 
-  /* 38. Підсумок — без змін */
+  /* 39. Підсумок — без змін */
   {
     const s = slide("Підсумок (без змін)", C.red);
     image(s, "full38", 0, 0, W, H, { name: "оригінальний слайд 38" });
@@ -649,7 +651,7 @@ async function build() {
     if (SLIDES) {
       const before = figma.getSlideGrid().map((r) => r.slice()).filter((r) => r.length);
       await build();
-      // старі ряди без змін + один новий ряд з 38 слайдами в правильному порядку
+      // старі ряди без змін + один новий ряд з усіма новими слайдами в правильному порядку
       try {
         const ids = new Set(MINE.map((n) => n.id));
         const old = before.map((r) => r.filter((n) => !ids.has(n.id))).filter((r) => r.length);
