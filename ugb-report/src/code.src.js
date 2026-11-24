@@ -168,10 +168,19 @@ function place(node, x, y, anchor) {
 let PAGE = null, N = 0;
 const SLIDES = figma.editorType === "slides";
 const MINE = [];
+/* команда «Лише виправлені слайди»: будуються тільки ці номери (решта створюється тимчасово й видаляється) */
+const ONLY = figma.command === "fix" ? [6, 9, 10] : null;
+const TEMP = [];
 function slide(name, bg) {
   N++;
   const label = String(N).padStart(2, "0") + " — " + name;
   let f;
+  if (ONLY && ONLY.indexOf(N) < 0) {
+    if (SLIDES) f = figma.createSlide();
+    else { f = figma.createFrame(); f.resize(W, H); }
+    TEMP.push(f);
+    return f;
+  }
   if (SLIDES) {
     // Figma Slides: справжній слайд 1920×1080; порядок і окремий ряд задаються в кінці через setSlideGrid
     f = figma.createSlide();
@@ -495,18 +504,18 @@ async function build() {
     title: PARTNER + " на події: " + EV + ": розміщення торговельних марок: на сцені та фотозоні (екрани)",
     pill: "Закритий захід | сцена та екрани",
     draw(s, top, bottom) {
-      const g = photoGrid(s, ["s8_stage1", "s8_stage2", "s8_tv"], ["Сцена", "Сцена", "Екрани"], 3, M, top, W - 2 * M, bottom - top, 20);
+      const g = photoGrid(s, ["s8_stage1", "s8_stage2", "s8_tv"], ["Екран біля сцени", "Екран біля сцени", "Екран у фотозоні"], 3, M, top, W - 2 * M, bottom - top, 20);
       return g.y + g.h;
     },
   });
 
-  /* 10. Фото з події: сюди перенесено старі слайди 16 і 17 «Закритий захід | виступ» (8 фото) */
+  /* 10. Фото з події: сюди перенесено старий слайд 16 «Закритий захід | виступ» (4 фото) */
   classic({
     name: "Фото з події", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
     title: "Фото з події " + EV,
     pill: "Закритий захід | виступ",
     draw(s, top, bottom) {
-      const g = photoGrid(s, ["s9_1", "s9_2", "s9_3", "s9_4", "s9_5", "s9_6", "s9_7", "s9_8"], null, 4, M, top, W - 2 * M, bottom - top, 14);
+      const g = photoGrid(s, ["s9_1", "s9_2", "s9_3", "s9_4"], null, 2, M, top, W - 2 * M, bottom - top, 16);
       return g.y + g.h;
     },
   });
@@ -651,6 +660,7 @@ async function build() {
     if (SLIDES) {
       const before = figma.getSlideGrid().map((r) => r.slice()).filter((r) => r.length);
       await build();
+      for (const t of TEMP) { try { t.remove(); } catch (e) {} }
       // старі ряди без змін + один новий ряд з усіма новими слайдами в правильному порядку
       try {
         const ids = new Set(MINE.map((n) => n.id));
@@ -664,10 +674,11 @@ async function build() {
       PAGE.name = "Звіт UGB — оновлено " + new Date().toLocaleDateString("uk-UA");
       await figma.setCurrentPageAsync(PAGE);
       await build();
+      for (const t of TEMP) { try { t.remove(); } catch (e) {} }
       figma.viewport.scrollAndZoomIntoView(PAGE.children);
       where = "на сторінці «" + PAGE.name + "»";
     }
-    const msg = ["Готово: " + N + " слайдів " + where + "."];
+    const msg = [ONLY ? "Готово: слайди " + ONLY.join(", ") + " " + where + "." : "Готово: " + N + " слайдів " + where + "."];
     if (fontNote) msg.push(fontNote);
     if (LOG.length) { msg.push(LOG.length + " попереджень — див. консоль."); console.warn(LOG.join("\n")); }
     figma.closePlugin(msg.join(" "));

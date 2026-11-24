@@ -3,7 +3,7 @@
 // Usage: node tools/preview.js code.js <fonts_dir with NotoSans-*.ttf> <out_dir> [slides|figma]
 const { chromium } = require("playwright");
 const fs = require("fs"), path = require("path");
-const [, , codePath, fontsDir, outDir, mode] = process.argv;
+const [, , codePath, fontsDir, outDir, mode, cmd] = process.argv;
 fs.mkdirSync(outDir, { recursive: true });
 
 const fontCss = ["Regular:400", "Medium:500", "SemiBold:600", "Bold:700"].map((s) => {
@@ -71,6 +71,7 @@ function textNode() {
 const pages = []; let grid = null; let finalGrid = null;
 window.figma = {
   editorType: window.MODE,
+  command: window.CMD || "all",
   listAvailableFontsAsync: async () => ["Regular", "Medium", "SemiBold", "Bold"].map((s) => ({ fontName: { family: "Noto Sans", style: s } })),
   loadFontAsync: async () => {},
   createPage() { if (window.MODE === "slides") throw new Error("no pages in Slides"); const p = node("PAGE"); pages.push(p); return p; },
@@ -141,7 +142,7 @@ window.RUN = async () => {
   await p.setContent(html);
   await p.evaluate(() => document.fonts.ready);
   await p.evaluate(async () => { for (const w of [400, 500, 600, 700]) await document.fonts.load(w + " 20px 'Noto Sans'"); });
-  await p.evaluate(([c, m]) => { window.CODE = c; window.MODE = m; }, [code, mode || "slides"]);
+  await p.evaluate(([c, m, k]) => { window.CODE = c; window.MODE = m; window.CMD = k; }, [code, mode || "slides", cmd || "all"]);
   await p.addScriptTag({ content: harness });
   const res = await p.evaluate(() => window.RUN());
   console.log(res.msg, "\n" + res.n, "slides");
