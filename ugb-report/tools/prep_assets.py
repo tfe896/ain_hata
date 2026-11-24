@@ -79,17 +79,33 @@ PHOTOS = {
     "s6_stand_a": (drv("0015"), None, 0, 0),         # whole stand, all text visible
     "s6_stand_b": (pi("x-023-002"), None, 0, 0),
     "s7_badges": (pi("x-018-000"), None, 0, 0),     # slide 7: the badge photo
-    "s8_stage1": (drv("0249"), 16 / 9, 0.5, 0.5),  # slide 8: stage + screen with logos
-    "s8_stage2": (pi("x-021-000"), 16 / 9, 0.5, 0.45),
-    "s8_tv1": (pi("x-019-000"), 16 / 9, 0.5, 0.42),
-    "s8_tv2": (pi("x-020-000"), 16 / 9, 0.5, 0.45),
-    "s9_1": (pi("x-016-000"), 16 / 9, 0.5, 0.55),  # slide 9 = old "photos from the event" slide
-    "s9_2": (pi("x-016-006"), 16 / 9, 0.5, 0.5),
-    "s9_3": (pi("x-016-004"), 16 / 9, 0.5, 0.55),
-    "s9_4": (pi("x-016-002"), 16 / 9, 0.5, 0.5),
+    "s9_1": (pi("x-016-000"), None, 0, 0),  # slide 9 = old "photos from the event" slides 16-17, uncropped
+    "s9_2": (pi("x-016-006"), None, 0, 0),
+    "s9_3": (pi("x-016-004"), None, 0, 0),
+    "s9_4": (pi("x-016-002"), None, 0, 0),
 }
+# slide 9 also gets the 4 photos of old slide 17 (old 16 + 17 were both "photos from the event")
+for i, f in enumerate(["x-017-000", "x-017-002", "x-017-004", "x-017-006"]):
+    PHOTOS["s9_%d" % (i + 5)] = (pi(f), None, 0, 0)
 for key, (im, asp, cx, cy) in PHOTOS.items():
-    put(key, cropf(im, asp, cx, cy), maxw=1400, q=82)
+    put(key, cropf(im, asp, cx, cy), maxw=1000 if key.startswith("s9_") else 1400, q=82)
+def cropbox(im, b):
+    w, h = im.size
+    return im.crop((round(b[0] * w), round(b[1] * h), round(b[2] * w), round(b[3] * h)))
+# slide 8: zoomed in on the screens so the partner logos are readable; all 0.92:1, x-range + vertical centre
+def zoom(im, x0, x1, cy, aspect=0.92):
+    w, h = im.size; cw = (x1 - x0) * w; ch = cw / aspect
+    y0 = min(max(0, cy * h - ch / 2), h - ch)
+    return im.crop((round(x0 * w), round(y0), round(x1 * w), round(y0 + ch)))
+put("s8_stage1", zoom(drv("0249"), 0.0, 0.60, 0.58), maxw=1400, q=84)       # stage + "Панель 1" screen
+put("s8_stage2", zoom(pi("x-021-000"), 0.55, 1.0, 0.47), maxw=1400, q=84)   # screen with speakers (UGB)
+put("s8_tv", zoom(pi("x-019-000"), 0.17, 0.73, 0.45), maxw=1400, q=84)      # TV with the cover
+# slide 7: the invitation page with the programme (old slide 15, original image)
+put("inv_full", Image.open(os.path.join(extra, "orig", "p-015-006.jpg")).convert("RGB"), maxw=1000, q=86)
+# slide 21: the three articles without the right sidebar of the site (bigger on the slide)
+# (left menu and right column of the site cut off: only the article itself, so it can be big)
+for key, f in {"art1": "p-012-006", "art2": "p-012-000", "art3": "p-012-002"}.items():
+    put(key, cropbox(Image.open(os.path.join(extra, "orig", f + ".jpg")).convert("RGB"), (0.226, 0, 0.735, 1)), maxw=1100, q=88)
 put("cover", pi("x-001-000"), maxw=1700)
 # full-bleed backgrounds of slides 2-4 (Drive)
 for k, f in (("bg2", "0116"), ("bg3", "0248"), ("bg4", "0135")):

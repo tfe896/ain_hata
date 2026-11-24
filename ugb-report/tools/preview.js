@@ -80,6 +80,10 @@ window.figma = {
   createSlideRow() { throw new Error("createSlideRow should not be needed"); },
   createSlide() { if (!grid) grid = [[]]; const f = frame(); f.type = "SLIDE"; f.width = 1920; f.height = 1080; f.resize = () => { throw new Error("cannot resize slide"); }; grid[grid.length - 1].push(f); return f; },
   createFrame: frame, createRectangle: () => node("RECTANGLE"), createText: textNode,
+  createVector() { const v = node("VECTOR"); let vp = [];
+    Object.defineProperty(v, "vectorPaths", { get: () => vp, set: (p) => { vp = p; const nums = p.map((q) => q.data).join(" ").match(/-?[0-9.]+/g).map(Number);
+      const xs = nums.filter((_, i) => i % 2 === 0), ys = nums.filter((_, i) => i % 2 === 1); v.width = Math.max(...xs); v.height = Math.max(...ys); if (v.parent && v.parent.relayout) v.parent.relayout(); } });
+    return v; },
   createImage(bytes) { const h = "h" + hn++; hashes[h] = bytes; return { hash: h }; },
   base64Decode(s) { return s; },
   viewport: { scrollAndZoomIntoView() {} },
@@ -91,6 +95,11 @@ function render(s, idx) {
   const draw = (n, host, isRoot) => {
     const el = n.type === "TEXT" ? textEl(n) : document.createElement("div");
     el.style.position = "absolute"; el.style.left = (isRoot ? 0 : n.x) + "px"; el.style.top = (isRoot ? 0 : n.y) + "px";
+    if (n.type === "VECTOR") {
+      el.style.width = n.width + "px"; el.style.height = n.height + "px"; el.style.overflow = "visible";
+      el.innerHTML = '<svg width="' + n.width + '" height="' + n.height + '" style="overflow:visible"><path d="' + n.vectorPaths.map((q) => q.data).join(" ") + '" fill="none" stroke="' + css(n.strokes[0].color) + '" stroke-width="' + n.strokeWeight + '" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      host.appendChild(el); return;
+    }
     if (n.type !== "TEXT") {
       el.style.width = n.width + "px"; el.style.height = n.height + "px"; el.style.borderRadius = (n.cornerRadius || 0) + "px"; el.style.overflow = isRoot ? "hidden" : "hidden";
       const bg = [];
