@@ -3,7 +3,7 @@
   "id": "ain-ugb-report-update",
   "api": "1.0.0",
   "main": "code.js",
-  "editorType": ["figma"],
+  "editorType": ["figma", "slides"],
   "documentAccess": "dynamic-page",
   "networkAccess": { "allowedDomains": ["none"] }
 }

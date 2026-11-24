@@ -6,7 +6,7 @@ fs.mkdirSync(outDir, { recursive: true });
 let imgs = {}, hashN = 0, errors = [];
 function node(type) {
   const n = { type, name: "", x: 0, y: 0, width: 100, height: 100, children: [], fills: [], strokes: [], parent: null,
-    appendChild(c) { c.parent = this; this.children.push(c); if (this.layoutMode && this.layoutMode !== "NONE") this.relayout(); },
+    appendChild(c) { if (c.parent && c.parent.children) { const k = c.parent.children.indexOf(c); if (k >= 0) c.parent.children.splice(k, 1); } c.parent = this; this.children.push(c); if (this.layoutMode && this.layoutMode !== "NONE") this.relayout(); },
     resize(w, h) { this.width = w; this.height = h; if (this.type === "TEXT") this.measure(); },
     setPluginData() {}, };
   return n;
@@ -48,10 +48,15 @@ function textNode() {
   return t;
 }
 const pages = [];
+const MODE = process.env.EDITOR || "figma";
+let grid = null;
 global.figma = {
+  editorType: MODE,
+  createSlideRow() { if (!grid) { grid = node("SLIDE_GRID"); pages.push(grid); } const r = node("SLIDE_ROW"); grid.appendChild(r); return r; },
+  createSlide() { if (!grid) this.createSlideRow(); const f = frame(); f.type = "SLIDE"; f.width = 1920; f.height = 1080; f.resize = () => { throw new Error("cannot resize slide"); }; grid.children[grid.children.length - 1].appendChild(f); return f; },
   listAvailableFontsAsync: async () => ["Regular", "Medium", "SemiBold", "Bold"].map((s) => ({ fontName: { family: "Noto Sans", style: s } })),
   loadFontAsync: async () => {},
-  createPage() { const p = node("PAGE"); pages.push(p); return p; },
+  createPage() { if (MODE === "slides") throw new Error("createPage not available in Slides"); const p = node("PAGE"); pages.push(p); return p; },
   setCurrentPageAsync: async () => {},
   createFrame: frame, createRectangle: () => node("RECTANGLE"), createText: textNode,
   createImage(bytes) { const h = "h" + hashN++; imgs[h] = bytes; return { hash: h }; },
@@ -61,7 +66,8 @@ global.figma = {
 };
 global.console.warn = (...a) => console.log("WARN", ...a);
 function finish() {
-  const page = pages[0]; if (!page) return;
+  let page = pages[0]; if (!page) return;
+  if (page.type === "SLIDE_GRID") { const rows = page.children; const last = rows[rows.length - 1]; page = { children: last.children.map((c) => { c.x = 0; c.y = 0; return c; }) }; console.log("rows:", rows.length, "slides in last row:", last.children.length); }
   const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
   const hashKey = {}; // map hash -> data uri
   for (const [h, b] of Object.entries(imgs)) hashKey[h] = "data:image/" + (b[0] === 0x89 ? "png" : "jpeg") + ";base64," + Buffer.from(b).toString("base64");

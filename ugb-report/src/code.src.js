@@ -1,6 +1,7 @@
 /* AIN × UGB — звіт «Українська енергетика»: оновлена презентація (38 слайдів).
    Запуск: Figma Desktop → Plugins → Development → Import plugin from manifest… → ugb-report/manifest.json → Run.
-   Плагін нічого не змінює в наявних сторінках: він створює НОВУ сторінку з усіма слайдами.
+   Працює у Figma Slides (додає 38 слайдів окремим рядом у кінці) і у Figma Design (створює нову сторінку).
+   Наявні слайди/сторінки не змінює.
    Згенерований файл: картинки вбудовує ugb-report/build.py. Правте src/code.src.js, а не code.js. */
 const A = __ASSETS__;
 const IMGS = A.img;
@@ -149,10 +150,22 @@ function place(node, x, y, anchor) {
 
 /* ---------------- елементи слайда ---------------- */
 let PAGE = null, N = 0;
+const SLIDES = figma.editorType === "slides";
+let ROW = null;
 function slide(name, bg) {
   N++;
+  const label = String(N).padStart(2, "0") + " — " + name;
+  if (SLIDES) {
+    // Figma Slides: справжній слайд 1920×1080 у новому ряду сітки (в кінці презентації)
+    const f = figma.createSlide();
+    if (ROW) { try { ROW.appendChild(f); } catch (e) { LOG.push("Ряд слайдів: " + e.message); } }
+    else { try { ROW = f.parent && f.parent.type === "SLIDE_ROW" ? f.parent : null; } catch (e) {} }
+    f.name = label;
+    try { f.fills = [solid(bg || C.white)]; } catch (e) { LOG.push("Фон слайда: " + e.message); }
+    return f;
+  }
   const f = figma.createFrame();
-  f.name = String(N).padStart(2, "0") + " — " + name;
+  f.name = label;
   f.resize(W, H);
   f.fills = [solid(bg || C.white)];
   f.clipsContent = true;
@@ -551,12 +564,22 @@ async function build() {
   try {
     await loadFonts();
     const d = new Date();
-    PAGE = figma.createPage();
-    PAGE.name = "Звіт UGB — оновлено " + d.toLocaleDateString("uk-UA");
-    await figma.setCurrentPageAsync(PAGE);
-    await build();
-    figma.viewport.scrollAndZoomIntoView(PAGE.children);
-    const msg = ["Готово: " + N + " слайдів на сторінці «" + PAGE.name + "»."];
+    let where;
+    if (SLIDES) {
+      // окремий новий ряд у сітці, щоб нові слайди не змішались зі старими
+      try { ROW = figma.createSlideRow(); } catch (e) { ROW = null; LOG.push("Новий ряд: " + e.message); }
+      await build();
+      try { figma.viewport.slidesView = "grid"; } catch (e) {}
+      where = "в кінці презентації (окремий ряд у сітці слайдів)";
+    } else {
+      PAGE = figma.createPage();
+      PAGE.name = "Звіт UGB — оновлено " + d.toLocaleDateString("uk-UA");
+      await figma.setCurrentPageAsync(PAGE);
+      await build();
+      figma.viewport.scrollAndZoomIntoView(PAGE.children);
+      where = "на сторінці «" + PAGE.name + "»";
+    }
+    const msg = ["Готово: " + N + " слайдів " + where + "."];
     if (fontNote) msg.push(fontNote);
     if (LOG.length) { msg.push(LOG.length + " попереджень — див. консоль."); console.warn(LOG.join("\n")); }
     figma.closePlugin(msg.join(" "));
