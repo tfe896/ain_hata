@@ -96,18 +96,16 @@ def zoom(im, x0, x1, cy, aspect=0.92):
     y0 = min(max(0, cy * h - ch / 2), h - ch)
     return im.crop((round(x0 * w), round(y0), round(x1 * w), round(y0 + ch)))
 # originals of old slides 21, 22 (stage) and 19 (TV); old 20 is the same TV shot, left out on request
-# slide 9 "на сцені (екрани)": the stage (old slide 17 photo) + 3 screens by the stage (old 21, 22, 19),
-# all 16:9 and tight on the screens so the partner logos on them are readable
+# slide 9 "на сцені (екрани)": the stage (old slide 17 photo) + the screen where the sponsors are clearly visible (old 19)
 def box169(im, x0, x1, cy, aspect=16 / 9):
     w, h = im.size; cw = (x1 - x0) * w; ch = cw / aspect
     y0 = min(max(0, cy * h - ch / 2), h - ch)
     return im.crop((round(x0 * w), round(y0), round(x1 * w), round(y0 + ch)))
 put("s9_stage", box169(pi("x-017-002"), 0.0, 1.0, 0.5), maxw=1400, q=86)
-put("s9_scr1", box169(pi("x-021-000"), 0.55, 1.0, 0.40), maxw=1400, q=86)
-put("s9_scr2", box169(pi("x-022-000"), 0.40, 0.95, 0.38), maxw=1400, q=86)
-put("s9_scr3", box169(pi("x-019-000"), 0.12, 0.72, 0.36), maxw=1400, q=86)
-# slide 7: second badge photo (shot in the office): the 3 right columns, no grey table visible, no text cut
-put("s7_badges2", Image.open(os.path.join(extra, "badge", "src.jpg")).convert("RGB").crop((548, 160, 1752, 1812)), maxw=1000, q=86)
+put("s9_screen", box169(pi("x-019-000"), 0.165, 0.605, 0.385), maxw=1600, q=88)
+# slide 7: the badge close up, both sides (office photos, straightened and cropped to the card by tools/card_crop.py)
+put("s7_card_front", Image.open(os.path.join(extra, "badge", "front_card.jpg")).convert("RGB"), maxw=900, q=88)
+put("s7_card_qr", Image.open(os.path.join(extra, "badge", "qr_card.jpg")).convert("RGB"), maxw=900, q=88)
 # invitation slide (old slide 15): both original screenshots in the old layout (frames p-015-000/004 skipped)
 put("inv_full", Image.open(os.path.join(extra, "orig", "p-015-006.jpg")).convert("RGB"), maxw=1000, q=86)
 put("inv_top", Image.open(os.path.join(extra, "orig", "p-015-002.jpg")).convert("RGB"), maxw=1400, q=86)

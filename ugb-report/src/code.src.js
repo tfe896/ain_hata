@@ -319,30 +319,32 @@ function classic(o) {
   return s;
 }
 
-/* 7. Бейджі: фото бейджів учасників (старий слайд 18) + нове фото 9 бейджів (обрізане без сірого фону) */
+/* 7. Бейджі: фото бейджів учасників (старий слайд 18) + бейдж крупно з обох боків (обрізано по картці, без столу) */
 function slideBadges() {
   classic({
     name: "Бейджі", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
     title: PARTNER + " на події: " + EV + ": розміщення торговельних марок: на бейджах",
     pill: "Закритий захід | бейджі учасників",
     draw(s, top, bottom) {
-      const h = bottom - top, gap = 24;
-      const w1 = h * ratio("s7_badges"), w2 = h * ratio("s7_badges2"), x0 = (W - (w1 + gap + w2)) / 2;
-      photo(s, "s7_badges", x0, top, w1, h);
-      photo(s, "s7_badges2", x0 + w1 + gap, top, w2, h);
-      return bottom;
+      const keys = ["s7_badges", "s7_card_front", "s7_card_qr"], gap = 24;
+      const sum = keys.reduce((a, k) => a + ratio(k), 0);
+      const h = Math.min(bottom - top, (W - 2 * M - gap * (keys.length - 1)) / sum);
+      let x = (W - (h * sum + gap * (keys.length - 1))) / 2;
+      const y = top + (bottom - top - h) / 2;
+      for (const k of keys) { const w = h * ratio(k); photo(s, k, x, y, w, h); x += w + gap; }
+      return y + h;
     },
   });
 }
 
-/* 9. Сцена (екрани): фото сцени + 3 екрани біля сцени, наближені так, щоб читалися логотипи */
+/* 9. Сцена (екрани): фото сцени + екран, на якому чітко видно спонсорів */
 function slideStage() {
   classic({
     name: "Сцена (екрани)", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
     title: PARTNER + " на події: " + EV + ": розміщення торговельних марок: на сцені (екрани)",
     pill: "Закритий захід | сцена та екрани",
     draw(s, top, bottom) {
-      const g = photoGrid(s, ["s9_stage", "s9_scr1", "s9_scr2", "s9_scr3"], ["Сцена", "Екран біля сцени", "Екран біля сцени", "Екран біля сцени"], 2, M, top, W - 2 * M, bottom - top, 20);
+      const g = photoGrid(s, ["s9_stage", "s9_screen"], ["Сцена", "Екран біля сцени"], 2, M, top, W - 2 * M, bottom - top, 24);
       return g.y + g.h;
     },
   });
