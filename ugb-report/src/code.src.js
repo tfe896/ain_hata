@@ -167,6 +167,7 @@ function place(node, x, y, anchor) {
 /* ---------------- елементи слайда ---------------- */
 let PAGE = null, N = 0;
 const SLIDES = figma.editorType === "slides";
+const PART = __PART__; // null = уся презентація; "two" = лише слайди 7 (бейджі) і 9 (сцена)
 const MINE = [];
 function slide(name, bg) {
   N++;
@@ -316,6 +317,35 @@ function classic(o) {
   for (const [prefix, url] of links) { const l = linkLine(s, url, W / 2, y, { anchor: "tc", prefix }); y += l.height + 4; }
   if (o.pill) bottomPill(s, o.pill);
   return s;
+}
+
+/* 7. Бейджі: фото бейджів учасників (старий слайд 18) + нове фото 9 бейджів (обрізане без сірого фону) */
+function slideBadges() {
+  classic({
+    name: "Бейджі", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
+    title: PARTNER + " на події: " + EV + ": розміщення торговельних марок: на бейджах",
+    pill: "Закритий захід | бейджі учасників",
+    draw(s, top, bottom) {
+      const h = bottom - top, gap = 24;
+      const w1 = h * ratio("s7_badges"), w2 = h * ratio("s7_badges2"), x0 = (W - (w1 + gap + w2)) / 2;
+      photo(s, "s7_badges", x0, top, w1, h);
+      photo(s, "s7_badges2", x0 + w1 + gap, top, w2, h);
+      return bottom;
+    },
+  });
+}
+
+/* 9. Сцена (екрани): фото сцени + 3 екрани біля сцени, наближені так, щоб читалися логотипи */
+function slideStage() {
+  classic({
+    name: "Сцена (екрани)", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
+    title: PARTNER + " на події: " + EV + ": розміщення торговельних марок: на сцені (екрани)",
+    pill: "Закритий захід | сцена та екрани",
+    draw(s, top, bottom) {
+      const g = photoGrid(s, ["s9_stage", "s9_scr1", "s9_scr2", "s9_scr3"], ["Сцена", "Екран біля сцени", "Екран біля сцени", "Екран біля сцени"], 2, M, top, W - 2 * M, bottom - top, 20);
+      return g.y + g.h;
+    },
+  });
 }
 
 /* ================= СЛАЙДИ ================= */
@@ -470,17 +500,8 @@ async function build() {
     },
   });
 
-  /* 7. Бейдж — одне фото, ціле (старий слайд 18) */
-  classic({
-    name: "Бейджі", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
-    title: PARTNER + " на події: " + EV + ": розміщення торговельних марок: на бейджах",
-    pill: "Закритий захід | бейджі учасників",
-    draw(s, top, bottom) {
-      const h = bottom - top, w = h * ratio("s7_badges");
-      photo(s, "s7_badges", (W - w) / 2, top, w, h);
-      return bottom;
-    },
-  });
+  /* 7. Бейджі */
+  slideBadges();
 
   /* 8. Запрошення на подію (старий слайд 15, обидва скріни) */
   classic({
@@ -489,16 +510,8 @@ async function build() {
     page: 15, frame: true, pill: "Запрошення на подію",
   });
 
-  /* 9. Сцена та екрани: 2 фото сцени (старі слайди 21, 22) + 1 телевізор (старий 19), наближені, щоб було видно лого */
-  classic({
-    name: "Сцена та екрани", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
-    title: PARTNER + " на події: " + EV + ": розміщення торговельних марок: на сцені та фотозоні (екрани)",
-    pill: "Закритий захід | сцена та екрани",
-    draw(s, top, bottom) {
-      const g = photoGrid(s, ["s8_stage1", "s8_stage2", "s8_tv"], ["Екран біля сцени", "Екран біля сцени", "Екран у фотозоні"], 3, M, top, W - 2 * M, bottom - top, 20);
-      return g.y + g.h;
-    },
-  });
+  /* 9. Сцена (екрани) */
+  slideStage();
 
   /* 10. Фото з події: сюди перенесено старий слайд 16 «Закритий захід | виступ» (4 фото) */
   classic({
@@ -644,6 +657,12 @@ async function build() {
   }
 }
 
+/* лише два оновлені слайди, щоб вставити їх у вже існуючу презентацію */
+async function buildTwo() {
+  N = 6; slideBadges();
+  N = 8; slideStage();
+}
+
 /* ---------------- запуск ---------------- */
 (async () => {
   try {
@@ -651,7 +670,7 @@ async function build() {
     let where;
     if (SLIDES) {
       const before = figma.getSlideGrid().map((r) => r.slice()).filter((r) => r.length);
-      await build();
+      await (PART === "two" ? buildTwo() : build());
       // старі ряди без змін + один новий ряд з усіма новими слайдами в правильному порядку
       try {
         const ids = new Set(MINE.map((n) => n.id));
@@ -664,11 +683,11 @@ async function build() {
       PAGE = figma.createPage();
       PAGE.name = "Звіт UGB — оновлено " + new Date().toLocaleDateString("uk-UA");
       await figma.setCurrentPageAsync(PAGE);
-      await build();
+      await (PART === "two" ? buildTwo() : build());
       figma.viewport.scrollAndZoomIntoView(PAGE.children);
       where = "на сторінці «" + PAGE.name + "»";
     }
-    const msg = ["Готово: " + N + " слайдів " + where + "."];
+    const msg = [PART === "two" ? "Готово: 2 слайди (07 — бейджі, 09 — сцена) " + where + "." : "Готово: " + N + " слайдів " + where + "."];
     if (fontNote) msg.push(fontNote);
     if (LOG.length) { msg.push(LOG.length + " попереджень — див. консоль."); console.warn(LOG.join("\n")); }
     figma.closePlugin(msg.join(" "));

@@ -1,0 +1,9 @@
+{
+  "name": "AIN × UGB — 2 слайди (бейджі, сцена)",
+  "id": "ain-ugb-report-two-slides",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma", "slides"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": { "allowedDomains": ["none"] }
+}
