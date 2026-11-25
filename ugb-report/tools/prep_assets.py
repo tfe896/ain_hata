@@ -40,6 +40,14 @@ mask = lg.convert("L").point(lambda v: 255 - v)
 for name, col in (("logo_k", (0, 0, 0)), ("logo_w", (255, 255, 255))):
     o = Image.new("RGBA", lg.size, col + (0,)); o.putalpha(mask)
     put(name, o, maxw=900, fmt="PNG")
+# AIN mark only (the left part of the same logo, up to the first empty gap) — for the general partners' report
+cols = [any(mask.getpixel((x, y)) > 60 for y in range(mask.height)) for x in range(mask.width)]
+x0 = cols.index(True); x1 = x0
+while x1 < len(cols) and (cols[x1] or any(cols[x1:x1 + 6])): x1 += 1
+ain_mask = mask.crop((x0, 0, x1, mask.height))
+for name, col in (("ain_k", (0, 0, 0)), ("ain_w", (255, 255, 255))):
+    o = Image.new("RGBA", ain_mask.size, col + (0,)); o.putalpha(ain_mask)
+    put(name, o, maxw=400, fmt="PNG")
 
 RED = (253, 53, 51)
 # ---- screenshots: the ORIGINAL images embedded in the PDF (the deck clipped/overlapped some of them) ----

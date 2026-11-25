@@ -167,7 +167,8 @@ function place(node, x, y, anchor) {
 /* ---------------- елементи слайда ---------------- */
 let PAGE = null, N = 0;
 const SLIDES = figma.editorType === "slides";
-const PART = "banner"; // null = уся презентація; "two" = лише слайди 7 (бейджі) і 9 (сцена); "banner" = лише слайд з банером
+const PART = "banner";
+const GEN = PART === "general"; // загальний звіт для партнерів дослідження: без прив'язки до Укргазбанку // null = уся презентація; "two" = лише слайди 7 (бейджі) і 9 (сцена); "banner" = лише слайд з банером
 const MINE = [];
 function slide(name, bg) {
   N++;
@@ -192,6 +193,11 @@ function slide(name, bg) {
   return f;
 }
 function logos(s, white) {
+  if (GEN) { // лише лого AIN
+    const q = ratio("ain_k");
+    image(s, white ? "ain_w" : "ain_k", M, 50, Math.round(48 * q), 48, { mode: "FIT", name: "logo AIN" });
+    return;
+  }
   const q = ratio("logo_k");
   image(s, white ? "logo_w" : "logo_k", M, 50, Math.round(48 * q), 48, { mode: "FIT", name: "logos AIN × UGB" });
 }
@@ -214,7 +220,7 @@ function header(s, tag, linkLabel, url, o) {
   place(g, W - M, 48, "tr");
   return g;
 }
-const PARTNER = "Прояви партнера Укргазбанк";
+const PARTNER = GEN ? "Прояви партнерів" : "Прояви партнера Укргазбанк";
 /* назва слайда: «Прояви партнера Укргазбанк» — червоним, решта — чорним */
 function title(s, str, o) {
   o = o || {};
@@ -511,8 +517,8 @@ async function build() {
     l.y = H - 40 - l.height;
   }
 
-  /* 6. Стенд — фото цілі, без обрізки */
-  classic({
+  /* 6. Стенд Укргазбанку — фото цілі, без обрізки (у загальному звіті немає) */
+  if (!GEN) classic({
     name: "Стенд партнера", tag: "Подія AIN.UA", linkLabel: "Фото з події", url: URL.photos, linkPrefix: "Фото з події: ",
     title: PARTNER + " на події: " + EV + ": розміщення найменування та торговельних марок на стенді",
     pill: "Закритий захід | стенд",
@@ -583,6 +589,7 @@ async function build() {
   const IM = PARTNER + ": розміщення торговельних марок в інформаційних матеріалах: дослідження ";
   const IE = PARTNER + ": розміщення торговельних марок в інформаційних матеріалах: івент "; // пости про подію
   classic({ name: "Сайт AIN", tag: "Дослідження", linkLabel: "Сайт AIN", url: URL.research, title: IM + "на сайті AIN", page: 2, pill: "Результат прочитань: 9.427" });
+  if (GEN) slideBanner(); // банер дослідження на сайті AIN + статистика
   classic({ name: "Facebook 1", tag: "Дослідження", linkLabel: "Facebook", url: URL.fb1, title: IM + "в Facebook AIN", page: 3, pill: "Результат охоплень (органіка+реклама): 600,733" });
   classic({ name: "Facebook 2 (анонс івенту)", tag: "Івент", linkLabel: "Facebook", url: URL.fb2, title: IE + "в Facebook AIN", page: 4, pill: "Результат охоплень: 1,047" });
   classic({ name: "Facebook 3 (анонс івенту)", tag: "Івент", linkLabel: "Facebook", url: URL.fb3, title: IE + "в Facebook AIN", page: 5, pill: "Результат охоплень: 1,076" });
@@ -670,6 +677,7 @@ async function build() {
   // за змістом: кейс CHOCOBOOM — лише старі 28, 31, 32 (стор. 147–149 дослідження), решта — коментарі Спонсора
   const T26 = { 26: EXP, 27: EXP, 28: CASE, 29: EXP, 30: EXP, 31: CASE, 32: CASE, 33: EXP, 34: EXP, 35: EXP, 36: EXP, 37: EXP };
   for (let n = 26; n <= 37; n++) {
+    if (GEN) break; // коментарі й кейси Укргазбанку — лише у звіті для банку
     classic({
       name: (T26[n] === CASE ? "Кейси Спонсора в дослідженні " : "Коментарі Спонсора в дослідженні ") + n, tag: "Дослідження", linkLabel: "Сайт AIN", url: URL.research, linkPrefix: "Дослідження: ",
       title: T26[n], page: n, pill: "Експертиза в дослідженні",
@@ -680,6 +688,10 @@ async function build() {
   {
     const s = slide("Підсумок (без змін)", C.red);
     image(s, "full38", 0, 0, W, H, { name: "оригінальний слайд 38" });
+    if (GEN) { // прибрати лого UGB з картинки: червона плашка + лише лого AIN
+      rect(s, 30, 30, 380, 92, [solid(C.red)], "без лого UGB");
+      logos(s, true);
+    }
   }
 }
 
@@ -711,7 +723,7 @@ const buildPart = () => (PART === "two" ? buildTwo() : PART === "banner" ? build
       where = "окремим рядом у кінці сітки слайдів";
     } else {
       PAGE = figma.createPage();
-      PAGE.name = "Звіт UGB — оновлено " + new Date().toLocaleDateString("uk-UA");
+      PAGE.name = (GEN ? "Звіт для партнерів — " : "Звіт UGB — оновлено ") + new Date().toLocaleDateString("uk-UA");
       await figma.setCurrentPageAsync(PAGE);
       await buildPart();
       figma.viewport.scrollAndZoomIntoView(PAGE.children);

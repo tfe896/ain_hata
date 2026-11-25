@@ -1,0 +1,9 @@
+{
+  "name": "AIN — звіт для партнерів дослідження «Українська енергетика»",
+  "id": "ain-energy-research-partners-report",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma", "slides"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": { "allowedDomains": ["none"] }
+}
