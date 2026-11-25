@@ -108,7 +108,7 @@ put("s7_card_front", Image.open(os.path.join(extra, "badge2", "front_card.jpg"))
 put("s7_card_qr", Image.open(os.path.join(extra, "badge2", "qr_card.jpg")).convert("RGB"), maxw=900, q=88)
 # extra slide: the top banner of the research on the AIN home page + its campaign statistics
 # (browser bar and scrollbar cut off; the AIN header under the banner shows it is ain.ua)
-put("s13_banner", Image.open(os.path.join(extra, "banner", "site.webp")).convert("RGB").crop((0, 110, 1900, 612)), maxw=1600, q=88)  # banner + AIN header
+put("s13_banner", Image.open(os.path.join(extra, "banner", "site.webp")).convert("RGB").crop((0, 110, 1900, 1016)), maxw=1600, q=88)
 put("s13_stats", Image.open(os.path.join(extra, "banner", "stats.png")).convert("RGB"), maxw=1740, q=90)
 # invitation slide (old slide 15): both original screenshots in the old layout (frames p-015-000/004 skipped)
 put("inv_full", Image.open(os.path.join(extra, "orig", "p-015-006.jpg")).convert("RGB"), maxw=1000, q=86)

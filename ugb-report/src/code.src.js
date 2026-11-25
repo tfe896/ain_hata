@@ -357,19 +357,19 @@ function slideBanner() {
     title: PARTNER + ": розміщення торговельних марок в інформаційних матеріалах: банер дослідження на сайті AIN",
     pill: "Результат охоплень: 70.089",
     draw(s, top, bottom) {
-      // одне під одним, однакової ширини: зверху банер на головній ain.ua, під ним статистика кампанії
-      const keys = ["s13_banner", "s13_stats"], gap = 18;
-      const inv = keys.reduce((a, k) => a + 1 / ratio(k), 0);
-      const w = Math.min(W - 2 * M, (bottom - top - gap) / inv);
-      const x = Math.round((W - w) / 2);
-      let y = top + (bottom - top - (w * inv + gap)) / 2;
+      // поруч: зліва банер на головній ain.ua, справа статистика кампанії
+      const keys = ["s13_banner", "s13_stats"], gap = 24;
+      const sum = keys.reduce((a, k) => a + ratio(k), 0);
+      const h = Math.min(bottom - top, (W - 2 * M - gap) / sum);
+      let x = (W - (h * sum + gap)) / 2;
+      const y = top + (bottom - top - h) / 2;
       for (const k of keys) {
-        const h = w / ratio(k);
-        const r = image(s, k, x, Math.round(y), Math.round(w), Math.round(h), { mode: "FIT", radius: 12, name: k === "s13_banner" ? "банер на сайті" : "статистика банера" });
+        const w = h * ratio(k);
+        const r = image(s, k, Math.round(x), Math.round(y), Math.round(w), Math.round(h), { mode: "FIT", radius: 12, name: k === "s13_banner" ? "банер на сайті" : "статистика банера" });
         r.strokes = [solid("#DDDDDD")]; r.strokeWeight = 1;
-        y += h + gap;
+        x += w + gap;
       }
-      return y - gap;
+      return y + h;
     },
   });
 }
