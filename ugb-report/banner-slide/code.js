@@ -312,7 +312,8 @@ function classic(o) {
   header(s, o.tag, o.linkLabel, o.url);
   const t = title(s, o.title);
   const top = Math.round(t.y + t.height + 26);
-  const links = o.links || (o.under === false ? [] : [[o.linkPrefix || "Посилання: ", o.under || o.url]]);
+  // у загальному звіті окремих рядків з адресою немає: посилання — гіперлінком у пігулці в правому верхньому куті
+  const links = GEN ? [] : o.links || (o.under === false ? [] : [[o.linkPrefix || "Посилання: ", o.under || o.url]]);
   const linkH = links.length * 32;
   const bottom = (o.pill ? PILL_TOP - 18 : H - 40) - (links.length ? linkH + 12 : 0);
   let end;
@@ -400,10 +401,10 @@ async function build() {
     darkOverlay(s, 0.2, 0.88);
     logos(s, true);
     header(s, "Подія AIN.UA", "Фото з події", URL.photos, { invert: true });
-    const l = linkLine(s, URL.photos, M + 12, 0, { prefix: "Фото з події: ", white: true, size: 22 });
-    l.y = H - 48 - l.height;
+    const l = GEN ? null : linkLine(s, URL.photos, M + 12, 0, { prefix: "Фото з події: ", white: true, size: 22 });
+    if (l) l.y = H - 48 - l.height;
     const d = text(s, "проведена у Києві 21 жовтня 2026 року", { size: 36, f: "m", color: C.white, x: M + 12, y: 0, name: "date" });
-    d.y = l.y - 40 - d.height;
+    d.y = (l ? l.y - 40 : H - 90) - d.height;
     const e = text(s, EV, { size: 76, f: "b", color: C.white, x: M + 12, y: 0, w: 1600, lh: 1.08, name: "event" });
     e.y = d.y - 20 - e.height;
     const k = text(s, "Подія від AIN.UA", { size: 34, f: "m", color: C.white, x: M + 12, y: 0, name: "kicker" });
@@ -434,8 +435,7 @@ async function build() {
       "Профільні юристи, регулятори та експерти галузі.",
     ]) { const t = text(s, [{ t: "•  ", c: C.red, f: "b" }, { t: b }], { size: 27, color: C.white, x: x + 10, y, w: w - 10, lh: 1.3 }); y += t.height + 10; }
     c.resize(c.width, y - 140 + 36);
-    const l = linkLine(s, URL.photos, M + 12, 0, { prefix: "Фото з події: ", white: true });
-    l.y = H - 48 - l.height;
+    if (!GEN) { const l = linkLine(s, URL.photos, M + 12, 0, { prefix: "Фото з події: ", white: true }); l.y = H - 48 - l.height; }
   }
 
   /* 4. Програма (посилання вгорі й унизу) */
@@ -464,8 +464,8 @@ async function build() {
       y += Math.max(tt.height, d.height) + 12;
     }
     y += 14;
-    const l = linkLine(s, URL.invite, x, y, { prefix: "Запрошення та програма: ", white: true, size: 24, w });
-    y += l.height + 40;
+    if (!GEN) { const l = linkLine(s, URL.invite, x, y, { prefix: "Запрошення та програма: ", white: true, size: 24, w }); y += l.height; }
+    y += 40;
     c.resize(c.width, y - 130);
   }
 
@@ -513,8 +513,7 @@ async function build() {
       photo(s, p.img, W - M - pw, y0, pw, ph);
       y = Math.max(y, y0 + ph) + 34;
     });
-    const l = linkLine(s, URL.photos, M, 0, { prefix: "Фото з події: " });
-    l.y = H - 40 - l.height;
+    if (!GEN) { const l = linkLine(s, URL.photos, M, 0, { prefix: "Фото з події: " }); l.y = H - 40 - l.height; }
   }
 
   /* 6. Стенд Укргазбанку — фото цілі, без обрізки (у загальному звіті немає) */
@@ -580,9 +579,11 @@ async function build() {
       text(s, n, { size: 64, f: "b", color: C.white, x: x + 32, y: y + 80 });
       text(s, d, { size: 24, color: C.white, x: x + 32, y: y + 178, w: w - 64 });
     });
-    let ly = y + h + 40;
-    const l1 = linkLine(s, URL.research, M, ly, { prefix: "Дослідження: ", white: true }); ly += l1.height + 6;
-    linkLine(s, URL.site, M, ly, { prefix: "Сайт AIN: ", white: true });
+    if (!GEN) {
+      let ly = y + h + 40;
+      const l1 = linkLine(s, URL.research, M, ly, { prefix: "Дослідження: ", white: true }); ly += l1.height + 6;
+      linkLine(s, URL.site, M, ly, { prefix: "Сайт AIN: ", white: true });
+    }
   }
 
   /* 12–24. Інформаційні матеріали: нові назви + посилання окремим рядком під картинками */
@@ -621,7 +622,9 @@ async function build() {
         const im = fitImage(s, k, x, top, w, ih, { mode: "FIT", radius: 12, name: "стаття " + (i + 1) });
         im.y = top; // вирівняти по верху
         im.strokes = [solid("#DDDDDD")]; im.strokeWeight = 1;
-        const l = linkLine(s, u, x, top + ih + 12, { w, size: 18, prefix: "Стаття: " });
+        const l = GEN
+          ? text(s, [{ t: "Читати статтю", u, c: C.link, f: "m" }], { size: 20, x, y: top + ih + 12, name: "link → " + u })
+          : linkLine(s, u, x, top + ih + 12, { w, size: 18, prefix: "Стаття: " });
         lb = Math.max(lb, l.y + l.height);
       });
       return lb;
