@@ -167,7 +167,7 @@ function place(node, x, y, anchor) {
 /* ---------------- елементи слайда ---------------- */
 let PAGE = null, N = 0;
 const SLIDES = figma.editorType === "slides";
-const PART = __PART__; // null = уся презентація; "two" = лише слайди 7 (бейджі) і 9 (сцена)
+const PART = __PART__; // null = уся презентація; "two" = лише слайди 7 (бейджі) і 9 (сцена); "banner" = лише слайд з банером
 const MINE = [];
 function slide(name, bg) {
   N++;
@@ -346,6 +346,30 @@ function slideStage() {
     draw(s, top, bottom) {
       const g = photoGrid(s, ["s9_stage", "s9_screen"], ["Сцена", "Екран біля сцени"], 2, M, top, W - 2 * M, bottom - top, 24);
       return g.y + g.h;
+    },
+  });
+}
+
+/* Окремий слайд: топ-банер дослідження на головній сайту AIN + статистика кампанії (23.10–25.11.2026) */
+function slideBanner() {
+  classic({
+    name: "Банер на сайті AIN", tag: "Дослідження", linkLabel: "Сайт AIN", url: URL.site, linkPrefix: "Сайт AIN: ",
+    title: PARTNER + ": розміщення торговельних марок в інформаційних матеріалах: банер дослідження на сайті AIN",
+    pill: "Результат охоплень: 70.089",
+    draw(s, top, bottom) {
+      // одне під одним, однакової ширини: зверху банер на головній ain.ua, під ним статистика кампанії
+      const keys = ["s13_banner", "s13_stats"], gap = 18;
+      const inv = keys.reduce((a, k) => a + 1 / ratio(k), 0);
+      const w = Math.min(W - 2 * M, (bottom - top - gap) / inv);
+      const x = Math.round((W - w) / 2);
+      let y = top + (bottom - top - (w * inv + gap)) / 2;
+      for (const k of keys) {
+        const h = w / ratio(k);
+        const r = image(s, k, x, Math.round(y), Math.round(w), Math.round(h), { mode: "FIT", radius: 12, name: k === "s13_banner" ? "банер на сайті" : "статистика банера" });
+        r.strokes = [solid("#DDDDDD")]; r.strokeWeight = 1;
+        y += h + gap;
+      }
+      return y - gap;
     },
   });
 }
@@ -659,11 +683,15 @@ async function build() {
   }
 }
 
-/* лише два оновлені слайди, щоб вставити їх у вже існуючу презентацію */
+/* лише окремі слайди, щоб вставити їх у вже існуючу презентацію */
 async function buildTwo() {
   N = 6; slideBadges();
   N = 8; slideStage();
 }
+async function buildBanner() {
+  N = 12; slideBanner();
+}
+const buildPart = () => (PART === "two" ? buildTwo() : PART === "banner" ? buildBanner() : build());
 
 /* ---------------- запуск ---------------- */
 (async () => {
@@ -672,7 +700,7 @@ async function buildTwo() {
     let where;
     if (SLIDES) {
       const before = figma.getSlideGrid().map((r) => r.slice()).filter((r) => r.length);
-      await (PART === "two" ? buildTwo() : build());
+      await buildPart();
       // старі ряди без змін + один новий ряд з усіма новими слайдами в правильному порядку
       try {
         const ids = new Set(MINE.map((n) => n.id));
@@ -685,11 +713,11 @@ async function buildTwo() {
       PAGE = figma.createPage();
       PAGE.name = "Звіт UGB — оновлено " + new Date().toLocaleDateString("uk-UA");
       await figma.setCurrentPageAsync(PAGE);
-      await (PART === "two" ? buildTwo() : build());
+      await buildPart();
       figma.viewport.scrollAndZoomIntoView(PAGE.children);
       where = "на сторінці «" + PAGE.name + "»";
     }
-    const msg = [PART === "two" ? "Готово: 2 слайди (07 — бейджі, 09 — сцена) " + where + "." : "Готово: " + N + " слайдів " + where + "."];
+    const msg = [PART === "two" ? "Готово: 2 слайди (07 — бейджі, 09 — сцена) " + where + "." : PART === "banner" ? "Готово: слайд «Банер на сайті AIN» " + where + "." : "Готово: " + N + " слайдів " + where + "."];
     if (fontNote) msg.push(fontNote);
     if (LOG.length) { msg.push(LOG.length + " попереджень — див. консоль."); console.warn(LOG.join("\n")); }
     figma.closePlugin(msg.join(" "));

@@ -1,0 +1,9 @@
+{
+  "name": "AIN × UGB — слайд: банер на сайті AIN",
+  "id": "ain-ugb-report-banner-slide",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma", "slides"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": { "allowedDomains": ["none"] }
+}
