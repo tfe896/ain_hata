@@ -105,9 +105,10 @@ function certA(p) {
 /* ---------- напрямок B: «розкіш» (за 2-м референсом) ---------- */
 function certB(p, i) {
   const foil = lin("v", [[0, "#FFFFFF"], [0.55, "#FFD3C2"], [1, "#FF9A80"]]);
-  const base = { c: "#FFC7B3", A: 62, A2: 24, f: 1.05, f2: 2.3, ph3: 1.3, Wmax: 190, g: 1.35 };
-  const L = Object.assign({}, base, { x0: 150, ph: 0.5 + i * 0.7, ph2: 0.9 + i * 0.5 });
-  const R = Object.assign({}, base, { x0: 150, ph: 2.1 + i * 0.6, ph2: 2.4 + i * 0.4, mirror: true });
+  /* розмах обмежено: x0+A+A2+Wmax/2 = 269 < 270 — стрічка не заходить у текстову колонку (270…970) */
+  const base = { c: "#FFC7B3", A: 40, A2: 14, f: 1.05, f2: 2.3, ph3: 1.3, Wmax: 170, g: 1.35 };
+  const L = Object.assign({}, base, { x0: 130, ph: 0.5 + i * 0.7, ph2: 0.9 + i * 0.5 });
+  const R = Object.assign({}, base, { x0: 130, ph: 2.1 + i * 0.6, ph2: 2.4 + i * 0.4, mirror: true });
   const title = [text({ n: "title", s: p.title, w: 760, al: "c", f: "dm", sz: 40, lhr: 1.2, ls: 0.08, c: PAL.cream, caps: true })];
   if (p.by) title.push(text({ n: "by", s: p.by, w: 760, al: "c", f: "dr", sz: 27, lhr: 1.3, c: PAL.peach }));
   return {
@@ -158,7 +159,7 @@ function mockup(makeCert, p, i, label) {
   const MW = 1080, MH = 1920;
   const cw = 500, chh = Math.round((cw * H) / W), s = cw / W;
   const SW = 560, SH = 780, sx = (MW - SW) / 2, sy = 850;
-  const sleeveD = `M0 0H226L266 44Q280 58 294 44L334 0H560V780H0Z`;
+  const sleeveD = "M 0 0 L 226 0 L 266 44 C 275.33 53.33 284.67 53.33 294 44 L 334 0 L 560 0 L 560 780 L 0 780 Z";
   const sleeveBase = "#8A221E";
   const card = {
     t: "frame", n: "Сертифікат у конверті", x: (MW - cw) / 2, y: 330, w: cw, h: chh, clip: true, fill: solid("#0A0A0B"),
@@ -167,7 +168,7 @@ function mockup(makeCert, p, i, label) {
   };
   const emb = (dx, dy, c, op, name) => ({ t: "svg", n: name, x: MW / 2 - 60 + dx, y: sy + SH - 215 + dy, w: 120, h: 76.3, svg: markSvg(120, c), op });
   return {
-    t: "frame", n: "Мокап " + label + " — " + p.title, x: 0, y: 0, w: MW, h: MH, clip: true,
+    t: "frame", n: "Пакування " + label + " — " + p.title, x: 0, y: 0, w: MW, h: MH, clip: true,
     fill: solid("#111010"),
     ch: [
       card,
@@ -185,9 +186,9 @@ function mockup(makeCert, p, i, label) {
 
 function buildScenes() {
   const out = [];
-  PRIZES.forEach((p, i) => out.push(Object.assign(certA(p, i), { row: 0, pv: "A-" + (i + 1) })));
-  PRIZES.forEach((p, i) => out.push(Object.assign(certB(p, i), { row: 1, pv: "B-" + (i + 1) })));
-  PRIZES.forEach((p, i) => out.push(Object.assign(mockup(certA, p, i, "A"), { row: 2, pv: "mock-A-" + (i + 1) })));
-  PRIZES.forEach((p, i) => out.push(Object.assign(mockup(certB, p, i, "B"), { row: 3, pv: "mock-B-" + (i + 1) })));
+  [["A", certA, "A · Swiss"], ["B", certB, "B · Luxury"]].forEach(([g, fn, title]) => {
+    PRIZES.forEach((p, i) => out.push(Object.assign(fn(p, i), { grp: g, grpTitle: title, row: 0, pv: g + "-" + (i + 1) })));
+    PRIZES.forEach((p, i) => out.push(Object.assign(mockup(fn, p, i, g), { grp: g, grpTitle: title, row: 1, pv: "mock-" + g + "-" + (i + 1) })));
+  });
   return out;
 }

@@ -108,9 +108,10 @@ function certA(p) {
 /* ---------- напрямок B: «розкіш» (за 2-м референсом) ---------- */
 function certB(p, i) {
   const foil = lin("v", [[0, "#FFFFFF"], [0.55, "#FFD3C2"], [1, "#FF9A80"]]);
-  const base = { c: "#FFC7B3", A: 62, A2: 24, f: 1.05, f2: 2.3, ph3: 1.3, Wmax: 190, g: 1.35 };
-  const L = Object.assign({}, base, { x0: 150, ph: 0.5 + i * 0.7, ph2: 0.9 + i * 0.5 });
-  const R = Object.assign({}, base, { x0: 150, ph: 2.1 + i * 0.6, ph2: 2.4 + i * 0.4, mirror: true });
+  /* розмах обмежено: x0+A+A2+Wmax/2 = 269 < 270 — стрічка не заходить у текстову колонку (270…970) */
+  const base = { c: "#FFC7B3", A: 40, A2: 14, f: 1.05, f2: 2.3, ph3: 1.3, Wmax: 170, g: 1.35 };
+  const L = Object.assign({}, base, { x0: 130, ph: 0.5 + i * 0.7, ph2: 0.9 + i * 0.5 });
+  const R = Object.assign({}, base, { x0: 130, ph: 2.1 + i * 0.6, ph2: 2.4 + i * 0.4, mirror: true });
   const title = [text({ n: "title", s: p.title, w: 760, al: "c", f: "dm", sz: 40, lhr: 1.2, ls: 0.08, c: PAL.cream, caps: true })];
   if (p.by) title.push(text({ n: "by", s: p.by, w: 760, al: "c", f: "dr", sz: 27, lhr: 1.3, c: PAL.peach }));
   return {
@@ -161,7 +162,7 @@ function mockup(makeCert, p, i, label) {
   const MW = 1080, MH = 1920;
   const cw = 500, chh = Math.round((cw * H) / W), s = cw / W;
   const SW = 560, SH = 780, sx = (MW - SW) / 2, sy = 850;
-  const sleeveD = `M0 0H226L266 44Q280 58 294 44L334 0H560V780H0Z`;
+  const sleeveD = "M 0 0 L 226 0 L 266 44 C 275.33 53.33 284.67 53.33 294 44 L 334 0 L 560 0 L 560 780 L 0 780 Z";
   const sleeveBase = "#8A221E";
   const card = {
     t: "frame", n: "Сертифікат у конверті", x: (MW - cw) / 2, y: 330, w: cw, h: chh, clip: true, fill: solid("#0A0A0B"),
@@ -170,7 +171,7 @@ function mockup(makeCert, p, i, label) {
   };
   const emb = (dx, dy, c, op, name) => ({ t: "svg", n: name, x: MW / 2 - 60 + dx, y: sy + SH - 215 + dy, w: 120, h: 76.3, svg: markSvg(120, c), op });
   return {
-    t: "frame", n: "Мокап " + label + " — " + p.title, x: 0, y: 0, w: MW, h: MH, clip: true,
+    t: "frame", n: "Пакування " + label + " — " + p.title, x: 0, y: 0, w: MW, h: MH, clip: true,
     fill: solid("#111010"),
     ch: [
       card,
@@ -188,10 +189,10 @@ function mockup(makeCert, p, i, label) {
 
 function buildScenes() {
   const out = [];
-  PRIZES.forEach((p, i) => out.push(Object.assign(certA(p, i), { row: 0, pv: "A-" + (i + 1) })));
-  PRIZES.forEach((p, i) => out.push(Object.assign(certB(p, i), { row: 1, pv: "B-" + (i + 1) })));
-  PRIZES.forEach((p, i) => out.push(Object.assign(mockup(certA, p, i, "A"), { row: 2, pv: "mock-A-" + (i + 1) })));
-  PRIZES.forEach((p, i) => out.push(Object.assign(mockup(certB, p, i, "B"), { row: 3, pv: "mock-B-" + (i + 1) })));
+  [["A", certA, "A · Swiss"], ["B", certB, "B · Luxury"]].forEach(([g, fn, title]) => {
+    PRIZES.forEach((p, i) => out.push(Object.assign(fn(p, i), { grp: g, grpTitle: title, row: 0, pv: g + "-" + (i + 1) })));
+    PRIZES.forEach((p, i) => out.push(Object.assign(mockup(fn, p, i, g), { grp: g, grpTitle: title, row: 1, pv: "mock-" + g + "-" + (i + 1) })));
+  });
   return out;
 }
 
@@ -324,6 +325,7 @@ function build(n, parent, parentIsLayout) {
     node = figma.createVector();
     node.name = n.n || "path";
     node.vectorPaths = [{ windingRule: "NONZERO", data: n.d }];
+    node.strokes = [];
     applyShape(node, n);
     parent.appendChild(node);
   } else if (n.t === "ellipse") {
@@ -365,19 +367,40 @@ async function main() {
   await loadFonts();
   const scenes = buildScenes();
   let baseX = 0;
-  figma.currentPage.children.forEach((c) => { baseX = Math.max(baseX, c.x + c.width + 200); });
-  const rowH = {}, rowX = {}, rowY = {}, made = [];
-  scenes.forEach((sc) => { const r = sc.row || 0; rowH[r] = Math.max(rowH[r] || 0, sc.h); });
-  let yy = 0;
-  Object.keys(rowH).map(Number).sort((a, b) => a - b).forEach((r) => { rowY[r] = yy; yy += rowH[r] + 200; });
-  scenes.forEach((sc) => {
-    const r = sc.row || 0, x = rowX[r] == null ? baseX : rowX[r];
-    const root = build(Object.assign({}, sc, { x, y: rowY[r] }), figma.currentPage, false);
-    rowX[r] = x + root.width + 200;
-    made.push(root);
+  figma.currentPage.children.forEach((c) => { baseX = Math.max(baseX, c.x + c.width + 300); });
+  /* Збираємо все у дві секції: A · Swiss і B · Luxury (зверху сертифікати, знизу пакування) */
+  const PAD = 120, GAP = 100, ROWGAP = 160, COLW = 1240, CERT_H = 1754, MOCK_H = 1920;
+  const secW = PAD * 2 + 3 * COLW + 2 * GAP, secH = PAD + CERT_H + ROWGAP + MOCK_H + PAD;
+  const groups = {};
+  scenes.forEach((sc) => { (groups[sc.grp] = groups[sc.grp] || { title: sc.grpTitle, list: [] }).list.push(sc); });
+  const made = [];
+  let gx = baseX;
+  Object.keys(groups).forEach((g) => {
+    let container = figma.currentPage, ox = gx, oy = 0, sec = null;
+    try {
+      sec = figma.createSection();
+      sec.name = groups[g].title + " — сертифікати та пакування";
+      sec.x = gx; sec.y = 0;
+      sec.resizeWithoutConstraints(secW, secH);
+      sec.fills = [{ type: "SOLID", color: hex("#1A1A1A") }];
+      container = sec; ox = 0; oy = 0;
+      made.push(sec);
+    } catch (e) {
+      NOTES.push("Секції недоступні, макети розкладено на сторінці.");
+      sec = null;
+    }
+    const cnt = [0, 0];
+    groups[g].list.forEach((sc) => {
+      const col = cnt[sc.row]++;
+      const x = ox + PAD + col * (COLW + GAP) + (COLW - sc.w) / 2;
+      const y = oy + (sc.row === 0 ? PAD : PAD + CERT_H + ROWGAP);
+      const root = build(Object.assign({}, sc, { x, y }), container, false);
+      if (!sec) made.push(root);
+    });
+    gx += secW + 400;
   });
   figma.currentPage.selection = made;
   figma.viewport.scrollAndZoomIntoView(made);
-  return "Готово: " + made.length + " макет(ів). " + NOTES.join(" ");
+  return "Готово: " + scenes.length + " макетів (3 призи × 2 стилі × сертифікат і пакування). " + NOTES.join(" ");
 }
 main().then((m) => figma.closePlugin(m)).catch((e) => figma.closePlugin("Помилка: " + (e && e.message ? e.message : e)));

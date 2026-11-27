@@ -127,6 +127,7 @@ function build(n, parent, parentIsLayout) {
     node = figma.createVector();
     node.name = n.n || "path";
     node.vectorPaths = [{ windingRule: "NONZERO", data: n.d }];
+    node.strokes = [];
     applyShape(node, n);
     parent.appendChild(node);
   } else if (n.t === "ellipse") {
@@ -168,19 +169,40 @@ async function main() {
   await loadFonts();
   const scenes = buildScenes();
   let baseX = 0;
-  figma.currentPage.children.forEach((c) => { baseX = Math.max(baseX, c.x + c.width + 200); });
-  const rowH = {}, rowX = {}, rowY = {}, made = [];
-  scenes.forEach((sc) => { const r = sc.row || 0; rowH[r] = Math.max(rowH[r] || 0, sc.h); });
-  let yy = 0;
-  Object.keys(rowH).map(Number).sort((a, b) => a - b).forEach((r) => { rowY[r] = yy; yy += rowH[r] + 200; });
-  scenes.forEach((sc) => {
-    const r = sc.row || 0, x = rowX[r] == null ? baseX : rowX[r];
-    const root = build(Object.assign({}, sc, { x, y: rowY[r] }), figma.currentPage, false);
-    rowX[r] = x + root.width + 200;
-    made.push(root);
+  figma.currentPage.children.forEach((c) => { baseX = Math.max(baseX, c.x + c.width + 300); });
+  /* Збираємо все у дві секції: A · Swiss і B · Luxury (зверху сертифікати, знизу пакування) */
+  const PAD = 120, GAP = 100, ROWGAP = 160, COLW = 1240, CERT_H = 1754, MOCK_H = 1920;
+  const secW = PAD * 2 + 3 * COLW + 2 * GAP, secH = PAD + CERT_H + ROWGAP + MOCK_H + PAD;
+  const groups = {};
+  scenes.forEach((sc) => { (groups[sc.grp] = groups[sc.grp] || { title: sc.grpTitle, list: [] }).list.push(sc); });
+  const made = [];
+  let gx = baseX;
+  Object.keys(groups).forEach((g) => {
+    let container = figma.currentPage, ox = gx, oy = 0, sec = null;
+    try {
+      sec = figma.createSection();
+      sec.name = groups[g].title + " — сертифікати та пакування";
+      sec.x = gx; sec.y = 0;
+      sec.resizeWithoutConstraints(secW, secH);
+      sec.fills = [{ type: "SOLID", color: hex("#1A1A1A") }];
+      container = sec; ox = 0; oy = 0;
+      made.push(sec);
+    } catch (e) {
+      NOTES.push("Секції недоступні, макети розкладено на сторінці.");
+      sec = null;
+    }
+    const cnt = [0, 0];
+    groups[g].list.forEach((sc) => {
+      const col = cnt[sc.row]++;
+      const x = ox + PAD + col * (COLW + GAP) + (COLW - sc.w) / 2;
+      const y = oy + (sc.row === 0 ? PAD : PAD + CERT_H + ROWGAP);
+      const root = build(Object.assign({}, sc, { x, y }), container, false);
+      if (!sec) made.push(root);
+    });
+    gx += secW + 400;
   });
   figma.currentPage.selection = made;
   figma.viewport.scrollAndZoomIntoView(made);
-  return "Готово: " + made.length + " макет(ів). " + NOTES.join(" ");
+  return "Готово: " + scenes.length + " макетів (3 призи × 2 стилі × сертифікат і пакування). " + NOTES.join(" ");
 }
 main().then((m) => figma.closePlugin(m)).catch((e) => figma.closePlugin("Помилка: " + (e && e.message ? e.message : e)));
