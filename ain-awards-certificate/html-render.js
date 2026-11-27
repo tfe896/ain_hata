@@ -27,10 +27,11 @@ function renderNode(n, parent) {
     s.position = "absolute";
     if (n.right != null) s.right = px(n.right);
     else s.left = px(n.cx != null ? n.cx : n.x || 0);
-    s.top = px(n.y || 0);
+    s.top = px(n.cy != null ? n.cy : n.y || 0);
     const tf = [];
     if (n.ctr) tf.push("translate(-50%,-50%)");
     else if (n.cx != null) tf.push("translateX(-50%)");
+    if (n.cy != null && !n.ctr) tf.push("translateY(-50%)");
     if (n.rot) tf.push(`rotate(${n.rot}deg)`);
     if (tf.length) s.transform = tf.join(" ");
   } else s.flex = "none";

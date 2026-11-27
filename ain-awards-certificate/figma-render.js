@@ -7,8 +7,6 @@ const rgbaF = (h, a) => Object.assign(hex(h), { a: a == null ? 1 : a });
 const FONT_WANT = {
   dm: { families: ["Basis Grotesque Pro", "Basis Grotesque"], styles: ["Medium", "Regular"], fb: { family: "Inter", style: "Medium" } },
   dr: { families: ["Basis Grotesque Pro", "Basis Grotesque"], styles: ["Regular", "Medium"], fb: { family: "Inter", style: "Regular" } },
-  mono: { families: ["JetBrains Mono", "Roboto Mono", "IBM Plex Mono", "Fira Code"], styles: ["Medium", "Regular"], fb: { family: "Inter", style: "Medium" } },
-  serif: { families: ["Cormorant Garamond", "Cormorant", "Playfair Display", "EB Garamond"], styles: ["Medium Italic", "Italic", "Regular"], fb: { family: "Inter", style: "Medium" } },
 };
 const FONTS = {};
 async function loadFonts() {
@@ -95,6 +93,7 @@ function place(node, n, parent) {
   let x = n.x || 0, y = n.y || 0;
   if (n.right != null) x = parent.width - n.right - w;
   else if (n.cx != null) x = n.cx - w / 2;
+  if (n.cy != null) y = n.cy - h / 2;
   if (n.ctr) { x = n.x - w / 2; y = n.y - h / 2; }
   node.x = x;
   node.y = y;
