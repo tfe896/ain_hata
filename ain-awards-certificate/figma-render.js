@@ -7,7 +7,7 @@ const rgbaF = (h, a) => Object.assign(hex(h), { a: a == null ? 1 : a });
 const FONT_WANT = {
   dm: { families: ["Basis Grotesque Pro", "Basis Grotesque"], styles: ["Medium", "Regular"], fb: { family: "Inter", style: "Medium" } },
   dr: { families: ["Basis Grotesque Pro", "Basis Grotesque"], styles: ["Regular", "Medium"], fb: { family: "Inter", style: "Regular" } },
-  serif: { families: ["Cormorant Garamond", "Cormorant", "Playfair Display", "EB Garamond"], styles: ["Light", "Regular"], fb: { family: "Inter", style: "Light" } },
+  serif: { families: ["Cormorant Garamond", "Cormorant", "Playfair Display", "EB Garamond"], styles: ["Medium", "SemiBold", "Regular"], fb: { family: "Inter", style: "Medium" } },
 };
 const FONTS = {};
 async function loadFonts() {
@@ -81,7 +81,12 @@ function makeText(n) {
   t.letterSpacing = { unit: "PERCENT", value: Math.round((n.ls || 0) * 1000) / 10 };
   if (n.caps) t.textCase = "UPPER";
   t.textAlignHorizontal = { l: "LEFT", c: "CENTER", r: "RIGHT" }[n.al || "l"];
-  t.fills = [{ type: "SOLID", color: hex(n.c), opacity: n.a == null ? 1 : n.a }];
+  t.fills = n.fill ? [].concat(n.fill).map(paintFrom) : [{ type: "SOLID", color: hex(n.c), opacity: n.a == null ? 1 : n.a }];
+  if (n.fit && t.width > 0) {
+    const k = Math.min(3, Math.max(0.3, n.fit / t.width));
+    t.fontSize = n.sz * k;
+    t.lineHeight = { unit: "PIXELS", value: n.lh * k };
+  }
   if (typeof n.w === "number") {
     t.resize(n.w, t.height);
     t.textAutoResize = "HEIGHT";
@@ -118,6 +123,12 @@ function build(n, parent, parentIsLayout) {
     node.name = n.n || "icon";
     node.resize(n.w, n.h);
     parent.appendChild(node);
+  } else if (n.t === "path") {
+    node = figma.createVector();
+    node.name = n.n || "path";
+    node.vectorPaths = [{ windingRule: "NONZERO", data: n.d }];
+    applyShape(node, n);
+    parent.appendChild(node);
   } else if (n.t === "ellipse") {
     node = figma.createEllipse();
     node.name = n.n || "ellipse";
@@ -146,6 +157,7 @@ function build(n, parent, parentIsLayout) {
     parent.appendChild(node);
     (n.ch || []).forEach((c) => build(c, node, !!n.layout));
   }
+  if (n.op != null) node.opacity = n.op;
   if (!parentIsLayout) place(node, n, parent);
   return node;
 }
@@ -155,12 +167,16 @@ async function main() {
   try { await figma.loadFontAsync({ family: "Inter", style: "Regular" }); } catch (e) {}
   await loadFonts();
   const scenes = buildScenes();
-  let startX = 0;
-  figma.currentPage.children.forEach((c) => { startX = Math.max(startX, c.x + c.width + 200); });
-  const made = [];
+  let baseX = 0;
+  figma.currentPage.children.forEach((c) => { baseX = Math.max(baseX, c.x + c.width + 200); });
+  const rowH = {}, rowX = {}, rowY = {}, made = [];
+  scenes.forEach((sc) => { const r = sc.row || 0; rowH[r] = Math.max(rowH[r] || 0, sc.h); });
+  let yy = 0;
+  Object.keys(rowH).map(Number).sort((a, b) => a - b).forEach((r) => { rowY[r] = yy; yy += rowH[r] + 200; });
   scenes.forEach((sc) => {
-    const root = build(Object.assign({}, sc, { x: startX, y: 0 }), figma.currentPage, false);
-    startX += root.width + 200;
+    const r = sc.row || 0, x = rowX[r] == null ? baseX : rowX[r];
+    const root = build(Object.assign({}, sc, { x, y: rowY[r] }), figma.currentPage, false);
+    rowX[r] = x + root.width + 200;
     made.push(root);
   });
   figma.currentPage.selection = made;

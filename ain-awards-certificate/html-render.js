@@ -2,7 +2,7 @@
 const FONT_CSS = {
   dm: { fam: "'Basis Grotesque Pro','Inter',sans-serif", w: 500 },
   dr: { fam: "'Basis Grotesque Pro','Inter',sans-serif", w: 400 },
-  serif: { fam: "'Cormorant Garamond','Playfair Display',serif", w: 300 },
+  serif: { fam: "'Cormorant Garamond','Playfair Display',serif", w: 500 },
 };
 const rgba = (h, a) => {
   const n = parseInt(h.slice(1), 16);
@@ -40,12 +40,25 @@ function renderNode(n, parent) {
     s.fontFamily = f.fam; s.fontWeight = f.w; s.fontSize = px(n.sz); s.lineHeight = px(n.lh);
     s.letterSpacing = n.ls ? n.ls + "em" : "normal";
     if (f.italic) s.fontStyle = "italic";
-    s.color = rgba(n.c, n.a); s.textAlign = { l: "left", c: "center", r: "right" }[n.al];
+    if (n.fill) { s.background = [].concat(n.fill).map(paintCss).reverse().join(","); s.webkitBackgroundClip = s.backgroundClip = "text"; s.color = "transparent"; }
+    else s.color = rgba(n.c, n.a);
+    if (n.fit) { el.dataset.fit = n.fit; el.dataset.sz = n.sz; el.dataset.lh = n.lh; }
+    s.textAlign = { l: "left", c: "center", r: "right" }[n.al];
     if (n.caps) s.textTransform = "uppercase";
     s.whiteSpace = typeof n.w === "number" || n.w === "fill" ? "pre-wrap" : "pre";
     if (typeof n.w === "number") s.width = px(n.w);
     else if (n.w === "fill") s.alignSelf = "stretch";
     el.textContent = n.s;
+    return el;
+  }
+  if (n.op != null) s.opacity = n.op;
+  if (n.t === "path") {
+    s.width = px(n.w); s.height = px(n.h);
+    const sh = (n.shadows || []).map((x) => `drop-shadow(${x.x || 0}px ${x.y || 0}px ${x.blur / 2}px ${rgba(x.c, x.a)})`);
+    if (sh.length) s.filter = sh.join(" ");
+    const inner = document.createElement("div");
+    inner.style.cssText = `width:${n.w}px;height:${n.h}px;clip-path:path('${n.d}');background:${[].concat(n.fill).map(paintCss).reverse().join(",")}`;
+    el.appendChild(inner);
     return el;
   }
   if (n.t === "svg") {
@@ -82,9 +95,13 @@ function mountScenes(host) {
     const wrap = document.createElement("div");
     wrap.className = "scene";
     wrap.style.cssText = `position:relative;width:${sc.w}px;height:${sc.h}px;`;
-    wrap.dataset.name = sc.n;
+    wrap.dataset.name = sc.n; wrap.dataset.pv = sc.pv || "";
     sc.x = 0; sc.y = 0;
     wrap.appendChild(renderNode(sc, null));
     host.appendChild(wrap);
+  });
+  host.querySelectorAll("[data-fit]").forEach((el) => {
+    const k = Number(el.dataset.fit) / el.offsetWidth;
+    el.style.fontSize = Number(el.dataset.sz) * k + "px"; el.style.lineHeight = Number(el.dataset.lh) * k + "px";
   });
 }
