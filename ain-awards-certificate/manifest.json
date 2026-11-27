@@ -1,0 +1,9 @@
+{
+  "name": "AIN Awards 2026 — сертифікат Molfar",
+  "id": "ain-awards-2026-molfar-certificate",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": { "allowedDomains": ["none"] }
+}
