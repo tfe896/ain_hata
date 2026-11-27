@@ -7,6 +7,7 @@ const rgbaF = (h, a) => Object.assign(hex(h), { a: a == null ? 1 : a });
 const FONT_WANT = {
   dm: { families: ["Basis Grotesque Pro", "Basis Grotesque"], styles: ["Medium", "Regular"], fb: { family: "Inter", style: "Medium" } },
   dr: { families: ["Basis Grotesque Pro", "Basis Grotesque"], styles: ["Regular", "Medium"], fb: { family: "Inter", style: "Regular" } },
+  serif: { families: ["Cormorant Garamond", "Cormorant", "Playfair Display", "EB Garamond"], styles: ["Light", "Regular"], fb: { family: "Inter", style: "Light" } },
 };
 const FONTS = {};
 async function loadFonts() {

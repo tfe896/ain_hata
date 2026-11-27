@@ -2,8 +2,7 @@
 const FONT_CSS = {
   dm: { fam: "'Basis Grotesque Pro','Inter',sans-serif", w: 500 },
   dr: { fam: "'Basis Grotesque Pro','Inter',sans-serif", w: 400 },
-  mono: { fam: "'JetBrains Mono','Roboto Mono',monospace", w: 500 },
-  serif: { fam: "'Cormorant Garamond','Playfair Display',serif", w: 500, italic: true },
+  serif: { fam: "'Cormorant Garamond','Playfair Display',serif", w: 300 },
 };
 const rgba = (h, a) => {
   const n = parseInt(h.slice(1), 16);
