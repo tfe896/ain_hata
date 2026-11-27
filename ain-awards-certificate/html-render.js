@@ -3,6 +3,7 @@ const FONT_CSS = {
   dm: { fam: "'Basis Grotesque Pro','Inter',sans-serif", w: 500 },
   dr: { fam: "'Basis Grotesque Pro','Inter',sans-serif", w: 400 },
   mono: { fam: "'JetBrains Mono','Roboto Mono',monospace", w: 500 },
+  serif: { fam: "'Cormorant Garamond','Playfair Display',serif", w: 500, italic: true },
 };
 const rgba = (h, a) => {
   const n = parseInt(h.slice(1), 16);
@@ -25,14 +26,20 @@ function renderNode(n, parent) {
   if (!parentLayout) {
     s.position = "absolute";
     if (n.right != null) s.right = px(n.right);
-    else s.left = px(n.x || 0);
+    else s.left = px(n.cx != null ? n.cx : n.x || 0);
     s.top = px(n.y || 0);
+    const tf = [];
+    if (n.ctr) tf.push("translate(-50%,-50%)");
+    else if (n.cx != null) tf.push("translateX(-50%)");
+    if (n.rot) tf.push(`rotate(${n.rot}deg)`);
+    if (tf.length) s.transform = tf.join(" ");
   } else s.flex = "none";
 
   if (n.t === "text") {
     const f = FONT_CSS[n.f];
     s.fontFamily = f.fam; s.fontWeight = f.w; s.fontSize = px(n.sz); s.lineHeight = px(n.lh);
     s.letterSpacing = n.ls ? n.ls + "em" : "normal";
+    if (f.italic) s.fontStyle = "italic";
     s.color = rgba(n.c, n.a); s.textAlign = { l: "left", c: "center", r: "right" }[n.al];
     if (n.caps) s.textTransform = "uppercase";
     s.whiteSpace = typeof n.w === "number" || n.w === "fill" ? "pre-wrap" : "pre";
@@ -43,6 +50,7 @@ function renderNode(n, parent) {
   }
   if (n.t === "svg") {
     s.width = px(n.w); s.height = px(n.h); el.innerHTML = n.svg;
+    el.firstChild.style.display = "block";
     return el;
   }
   // frame / ellipse
@@ -74,6 +82,7 @@ function mountScenes(host) {
     const wrap = document.createElement("div");
     wrap.className = "scene";
     wrap.style.cssText = `position:relative;width:${sc.w}px;height:${sc.h}px;`;
+    wrap.dataset.name = sc.n;
     sc.x = 0; sc.y = 0;
     wrap.appendChild(renderNode(sc, null));
     host.appendChild(wrap);

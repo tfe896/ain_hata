@@ -1,188 +1,189 @@
-/* AIN Awards 2026 — сертифікат Molfar Intelligence.
+/* AIN Awards 2026 — сертифікати партнера Molfar Intelligence (3 окремі сертифікати).
    Єдиний опис сцени: його читають і Figma-плагін (figma-render.js), і HTML-прев'ю (html-render.js).
-   Тексти — у TXT нижче. Усе інше — геометрія й кольори. Координати в px. */
+   Тексти — у COPY і PRIZES. Координати в px, формат A4 landscape 1754×1240. */
 
-const TXT = {
-  pill: "AIN Awards 2026",
-  eyebrow: "Подарунковий сертифікат",
-  title: "Три призи\nвід Molfar\nIntelligence",
-  sub: "Партнер AIN Awards 2026 дарує інструменти, щоб перевіряти, вчитися й помічати загрози вчасно.",
-  awardLabel: "Нагороджується",
-  awardName: "Ім’я Прізвище",
-  awardNote: "Компанія або проєкт",
-  meta: [
-    ["Дата видачі", "19.12.2026"],
-    ["Номер", "AIN-0001"],
-    ["Активувати до", "дд.мм.рррр"],
-  ],
-  listLabel: "У сертифікат входить",
-  prizes: [
-    {
-      no: "01",
-      chip: "Письмовий звіт",
-      title: "Background check",
-      by: "Molfar Intelligence",
-      desc: "Перевірка компанії або людини: власники й пов’язані особи, корпоративна історія, репутаційні та санкційні ризики. Підсумок — письмовий звіт.",
-      icon: "search",
-    },
-    {
-      no: "02",
-      chip: "У власному темпі",
-      title: "Курс з OSINT",
-      by: "Molfar Intelligence Institute",
-      desc: "Онлайн-курс із розвідки з відкритих джерел. Аналітики-практики вчать шукати, перевіряти й аналізувати інформацію.",
-      icon: "course",
-    },
-    {
-      no: "03",
-      chip: "1 місяць безкоштовно",
-      title: "Місяць доступу до Minos",
-      by: "Molfar Intelligence",
-      desc: "Платформа для моніторингу інформаційних загроз і реагування на них. Безкоштовно протягом місяця з дня активації.",
-      icon: "radar",
-      accent: "mint",
-    },
-  ],
+const COPY = {
+  eyebrow: "AIN Awards 2026 · Приз",
+  title: "Сертифікат",
+  lead1: "Цим підтверджується, що",
+  name: "Ім’я Прізвище",
+  lead2: "отримує у подарунок",
+  byPrefix: "від ",
+  ring: "AIN AWARDS 2026 · MOLFAR INTELLIGENCE · ",
+  micro: "AIN AWARDS 2026 · MOLFAR INTELLIGENCE · ",
+  no: ["Сертифікат №", "AIN-0001"],
+  date: ["Видано", "19.12.2026"],
+  valid: ["Активувати до", "дд.мм.рррр"],
+  sign: [["AIN Awards", "Організатор премії"], ["Molfar Intelligence", "Партнер премії"]],
 };
+const PRIZES = [
+  {
+    key: "background-check",
+    no: "01",
+    title: "Background check",
+    by: "Molfar Intelligence",
+    desc: "Оберіть компанію чи людину, яку хочете перевірити. Аналітики дослідять власників і пов’язаних осіб, корпоративну історію, репутаційні та санкційні ризики. Висновки ви отримаєте в письмовому звіті.",
+  },
+  {
+    key: "osint-course",
+    no: "02",
+    descW: 1080,
+    title: "Курс з OSINT",
+    by: "Molfar Intelligence Institute",
+    desc: "Доступ до онлайн-курсу з розвідки з відкритих джерел. Аналітики-практики навчать вас шукати, перевіряти й аналізувати відкриту інформацію. Вчитися можна у власному темпі.",
+  },
+  {
+    key: "minos-month",
+    no: "03",
+    title: "Місяць доступу до Minos",
+    by: "Molfar Intelligence",
+    desc: "Minos — платформа Molfar Intelligence для моніторингу інформаційних загроз і реагування на них. Протягом місяця з дня активації ви користуєтеся нею безкоштовно.",
+  },
+];
 
-/* палітра AIN Awards 2026 (знято зі скріншота й макета Червень-липень 2026) */
+/* палітра AIN Awards 2026 */
 const PAL = {
-  black: "#000000",
-  base1: "#141416",
-  base2: "#0A0A0B",
-  red: "#C2382E",
-  ember: "#F06A4E",
-  flash: "#FFD9CC",
-  peach: "#FF8F73",
-  cream: "#F3F3EB",
-  white: "#FFFFFF",
-  mint: "#3EE0A0",
+  black: "#000000", base1: "#0A0A0B", base2: "#240D0B", disc: "#260C0B",
+  red: "#C2382E", ember: "#F06A4E", flash: "#FFD9CC", peach: "#FF8F73", cream: "#F3F3EB", white: "#FFFFFF",
 };
+const W = 1754, H = 1240, CX = W / 2;
 
 const solid = (c, a) => ({ k: "solid", c, a: a == null ? 1 : a });
 const lin = (dir, stops) => ({ k: "lin", dir, stops });
 const rad = (c, a) => ({ k: "rad", stops: [[0, c, a], [0.4, c, a * 0.7], [0.7, c, a * 0.24], [1, c, 0]] });
 const lh = (sz, ratio) => Math.round(sz * ratio * 10) / 10;
-
 function text(o) {
-  return Object.assign({ t: "text", f: "dr", c: PAL.white, a: 1, al: "l", lhr: 1.3, ls: 0 }, o, {
-    lh: lh(o.sz, o.lhr || 1.3),
-  });
+  return Object.assign({ t: "text", f: "dr", c: PAL.white, a: 1, al: "l", ls: 0 }, o, { lh: lh(o.sz, o.lhr || 1.3) });
 }
-function glow(name, cx, cy, w, h, c, a, blur) {
-  return { t: "ellipse", n: name, x: cx - w / 2, y: cy - h / 2, w, h, fill: rad(c, a), blur };
-}
-function ring(cx, cy, r) {
-  return { t: "ellipse", n: "Коло радара", x: cx - r, y: cy - r, w: r * 2, h: r * 2, stroke: { c: PAL.white, a: 0.07, w: 1 } };
-}
-const svgIcon = (inner) =>
-  '<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#F3F3EB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
-  inner +
-  "</svg>";
-const ICONS = {
-  search: svgIcon('<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>'),
-  course: svgIcon('<path d="M2.5 5.5C5 4.5 8.5 4.6 12 6.5c3.5-1.9 7-2 9.5-1v13c-2.5-1-6-.9-9.5 1-3.5-1.9-7-2-9.5-1z"/><path d="M12 6.5v13"/>'),
-  radar: svgIcon('<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#F3F3EB"/><path d="M12 12L18.5 5.5"/>'),
+/* текст по центру сторінки у блоці заданої ширини */
+const ctext = (o, w) => text(Object.assign({ w: w || 1100, x: CX - (w || 1100) / 2, al: "c" }, o));
+const glow = (name, cx, cy, w, h, c, a, blur) => ({ t: "ellipse", n: name, x: cx - w / 2, y: cy - h / 2, w, h, fill: rad(c, a), blur });
+const dot = (name, cx, cy, s, c, a) => ({ t: "frame", n: name, x: cx, y: cy, w: s, h: s, ctr: true, rot: 45, fill: solid(c, a) });
+const rule = (name, x, y, w, a) => ({ t: "frame", n: name, x, y, w, h: 1, fill: solid(PAL.cream, a) });
+
+/* логотип */
+const logoSvg = (w, color) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${Math.round((w * LOGO.H) / LOGO.W * 10) / 10}" viewBox="0 0 ${LOGO.W} ${LOGO.H}" fill="none"><path d="${LOGO.mark}" fill="${color}"/><path d="${LOGO.word}" fill="${color}"/></svg>`;
+const markSvg = (w, color) => {
+  const b = LOGO.markBox, bw = b[2] - b[0], bh = b[3] - b[1];
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${Math.round(((w * bh) / bw) * 10) / 10}" viewBox="${b[0]} ${b[1]} ${bw} ${bh}" fill="none"><path d="${LOGO.mark}" fill="${color}"/></svg>`;
 };
 
-function prizeCard(p, i) {
-  const mint = p.accent === "mint";
-  const accent = mint ? PAL.mint : PAL.peach;
+/* розетка (гільйош): N кіл радіуса R з центрами на колі r0 */
+function rosette(name, cx, cy, N, R, r0, a, sw, color) {
+  const ch = [];
+  for (let k = 0; k < N; k++) {
+    const f = (2 * Math.PI * k) / N;
+    ch.push({
+      t: "ellipse", n: "кільце", x: cx + r0 * Math.cos(f) - R, y: cy + r0 * Math.sin(f) - R, w: 2 * R, h: 2 * R,
+      stroke: { c: color, a, w: sw },
+    });
+  }
+  return { t: "frame", n: name, x: 0, y: 0, w: W, h: H, ch };
+}
+
+/* підпис «Назва / роль» під рискою */
+function signBlock(x, pair) {
   return {
-    t: "frame", n: "prize-card " + p.no, x: 664, y: 92 + i * 316, w: 874, h: 300, r: 44, clip: true,
-    fill: [solid(PAL.white, mint ? 0.05 : 0.07), lin("v", [[0, PAL.white, 0.06], [1, PAL.white, 0.01]])],
-    stroke: { c: mint ? PAL.mint : PAL.white, a: mint ? 0.34 : 0.16, w: 1 },
-    bgBlur: 40,
-    shadows: [{ inner: true, x: 0, y: 0, blur: 30, c: mint ? PAL.mint : PAL.white, a: mint ? 0.1 : 0.05 }],
+    t: "frame", n: "підпис", x, y: 1050, w: 420, h: 70,
     ch: [
-      glow("Сяйво картки", 710, 40, 460, 320, mint ? PAL.mint : PAL.ember, mint ? 0.4 : 0.42, 50),
-      {
-        t: "frame", n: "prize-top", x: 36, y: 34, w: "hug", h: "hug", layout: "H", gap: 16, align: "center",
-        ch: [
-          text({ n: "prize-no", s: p.no, f: "mono", sz: 18, ls: 0.06, c: PAL.cream, a: 0.55 }),
-          {
-            t: "frame", n: "chip", w: "hug", h: "hug", layout: "H", pad: [8, 16, 8, 16], align: "center", r: 999,
-            fill: solid(PAL.mint, 0.12), stroke: { c: PAL.mint, a: 0.4, w: 1 },
-            ch: [text({ n: "chip-text", s: p.chip, f: "mono", sz: 15, ls: 0.06, c: PAL.mint, caps: true, lhr: 1.2 })],
-          },
-        ],
-      },
-      {
-        t: "frame", n: "prize-badge", right: 36, y: 30, w: 72, h: 72, r: 36,
-        fill: solid(PAL.white, 0.08), stroke: { c: PAL.white, a: 0.2, w: 1 },
-        ch: [{ t: "svg", n: "icon " + p.icon, x: 19, y: 19, w: 34, h: 34, svg: ICONS[p.icon] }],
-      },
-      text({ n: "prize-title", s: p.title, x: 36, y: 90, w: 680, f: "dm", sz: 46, lhr: 1.08, ls: -0.02, c: PAL.cream }),
-      text({ n: "prize-by", s: p.by, x: 36, y: 148, w: 680, f: "mono", sz: 16, ls: 0.1, c: accent, caps: true, lhr: 1.25 }),
-      text({ n: "prize-desc", s: p.desc, x: 36, y: 180, w: 800, f: "dr", sz: 21, lhr: 1.45, c: PAL.white, a: 0.74 }),
+      rule("риска підпису", 0, 0, 420, 0.5),
+      text({ n: "підпис-назва", s: pair[0], x: 0, y: 14, w: 420, f: "dm", sz: 22, lhr: 1.2, c: PAL.cream, al: "c" }),
+      text({ n: "підпис-роль", s: pair[1], x: 0, y: 44, w: 420, f: "mono", sz: 13, ls: 0.16, c: PAL.white, a: 0.5, caps: true, lhr: 1.2, al: "c" }),
+    ],
+  };
+}
+/* поле «мітка / значення» */
+function field(pair, align) {
+  return {
+    t: "frame", n: "поле", w: "hug", h: "hug", layout: "V", gap: 6, align: align || "start",
+    ch: [
+      text({ n: "поле-мітка", s: pair[0], f: "mono", sz: 13, ls: 0.16, c: PAL.white, a: 0.5, caps: true, lhr: 1.2 }),
+      text({ n: "поле-значення", s: pair[1], f: "mono", sz: 20, c: PAL.cream, lhr: 1.2 }),
     ],
   };
 }
 
-function certificateLandscape() {
-  const W = 1754, H = 1240;
-  const bgCard = {
-    t: "frame", n: "Фон / картка", x: 36, y: 36, w: W - 72, h: H - 72, r: 96, clip: true,
-    fill: lin("v", [[0, PAL.base1], [1, PAL.base2]]),
-    shadows: [{ inner: true, x: 0, y: 0, blur: 60, c: PAL.ember, a: 0.38 }],
-    ch: [
-      glow("Сяйво / низ-ліво", 330, 1080, 1500, 900, PAL.red, 0.7, 80),
-      glow("Сяйво / верх-ліво", 180, 60, 1000, 560, PAL.red, 0.34, 80),
-      glow("Сяйво / верх-право", 1400, 140, 1200, 800, PAL.red, 0.5, 80),
-      glow("М’ята / низ-право", 1450, 1000, 800, 700, PAL.mint, 0.2, 80),
-      glow("Ядро", 330, 1138, 1000, 300, PAL.ember, 0.8, 50),
-      glow("Спалах", 330, 1160, 460, 110, PAL.flash, 0.65, 30),
-      ring(330, 800, 210), ring(330, 800, 340), ring(330, 800, 480), ring(330, 800, 630),
-      { t: "frame", n: "Риска V", x: 330, y: 260, w: 1, h: 908, fill: solid(PAL.white, 0.05) },
-      { t: "frame", n: "Риска H", x: 0, y: 800, w: 780, h: 1, fill: solid(PAL.white, 0.05) },
-    ],
-  };
-
-  const left = [
-    {
-      t: "frame", n: "pill", x: 0, y: 0, w: "hug", h: "hug", layout: "H", pad: [14, 26, 14, 26], align: "center", r: 999,
-      fill: solid(PAL.cream),
-      ch: [text({ n: "pill-text", s: TXT.pill, f: "mono", sz: 20, c: PAL.base2, lhr: 1.2 })],
-    },
-    {
-      t: "frame", n: "eyebrow", x: 0, y: 196, w: "hug", h: "hug", layout: "H", gap: 16, align: "center",
-      ch: [
-        { t: "frame", n: "eyebrow-dash", w: 28, h: 2, fill: solid(PAL.peach) },
-        text({ n: "eyebrow-text", s: TXT.eyebrow, f: "mono", sz: 18, ls: 0.14, c: PAL.peach, caps: true, lhr: 1.2 }),
-      ],
-    },
-    text({ n: "title", s: TXT.title, x: 0, y: 244, w: 680, f: "dm", sz: 76, lhr: 1.02, ls: -0.03, c: PAL.cream, caps: true }),
-    text({ n: "sub", s: TXT.sub, x: 0, y: 510, w: 560, f: "dr", sz: 25, lhr: 1.45, c: PAL.white, a: 0.72 }),
-    text({ n: "award-label", s: TXT.awardLabel, x: 0, y: 742, w: 600, f: "mono", sz: 15, ls: 0.14, c: PAL.white, a: 0.5, caps: true, lhr: 1.2 }),
-    text({ n: "award-name", s: TXT.awardName, x: 0, y: 772, w: 600, f: "dm", sz: 48, lhr: 1.1, ls: -0.01, c: PAL.cream }),
-    { t: "frame", n: "award-line", x: 0, y: 848, w: 600, h: 1, fill: solid(PAL.white, 0.3) },
-    text({ n: "award-note", s: TXT.awardNote, x: 0, y: 862, w: 600, f: "dr", sz: 21, c: PAL.white, a: 0.5 }),
-    { t: "frame", n: "meta-line", x: 0, y: 932, w: 600, h: 1, fill: solid(PAL.white, 0.14) },
-  ];
-  TXT.meta.forEach((m, i) => {
-    left.push(text({ n: "meta-label", s: m[0], x: i * 210, y: 954, w: 200, f: "mono", sz: 13, ls: 0.12, c: PAL.white, a: 0.45, caps: true, lhr: 1.2 }));
-    left.push(text({ n: "meta-value", s: m[1], x: i * 210, y: 980, w: 200, f: "dm", sz: 26, lhr: 1.2, c: PAL.cream }));
+/* печатка: диск + кільця + текст по колу + розетка + знак AIN */
+function seal(cx, cy) {
+  const R = 104, ch = [];
+  const rel = (n) => Object.assign({}, n);
+  ch.push({
+    t: "ellipse", n: "диск", x: 0, y: 0, w: 2 * R, h: 2 * R, fill: [solid(PAL.disc), rad(PAL.ember, 0.55)],
+    stroke: { c: PAL.cream, a: 0.7, w: 1.5 }, shadows: [{ x: 0, y: 0, blur: 50, c: PAL.ember, a: 0.5 }],
   });
+  ch.push({ t: "ellipse", n: "кільце 1", x: R - 90, y: R - 90, w: 180, h: 180, stroke: { c: PAL.cream, a: 0.35, w: 1 } });
+  ch.push({ t: "ellipse", n: "кільце 2", x: R - 62, y: R - 62, w: 124, h: 124, stroke: { c: PAL.cream, a: 0.3, w: 1 } });
+  const rs = rosette("розетка печатки", R, R, 24, 30, 24, 0.28, 0.8, PAL.cream);
+  rs.w = 2 * R; rs.h = 2 * R;
+  ch.push(rs);
+  const str = COPY.ring, step = 360 / str.length;
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === " ") continue;
+    const th = i * step, rr = (Math.PI * th) / 180;
+    ch.push(text({
+      n: "символ " + str[i], s: str[i], f: "mono", sz: 12, c: PAL.cream, a: 0.88, lhr: 1.2,
+      x: R + 76 * Math.sin(rr), y: R - 76 * Math.cos(rr), ctr: true, rot: th,
+    }));
+  }
+  ch.push({ t: "svg", n: "знак AIN", x: R - 27, y: R - 17.2, w: 54, h: 34.4, svg: markSvg(54, PAL.cream) });
+  return { t: "frame", n: "печатка", x: cx - R, y: cy - R, w: 2 * R, h: 2 * R, ch };
+}
 
-  const right = [
-    text({ n: "list-label", s: TXT.listLabel, x: 664, y: 16, w: 600, f: "mono", sz: 16, ls: 0.14, c: PAL.white, a: 0.55, caps: true, lhr: 1.2 }),
+function certificate(p) {
+  const bg = [
+    glow("Сяйво / низ", CX, 1250, 1700, 760, PAL.red, 0.62, 80),
+    glow("Сяйво / верх-ліво", 140, 40, 900, 500, PAL.red, 0.45, 80),
+    glow("Сяйво / верх-право", 1620, 60, 900, 500, PAL.red, 0.38, 80),
+    glow("Сяйво / ліво", -60, 640, 520, 900, PAL.red, 0.3, 80),
+    glow("Сяйво / право", W + 60, 640, 520, 900, PAL.red, 0.3, 80),
+    glow("Ядро", CX, 1225, 900, 260, PAL.ember, 0.6, 50),
+    glow("Спалах", CX, 1232, 420, 90, PAL.flash, 0.45, 30),
+    rosette("Гільйош-водяний знак", CX, 590, 64, 330, 250, 0.045, 1, PAL.cream),
+  ];
+  const frame = [
+    { t: "frame", n: "Рамка зовнішня", x: 36, y: 36, w: W - 72, h: H - 72, stroke: { c: PAL.cream, a: 0.55, w: 1.5 } },
+    { t: "frame", n: "Рамка внутрішня", x: 76, y: 76, w: W - 152, h: H - 152, stroke: { c: PAL.cream, a: 0.18, w: 1 } },
+    dot("ромб", 76, 76, 14, PAL.peach), dot("ромб", W - 76, 76, 14, PAL.peach),
+    dot("ромб", 76, H - 76, 14, PAL.peach), dot("ромб", W - 76, H - 76, 14, PAL.peach),
+    ...[56, H - 56].map((cy, i) => ({
+      t: "frame", n: i ? "Мікротекст низ" : "Мікротекст верх", x: 76, y: cy - 10, w: W - 152, h: 20, clip: true,
+      ch: [text({ n: "мікротекст", s: COPY.micro.repeat(4).trim(), cx: (W - 152) / 2, y: 3, f: "mono", sz: 11, ls: 0.26, c: PAL.cream, a: 0.3, lhr: 1.2 })],
+    })),
+  ];
+  const header = [
+    { t: "frame", n: "header-ліво", x: 124, y: 114, w: "hug", h: "hug", layout: "H", ch: [field(COPY.no, "start")] },
+    { t: "svg", n: "AIN logo", cx: CX, y: 112, w: 168, h: 48.6, svg: logoSvg(168, PAL.cream) },
+    { t: "frame", n: "header-право", right: 124, y: 114, w: "hug", h: "hug", layout: "H", gap: 44, ch: [field(COPY.date, "end"), field(COPY.valid, "end")] },
+  ];
+  const body = [
+    ctext({ n: "title", s: COPY.title, y: 200, f: "dm", sz: 100, lhr: 1.05, ls: 0.06, c: PAL.cream, caps: true }, 1200),
+    rule("лінія титулу L", 130, 252, 250, 0.3), dot("ромб титулу", 380, 252.5, 8, PAL.peach),
+    rule("лінія титулу R", 1374, 252, 250, 0.3), dot("ромб титулу", 1374, 252.5, 8, PAL.peach),
+    ctext({ n: "eyebrow", s: COPY.eyebrow + " " + p.no + " / 03", y: 322, f: "mono", sz: 16, ls: 0.3, c: PAL.peach, caps: true, lhr: 1.2 }, 1200),
+    ctext({ n: "lead1", s: COPY.lead1, y: 372, f: "dr", sz: 26, lhr: 1.3, a: 0.62 }),
+    ctext({ n: "name", s: COPY.name, y: 402, f: "serif", sz: 100, lhr: 1.05, c: PAL.cream }),
+    rule("лінія імені", CX - 360, 524, 720, 0.42), dot("ромб імені", CX - 360, 524.5, 8, PAL.peach), dot("ромб імені", CX + 360, 524.5, 8, PAL.peach),
+    ctext({ n: "lead2", s: COPY.lead2, y: 550, f: "dr", sz: 26, lhr: 1.3, a: 0.62 }),
+    ctext({ n: "prize", s: p.title, y: 594, f: "dm", sz: 70, lhr: 1.05, ls: 0.02, c: PAL.cream, caps: true }, 1500),
     {
-      t: "frame", n: "AIN logo (замінити на оригінал)", right: 0, y: 2, w: 64, h: 48,
+      t: "frame", n: "partner", cx: CX, y: 692, w: "hug", h: "hug", layout: "H", gap: 22, align: "center",
       ch: [
-        { t: "frame", n: "logo-L", x: 0, y: 0, w: 30, h: 48, r: [24, 4, 4, 24], fill: solid(PAL.cream) },
-        { t: "frame", n: "logo-R", x: 34, y: 0, w: 30, h: 48, r: [4, 24, 24, 4], fill: solid(PAL.cream) },
+        { t: "frame", n: "partner-line", w: 70, h: 1, fill: solid(PAL.peach, 0.7) },
+        text({ n: "partner-name", s: COPY.byPrefix + p.by, f: "mono", sz: 19, ls: 0.22, c: PAL.peach, caps: true, lhr: 1.2 }),
+        { t: "frame", n: "partner-line", w: 70, h: 1, fill: solid(PAL.peach, 0.7) },
       ],
     },
+    ctext({ n: "desc", s: p.desc, y: 750, f: "dr", sz: 23, lhr: 1.55, a: 0.66 }, p.descW || 1000),
   ];
-  TXT.prizes.forEach((p, i) => right.push(prizeCard(p, i)));
-
   return {
-    t: "frame", n: "AIN Awards 2026 — сертифікат Molfar (A4 landscape)", x: 0, y: 0, w: W, h: H, clip: true,
-    fill: solid(PAL.black),
-    ch: [bgCard, { t: "frame", n: "content", x: 108, y: 108, w: W - 216, h: H - 216, ch: left.concat(right) }],
+    t: "frame", n: "AIN Awards 2026 — Сертифікат — " + p.title, x: 0, y: 0, w: W, h: H, clip: true,
+    fill: lin("v", [[0, PAL.base1], [1, PAL.base2]]),
+    shadows: [{ inner: true, x: 0, y: 0, blur: 140, c: PAL.ember, a: 0.28 }],
+    ch: [...bg, ...frame, ...header, ...body, signBlock(150, COPY.sign[0]), signBlock(W - 150 - 420, COPY.sign[1]), seal(CX, 1012)],
   };
 }
 
 function buildScenes() {
-  return [certificateLandscape()];
+  return PRIZES.map(certificate);
 }

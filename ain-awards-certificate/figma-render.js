@@ -8,6 +8,7 @@ const FONT_WANT = {
   dm: { families: ["Basis Grotesque Pro", "Basis Grotesque"], styles: ["Medium", "Regular"], fb: { family: "Inter", style: "Medium" } },
   dr: { families: ["Basis Grotesque Pro", "Basis Grotesque"], styles: ["Regular", "Medium"], fb: { family: "Inter", style: "Regular" } },
   mono: { families: ["JetBrains Mono", "Roboto Mono", "IBM Plex Mono", "Fira Code"], styles: ["Medium", "Regular"], fb: { family: "Inter", style: "Medium" } },
+  serif: { families: ["Cormorant Garamond", "Cormorant", "Playfair Display", "EB Garamond"], styles: ["Medium Italic", "Italic", "Regular"], fb: { family: "Inter", style: "Medium" } },
 };
 const FONTS = {};
 async function loadFonts() {
@@ -88,6 +89,21 @@ function makeText(n) {
   }
   return t;
 }
+/* позиція вузла: x/y, right, cx (центр по горизонталі), ctr (x,y — центр), rot (поворот за годинниковою, навколо центру) */
+function place(node, n, parent) {
+  const w = node.width, h = node.height;
+  let x = n.x || 0, y = n.y || 0;
+  if (n.right != null) x = parent.width - n.right - w;
+  else if (n.cx != null) x = n.cx - w / 2;
+  if (n.ctr) { x = n.x - w / 2; y = n.y - h / 2; }
+  node.x = x;
+  node.y = y;
+  if (n.rot) {
+    const t = (n.rot * Math.PI) / 180, a = Math.cos(t), b = -Math.sin(t), c = Math.sin(t), d = Math.cos(t);
+    const mx = x + w / 2, my = y + h / 2;
+    node.relativeTransform = [[a, b, mx - (a * w / 2 + b * h / 2)], [c, d, my - (c * w / 2 + d * h / 2)]];
+  }
+}
 function build(n, parent, parentIsLayout) {
   let node;
   if (n.t === "text") {
@@ -130,10 +146,7 @@ function build(n, parent, parentIsLayout) {
     parent.appendChild(node);
     (n.ch || []).forEach((c) => build(c, node, !!n.layout));
   }
-  if (!parentIsLayout) {
-    node.y = n.y || 0;
-    node.x = n.right != null ? parent.width - n.right - node.width : n.x || 0;
-  }
+  if (!parentIsLayout) place(node, n, parent);
   return node;
 }
 
